@@ -43,7 +43,7 @@ def flat_callable_for(func, func_name=None, cls=None):
     
     
     """
-    containing_cls = get_class_that_defined_method(method)
+    containing_cls = get_class_that_defined_method(func)
     if not containing_cls:  # then it's just a "normal" function, so return it:
         if func_name is not None:
             func.__name__ = func_name
@@ -52,8 +52,8 @@ def flat_callable_for(func, func_name=None, cls=None):
         if cls is None:
             cls = containing_cls
         if func_name is None:
-            func_name = getattr(method, '__name__', 'flat_func')
+            func_name = getattr(func, '__name__', 'flat_func')
 
-        func = mk_flat(cls=cls, method=method, func_name=func_name)
-        func.__qualname__ = getattr(method, '__qualname__', None)
+        func = mk_flat(cls=cls, method=func, func_name=func_name)
+        func.__qualname__ = getattr(func, '__qualname__', None)
         return func
