@@ -84,8 +84,8 @@ def add_numpy_arrays(a, b):
 ```
 
 
-Here the a and b are assumed to be numpy arrays (or .tolist() would fail).
-Out of the box, qh can only handle json types (str, list, int, float), so we need to preprocess the input. 
+Here the a and b are assumed to be numpy arrays (or `.tolist()` would fail).
+Out of the box, qh can only handle json types `(str, list, int, float)`, so we need to preprocess the input. 
 `qh` makes that easy too. 
 
 Here we provide a name->conversion_func mapping (but could express it otherwise)
@@ -103,4 +103,13 @@ input_trans = mk_json_handler_from_name_mapping(
 
 app = mk_http_service_app([poke, foo, bar, add_numpy_arrays],
                           input_trans=input_trans)
+
+app.run()
+```
+
+Now try it out:
+
+```
+curl -H "Content-Type: application/json" -X POST -d '{"a": [1,2,3], "b": [4,5,6]}' http://127.0.0.1:8080/add_numpy_arrays
+# should get [5, 7, 9]
 ```
