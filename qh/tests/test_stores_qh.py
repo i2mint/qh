@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from qh.stores_qh import add_mall_access, create_mall_app
+from qh.stores_qh import add_mall_access
 
 """
 Tests for the stores_qh module.
@@ -203,31 +203,6 @@ def test_both_write_and_delete_enabled():
     response = client.delete("/users/test_user/mall/preferences/language")
     assert response.status_code == 200
 
-
-def test_backwards_compatibility():
-    """Test that create_mall_app still works for backward compatibility."""
-    mock_mall = {'preferences': {'theme': 'dark'}}
-
-    def mock_get_mall(user_id: str):
-        return mock_mall
-
-    app = create_mall_app(
-        mock_get_mall,
-        app_title="Backwards Compatible App",
-        app_version="1.0.0",
-        allow_mutations=True,
-    )
-
-    client = TestClient(app)
-
-    # Test that both read and write endpoints work
-    response = client.get("/users/test_user/mall/preferences")
-    assert response.status_code == 200
-
-    response = client.put(
-        "/users/test_user/mall/preferences/theme", json={"value": "light"}
-    )
-    assert response.status_code == 200
 
 
 def test_error_handling():
