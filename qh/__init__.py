@@ -1,4 +1,5 @@
-import http2py
+"""Quick HTTP service for Python."""
+
 from py2http.service import run_app
 from py2http.decorators import mk_flat, handle_json_req
 
