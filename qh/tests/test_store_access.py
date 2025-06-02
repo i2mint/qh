@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from qh.stores_qh import add_store_access, StoreValue
+from qh.stores_qh import add_store_access, StoreValue, DEFAULT_METHODS
 
 
 def test_add_store_access_basic():
@@ -33,8 +33,16 @@ def test_add_store_access_write_delete():
     def mock_get_obj(user_id: str):
         return mock_store
 
+    # Use methods instead of write/delete flags
+    methods = {
+        "__iter__": None,
+        "__getitem__": None,
+        "__setitem__": None,
+        "__delitem__": None,
+    }
+
     app = add_store_access(
-        mock_get_obj, base_path="/users/{user_id}/store", write=True, delete=True
+        mock_get_obj, base_path="/users/{user_id}/store", methods=methods
     )
     client = TestClient(app)
 
@@ -141,6 +149,41 @@ def test_add_store_access_with_existing_app():
     response = client.get("/users/test_user/store/key1")
     assert response.status_code == 200
     assert response.json() == {"value": "value1"}
+
+
+def test_contains_and_len_methods():
+    """Test __contains__ and __len__ methods in add_store_access."""
+    mock_store = {'key1': 'value1', 'key2': 'value2'}
+
+    def mock_get_obj(user_id: str):
+        return mock_store
+
+    methods = {
+        "__iter__": None,
+        "__getitem__": None,
+        "__contains__": None,
+        "__len__": None,
+    }
+
+    app = add_store_access(
+        mock_get_obj, base_path="/users/{user_id}/store", methods=methods
+    )
+    client = TestClient(app)
+
+    # Test __contains__ for existing key
+    response = client.get("/users/test_user/store/key1/exists")
+    assert response.status_code == 200
+    assert response.json() is True
+
+    # Test __contains__ for non-existing key
+    response = client.get("/users/test_user/store/nonexistent/exists")
+    assert response.status_code == 200
+    assert response.json() is False
+
+    # Test __len__
+    response = client.get("/users/test_user/store/$count")
+    assert response.status_code == 200
+    assert response.json() == 2
 
 
 if __name__ == "__main__":

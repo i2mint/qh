@@ -15,18 +15,81 @@ from typing import (
     Union,
     Dict,
 )
-from functools import wraps
+from functools import wraps, partial
 from collections.abc import ItemsView, KeysView, ValuesView
 
 from fastapi import FastAPI, HTTPException, Path, Body
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
+from i2 import Pipe
+
 
 class StoreValue(BaseModel):
     """Request body for setting store values."""
 
     value: Any
+
+
+# Default method configurations
+DEFAULT_ITER_CONFIG = {
+    "path": "",
+    "method": "get",
+    "description": "List all keys in the store",
+    "response_model": list[str],
+}
+
+DEFAULT_GETITEM_CONFIG = {
+    "path": "/{item_key}",
+    "method": "get",
+    "description": "Get a specific item from the store",
+    "path_params": ["item_key"],
+}
+
+DEFAULT_SETITEM_CONFIG = {
+    "path": "/{item_key}",
+    "method": "put",
+    "description": "Set a value in the store",
+    "path_params": ["item_key"],
+    "body": "value",
+    "body_model": StoreValue,
+}
+
+DEFAULT_DELITEM_CONFIG = {
+    "path": "/{item_key}",
+    "method": "delete",
+    "description": "Delete an item from the store",
+    "path_params": ["item_key"],
+}
+
+DEFAULT_CONTAINS_CONFIG = {
+    "path": "/{item_key}/exists",
+    "method": "get",
+    "description": "Check if key exists in the store",
+    "path_params": ["item_key"],
+    "response_model": bool,
+}
+
+DEFAULT_LEN_CONFIG = {
+    "path": "/$count",  # changed from "/count" to avoid key conflicts
+    "method": "get",
+    "description": "Get the number of items in the store",
+    "response_model": int,
+}
+
+DEFAULT_METHODS = {
+    "__iter__": DEFAULT_ITER_CONFIG,
+    "__getitem__": DEFAULT_GETITEM_CONFIG,
+    "__contains__": DEFAULT_CONTAINS_CONFIG,
+    "__len__": DEFAULT_LEN_CONFIG,
+}
+
+# Default configuration for get_obj dispatch
+DEFAULT_GET_OBJ_DISPATCH = {
+    "path_params": ["user_id"],
+    "error_code": 404,
+    "error_message": "Object not found for: {user_id}",
+}
 
 
 def _serialize_value(value: Any) -> Any:
@@ -70,6 +133,133 @@ def _dispatch_mapping_method(
     return method(*args, **kwargs)
 
 
+def create_method_endpoint(method_name: str, config: Dict, get_obj_fn: Callable):
+    """
+    Create an endpoint function for a specific mapping method.
+
+    Args:
+        method_name: The mapping method to dispatch (e.g., '__iter__', '__getitem__')
+        config: Configuration for the endpoint
+        get_obj_fn: Function to retrieve the object to operate on
+
+    Returns:
+        An async endpoint function compatible with FastAPI
+    """
+    http_method = config.get("method", "get")
+
+    if method_name == "__iter__":
+
+        async def endpoint(user_id: str = Path(..., description="User ID")):
+            obj = get_obj_fn(user_id)
+            return list(_dispatch_mapping_method(obj, method_name))
+
+        return endpoint
+
+    elif method_name == "__getitem__":
+
+        async def endpoint(
+            user_id: str = Path(..., description="User ID"),
+            item_key: str = Path(..., description="Item key"),
+        ):
+            obj = get_obj_fn(user_id)
+            try:
+                value = _dispatch_mapping_method(obj, method_name, item_key)
+                return JSONResponse(content={"value": _serialize_value(value)})
+            except KeyError:
+                raise HTTPException(
+                    status_code=404, detail=f"Item not found: {item_key}"
+                )
+
+        return endpoint
+
+    elif method_name == "__setitem__":
+
+        async def endpoint(
+            user_id: str = Path(..., description="User ID"),
+            item_key: str = Path(..., description="Item key"),
+            body: StoreValue = Body(
+                ..., description="Value to set"
+            ),
+        ):
+            obj = get_obj_fn(user_id)
+            try:
+                _dispatch_mapping_method(obj, method_name, item_key, body.value)
+                return {"message": "Item set successfully", "key": item_key}
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400, detail=f"Failed to set item: {str(e)}"
+                )
+
+        return endpoint
+
+    elif method_name == "__delitem__":
+
+        async def endpoint(
+            user_id: str = Path(..., description="User ID"),
+            item_key: str = Path(..., description="Item key"),
+        ):
+            obj = get_obj_fn(user_id)
+            try:
+                _dispatch_mapping_method(obj, method_name, item_key)
+                return {"message": "Item deleted successfully", "key": item_key}
+            except KeyError:
+                raise HTTPException(
+                    status_code=404, detail=f"Item not found: {item_key}"
+                )
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400, detail=f"Failed to delete item: {str(e)}"
+                )
+
+        return endpoint
+
+    elif method_name == "__contains__":
+
+        async def endpoint(
+            user_id: str = Path(..., description="User ID"),
+            item_key: str = Path(..., description="Item key"),
+        ):
+            obj = get_obj_fn(user_id)
+            try:
+                exists = _dispatch_mapping_method(obj, method_name, item_key)
+                return exists
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400, detail=f"Failed to check if item exists: {str(e)}"
+                )
+
+        return endpoint
+
+    elif method_name == "__len__":
+
+        async def endpoint(user_id: str = Path(..., description="User ID")):
+            obj = get_obj_fn(user_id)
+            try:
+                count = _dispatch_mapping_method(obj, method_name)
+                return count
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400, detail=f"Failed to get item count: {str(e)}"
+                )
+
+        return endpoint
+
+    else:
+        # Generic handler for other methods
+        async def endpoint(
+            user_id: str = Path(..., description="User ID"),
+            item_key: str = Path(..., description="Item key", default=None),
+        ):
+            obj = get_obj_fn(user_id)
+            args = []
+            if item_key is not None:
+                args.append(item_key)
+            result = _dispatch_mapping_method(obj, method_name, *args)
+            return JSONResponse(content={"value": _serialize_value(result)})
+
+        return endpoint
+
+
 def add_store_access(
     get_obj: Callable[[str], Mapping],
     app=None,
@@ -77,8 +267,6 @@ def add_store_access(
     methods: Optional[Dict[str, Optional[Dict]]] = None,
     get_obj_dispatch: Optional[Dict] = None,
     base_path: str = "/users/{user_id}/mall/{store_key}",
-    write: bool = False,
-    delete: bool = False,
 ) -> FastAPI:
     """
     Add store access endpoints to a FastAPI application.
@@ -91,10 +279,10 @@ def add_store_access(
             - str: creates a new FastAPI app with this title
             - dict: creates a new FastAPI app with these kwargs
         methods: Dictionary mapping method names to dispatch configuration
+            - Key is the mapping method name (e.g., '__iter__', '__getitem__')
+            - Value is None to use defaults or a dict with configuration
         get_obj_dispatch: Configuration for how to dispatch the get_obj function
         base_path: Base path for all endpoints
-        write: Whether to allow PUT operations to set values
-        delete: Whether to allow DELETE operations to remove values
 
     Returns:
         FastAPI application instance with store endpoints added
@@ -108,50 +296,29 @@ def add_store_access(
         app = FastAPI(**app)
     # If it's already a FastAPI instance, use it directly
 
-    # Default configuration for get_obj dispatch
-    if get_obj_dispatch is None:
-        get_obj_dispatch = {
-            "path_params": ["user_id"],
-            "error_code": 404,
-            "error_message": "Object not found for: {user_id}",
-        }
+    # Use provided configuration or defaults
+    get_obj_dispatch = get_obj_dispatch or DEFAULT_GET_OBJ_DISPATCH
+    methods = methods or DEFAULT_METHODS.copy()
 
-    # Default methods configuration
-    default_methods = {
-        "__iter__": {
-            "path": "",
-            "method": "get",
-            "description": "List all keys in the store",
-            "response_model": list[str],
-        },
-        "__getitem__": {
-            "path": "/{item_key}",
-            "method": "get",
-            "description": "Get a specific item from the store",
-            "path_params": ["item_key"],
-        },
-    }
-
-    if write:
-        default_methods["__setitem__"] = {
-            "path": "/{item_key}",
-            "method": "put",
-            "description": "Set a value in the store",
-            "path_params": ["item_key"],
-            "body": "value",
-            "body_model": StoreValue,
-        }
-
-    if delete:
-        default_methods["__delitem__"] = {
-            "path": "/{item_key}",
-            "method": "delete",
-            "description": "Delete an item from the store",
-            "path_params": ["item_key"],
-        }
-
-    # Use provided methods or defaults
-    methods = methods or default_methods
+    # Process methods dict to apply defaults
+    for method_name, config in list(methods.items()):
+        if config is None:
+            # Use default configuration if available
+            if method_name == "__iter__":
+                methods[method_name] = DEFAULT_ITER_CONFIG.copy()
+            elif method_name == "__getitem__":
+                methods[method_name] = DEFAULT_GETITEM_CONFIG.copy()
+            elif method_name == "__setitem__":
+                methods[method_name] = DEFAULT_SETITEM_CONFIG.copy()
+            elif method_name == "__delitem__":
+                methods[method_name] = DEFAULT_DELITEM_CONFIG.copy()
+            elif method_name == "__contains__":
+                methods[method_name] = DEFAULT_CONTAINS_CONFIG.copy()
+            elif method_name == "__len__":
+                methods[method_name] = DEFAULT_LEN_CONFIG.copy()
+            else:
+                # No default available for this method
+                continue
 
     def _get_obj_or_error(user_id: str) -> Mapping:
         """Get object or raise HTTP exception."""
@@ -172,89 +339,30 @@ def add_store_access(
                 status_code=get_obj_dispatch["error_code"], detail=str(e)
             )
 
-    # Add endpoints for each method
-    for method_name, config in methods.items():
-        if config is None:
+    # Reorder endpoints to prioritize static routes over dynamic ones
+    ordered_methods = ["__iter__", "__len__", "__contains__", "__getitem__", "__setitem__", "__delitem__"]
+    for method_name in ordered_methods:
+        config = methods.get(method_name)
+        if not config:
             continue
-
         path = base_path + config.get("path", "")
         http_method = config.get("method", "get")
         description = config.get("description", f"Execute {method_name} on the store")
+        endpoint = create_method_endpoint(method_name, config, _get_obj_or_error)
+        getattr(app, http_method)(
+            path,
+            response_model=config.get("response_model", None),
+            description=description,
+        )(endpoint)
 
-        # Create a closure to capture the current values
-        def create_endpoint(
-            method_name=method_name, config=config, http_method=http_method
-        ):
-            if http_method == "get":
-                if method_name == "__iter__":
-
-                    async def endpoint(
-                        user_id: str = Path(..., description="User ID"),
-                    ):
-                        obj = _get_obj_or_error(user_id)
-                        return list(_dispatch_mapping_method(obj, method_name))
-
-                    return endpoint
-                else:  # __getitem__
-
-                    async def endpoint(
-                        user_id: str = Path(..., description="User ID"),
-                        item_key: str = Path(..., description="Item key"),
-                    ):
-                        obj = _get_obj_or_error(user_id)
-                        try:
-                            value = _dispatch_mapping_method(obj, method_name, item_key)
-                            return JSONResponse(
-                                content={"value": _serialize_value(value)}
-                            )
-                        except KeyError:
-                            raise HTTPException(
-                                status_code=404, detail=f"Item not found: {item_key}"
-                            )
-
-                    return endpoint
-
-            elif http_method == "put" and method_name == "__setitem__":
-
-                async def endpoint(
-                    user_id: str = Path(..., description="User ID"),
-                    item_key: str = Path(..., description="Item key"),
-                    body: StoreValue = Body(..., description="Value to set"),
-                ):
-                    obj = _get_obj_or_error(user_id)
-                    try:
-                        _dispatch_mapping_method(obj, method_name, item_key, body.value)
-                        return {"message": "Item set successfully", "key": item_key}
-                    except Exception as e:
-                        raise HTTPException(
-                            status_code=400, detail=f"Failed to set item: {str(e)}"
-                        )
-
-                return endpoint
-
-            elif http_method == "delete" and method_name == "__delitem__":
-
-                async def endpoint(
-                    user_id: str = Path(..., description="User ID"),
-                    item_key: str = Path(..., description="Item key"),
-                ):
-                    obj = _get_obj_or_error(user_id)
-                    try:
-                        _dispatch_mapping_method(obj, method_name, item_key)
-                        return {"message": "Item deleted successfully", "key": item_key}
-                    except KeyError:
-                        raise HTTPException(
-                            status_code=404, detail=f"Item not found: {item_key}"
-                        )
-                    except Exception as e:
-                        raise HTTPException(
-                            status_code=400, detail=f"Failed to delete item: {str(e)}"
-                        )
-
-                return endpoint
-
-        # Register the endpoint with FastAPI
-        endpoint = create_endpoint()
+    # Register any additional methods not in the ordered list
+    for method_name, config in methods.items():
+        if method_name in ordered_methods or not config:
+            continue
+        path = base_path + config.get("path", "")
+        http_method = config.get("method", "get")
+        description = config.get("description", f"Execute {method_name} on the store")
+        endpoint = create_method_endpoint(method_name, config, _get_obj_or_error)
         getattr(app, http_method)(
             path,
             response_model=config.get("response_model", None),
@@ -271,33 +379,7 @@ def add_mall_access(
     write: bool = False,
     delete: bool = False,
 ) -> FastAPI:
-    """
-    Add mall/store access endpoints to a FastAPI application.
-
-    Args:
-        get_mall: Function that takes a user ID and returns a mall object
-        app: Can be:
-            - None: creates a new FastAPI app with default settings
-            - FastAPI instance: uses this existing app
-            - str: creates a new FastAPI app with this title
-            - dict: creates a new FastAPI app with these kwargs
-        write: Whether to allow PUT operations to set values
-        delete: Whether to allow DELETE operations to remove values
-
-    Returns:
-        FastAPI application instance with mall endpoints added
-
-    Example:
-
-    >>> def mock_get_mall(user_id: str):
-    ...     return {
-    ...         'preferences': {'theme': 'dark'},
-    ...         'cart': {'item1': 2}
-    ...     }
-    >>> app = add_mall_access(mock_get_mall) # doctest: +SKIP
-    >>> isinstance(app, FastAPI) # doctest: +SKIP
-    True
-    """
+    """Add mall/store access endpoints to a FastAPI application."""
     # Create or use app based on the input type
     if app is None:
         app = FastAPI(title="Mall API", version="1.0.0")
@@ -305,7 +387,6 @@ def add_mall_access(
         app = FastAPI(title=app, version="1.0.0")
     elif isinstance(app, dict):
         app = FastAPI(**app)
-    # If it's already a FastAPI instance, use it directly
 
     def _get_mall_or_404(user_id: str) -> Mapping[str, MutableMapping]:
         """Get mall for user or raise 404."""
@@ -322,43 +403,27 @@ def add_mall_access(
 
     # Add mall-level endpoint to list all store keys
     @app.get("/users/{user_id}/mall")
-    async def list_mall_keys(
+    def list_user_mall_stores(
         user_id: str = Path(..., description="User ID")
     ) -> list[str]:
         """List all store keys in a user's mall."""
         mall = _get_mall_or_404(user_id)
         return list(_dispatch_mapping_method(mall, '__iter__'))
 
-    # Add store-level endpoints
+    # Prepare store methods based on write/delete flags
     store_methods = {
-        "__iter__": {
-            "path": "",
-            "method": "get",
-            "description": "List all keys in a specific store",
-        },
-        "__getitem__": {
-            "path": "/{item_key}",
-            "method": "get",
-            "description": "Get a specific item from a store",
-        },
+        "__iter__": None,  # Use default config
+        "__getitem__": None,  # Use default config
     }
-
     if write:
-        store_methods["__setitem__"] = {
-            "path": "/{item_key}",
-            "method": "put",
-            "description": "Set a value in a store",
-        }
+        store_methods["__setitem__"] = None  # Use default config
 
     if delete:
-        store_methods["__delitem__"] = {
-            "path": "/{item_key}",
-            "method": "delete",
-            "description": "Delete an item from a store",
-        }
+        store_methods["__delitem__"] = None  # Use default config
 
     # Function to get a specific store from a mall
     def get_store(user_store_key: str) -> MutableMapping:
+        """Get a specific store from a mall."""
         parts = user_store_key.split(":", 1)
         if len(parts) != 2:
             raise ValueError("Invalid store key format, expected 'user_id:store_key'")
@@ -375,18 +440,17 @@ def add_mall_access(
         app,
         methods=store_methods,
         get_obj_dispatch={
+            "error_message": "Store not found for user: {user_id}, store: {store_key}",
             "path_params": ["user_id", "store_key"],
             "error_code": 404,
-            "error_message": "Store not found for user: {user_id}, store: {store_key}",
         },
         base_path="/users/{user_id}/mall/{store_key}",
-        write=write,
-        delete=delete,
     )
 
     return app
 
 
+# Example usage and runner
 # Example usage and runner
 if __name__ == "__main__":
     # Example mall implementation for testing
