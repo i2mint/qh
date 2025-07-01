@@ -47,6 +47,58 @@ def mk_json_egress(
     return egress
 
 
+def _mk_endpoint(
+    func: Callable,
+    defaults: Dict[str, Any],
+    input_trans: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]],
+    output_trans: Optional[Callable[[Any], Any]],
+) -> Callable:
+    """Create a FastAPI endpoint function for a given callable with its configuration."""
+    
+    async def endpoint(request: Request):
+        # Read JSON payload
+        try:
+            data = await request.json()
+            if data is None:
+                data = {}
+        except:
+            data = {}
+        # Merge path parameters into data
+        path_params = request.path_params
+        for k, v in path_params.items():
+            data[k] = v
+        # Apply defaults
+        for k, v in defaults.items():
+            data.setdefault(k, v)
+        # Input transformation
+        if input_trans:
+            data = input_trans(data)
+        # Validate required parameters for non-GET requests
+        if request.method != 'GET':
+            sig = inspect.signature(func)
+            for name, param in sig.parameters.items():
+                if param.default is inspect._empty and name not in data:
+                    raise HTTPException(
+                        status_code=422,
+                        detail=f"Missing required parameter: {name}",
+                    )
+        # Call function
+        try:
+            result = func(**data)
+            if inspect.iscoroutine(result):
+                result = await result
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+        # Output transformation
+        if output_trans:
+            result = output_trans(result)
+        return JSONResponse(content=result)
+    
+    return endpoint
+
+
 def mk_fastapi_app(
     funcs: Union[Iterable, Dict],
     *,
@@ -104,52 +156,8 @@ def mk_fastapi_app(
         input_trans = conf.get('input_trans')
         output_trans = conf.get('output_trans')
 
-        async def endpoint(
-            request: Request,
-            _func=func,
-            _defaults=defaults,
-            _in=input_trans,
-            _out=output_trans,
-        ):
-            # Read JSON payload
-            try:
-                data = await request.json()
-                if data is None:
-                    data = {}
-            except:
-                data = {}
-            # Merge path parameters into data
-            path_params = request.path_params
-            for k, v in path_params.items():
-                data[k] = v
-            # Apply defaults
-            for k, v in _defaults.items():
-                data.setdefault(k, v)
-            # Input transformation
-            if _in:
-                data = _in(data)
-            # Validate required parameters for non-GET requests
-            if request.method != 'GET':
-                sig = inspect.signature(_func)
-                for name, param in sig.parameters.items():
-                    if param.default is inspect._empty and name not in data:
-                        raise HTTPException(
-                            status_code=422,
-                            detail=f"Missing required parameter: {name}",
-                        )
-            # Call function
-            try:
-                result = _func(**data)
-                if inspect.iscoroutine(result):
-                    result = await result
-            except HTTPException:
-                raise
-            except Exception as e:
-                raise HTTPException(status_code=500, detail=str(e))
-            # Output transformation
-            if _out:
-                result = _out(result)
-            return JSONResponse(content=result)
+        # Create endpoint using the factory function
+        endpoint = _mk_endpoint(func, defaults, input_trans, output_trans)
 
         route_params: Dict[str, Any] = {
             'path': path,

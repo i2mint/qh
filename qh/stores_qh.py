@@ -177,9 +177,7 @@ def create_method_endpoint(method_name: str, config: Dict, get_obj_fn: Callable)
         async def endpoint(
             user_id: str = Path(..., description="User ID"),
             item_key: str = Path(..., description="Item key"),
-            body: StoreValue = Body(
-                ..., description="Value to set"
-            ),
+            body: StoreValue = Body(..., description="Value to set"),
         ):
             obj = get_obj_fn(user_id)
             try:
@@ -340,7 +338,14 @@ def add_store_access(
             )
 
     # Reorder endpoints to prioritize static routes over dynamic ones
-    ordered_methods = ["__iter__", "__len__", "__contains__", "__getitem__", "__setitem__", "__delitem__"]
+    ordered_methods = [
+        "__iter__",
+        "__len__",
+        "__contains__",
+        "__getitem__",
+        "__setitem__",
+        "__delitem__",
+    ]
     for method_name in ordered_methods:
         config = methods.get(method_name)
         if not config:
@@ -421,22 +426,25 @@ def add_mall_access(
     if delete:
         store_methods["__delitem__"] = None  # Use default config
 
-    # Function to get a specific store from a mall
-    def get_store(user_store_key: str) -> MutableMapping:
-        """Get a specific store from a mall."""
-        parts = user_store_key.split(":", 1)
-        if len(parts) != 2:
-            raise ValueError("Invalid store key format, expected 'user_id:store_key'")
-        user_id, store_key = parts
+    # Function to get a specific store from a mall (refactored: use user_id and store_key separately)
+    def get_store(user_id: str, store_key: str) -> MutableMapping:
         mall = _get_mall_or_404(user_id)
+        import logging
+        logging.basicConfig(level=logging.INFO)
+        logging.info(
+            f"get_store: mall keys for user {user_id}: {list(mall.keys())}, requested store_key: {store_key}"
+        )
         try:
             return mall[store_key]
         except KeyError:
             raise HTTPException(status_code=404, detail=f"Store not found: {store_key}")
 
-    # Add store access endpoints
+    # Add store access endpoints (refactored: use user_id and store_key as separate path params)
+    def get_store_wrapper(user_id: str = Path(..., description="User ID"), store_key: str = Path(..., description="Store key")):
+        return get_store(user_id, store_key)
+
     add_store_access(
-        get_store,
+        get_store_wrapper,
         app,
         methods=store_methods,
         get_obj_dispatch={
