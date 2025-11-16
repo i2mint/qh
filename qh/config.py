@@ -8,8 +8,7 @@ Configuration flows from general to specific:
 4. Parameter-level config
 """
 
-from typing import Any, Dict, List, Optional, Union
-from collections.abc import Callable
+from typing import Any, Callable, Dict, List, Optional, Union
 from dataclasses import dataclass, field, replace
 from qh.rules import RuleChain, DEFAULT_RULE_CHAIN, HttpLocation
 
@@ -19,22 +18,22 @@ class RouteConfig:
     """Configuration for a single route (function endpoint)."""
 
     # Route path (None = auto-generate from function name)
-    path: str | None = None
+    path: Optional[str] = None
 
     # HTTP methods for this route
-    methods: list[str] | None = None
+    methods: Optional[List[str]] = None
 
     # Custom rule chain for parameter transformations
-    rule_chain: RuleChain | None = None
+    rule_chain: Optional[RuleChain] = None
 
     # Parameter-specific overrides {param_name: transform_spec}
-    param_overrides: dict[str, Any] = field(default_factory=dict)
+    param_overrides: Dict[str, Any] = field(default_factory=dict)
 
     # Additional metadata
-    summary: str | None = None
-    description: str | None = None
-    tags: list[str] | None = None
-    response_model: type | None = None
+    summary: Optional[str] = None
+    description: Optional[str] = None
+    tags: Optional[List[str]] = None
+    response_model: Optional[type] = None
 
     # Advanced options
     include_in_schema: bool = True
@@ -61,7 +60,7 @@ class AppConfig:
     """Global configuration for the entire FastAPI app."""
 
     # Default HTTP methods for all routes
-    default_methods: list[str] = field(default_factory=lambda: ['POST'])
+    default_methods: List[str] = field(default_factory=lambda: ['POST'])
 
     # Path template for auto-generating routes
     # Available placeholders: {func_name}
@@ -81,9 +80,9 @@ class AppConfig:
     openapi_url: str = "/openapi.json"
 
     # Additional FastAPI app kwargs
-    fastapi_kwargs: dict[str, Any] = field(default_factory=dict)
+    fastapi_kwargs: Dict[str, Any] = field(default_factory=dict)
 
-    def to_fastapi_kwargs(self) -> dict[str, Any]:
+    def to_fastapi_kwargs(self) -> Dict[str, Any]:
         """Convert to FastAPI() constructor kwargs."""
         return {
             'title': self.title,
@@ -103,7 +102,7 @@ DEFAULT_APP_CONFIG = AppConfig()
 def resolve_route_config(
     func: Callable,
     app_config: AppConfig,
-    route_config: RouteConfig | dict[str, Any] | None = None,
+    route_config: Optional[RouteConfig] = None,
 ) -> RouteConfig:
     """
     Resolve complete route configuration for a function.
@@ -125,12 +124,6 @@ def resolve_route_config(
 
     # Apply function-specific config
     if route_config is not None:
-        # Convert dict to RouteConfig if necessary
-        if isinstance(route_config, dict):
-            route_config = RouteConfig(**{
-                k: v for k, v in route_config.items()
-                if k in RouteConfig.__dataclass_fields__
-            })
         config = config.merge_with(route_config)
 
     # Auto-generate path if not specified
@@ -157,7 +150,7 @@ class ConfigBuilder:
 
     def __init__(self):
         self.app_config = AppConfig()
-        self.route_configs: dict[Callable, RouteConfig] = {}
+        self.route_configs: Dict[Callable, RouteConfig] = {}
 
     def with_path_prefix(self, prefix: str) -> 'ConfigBuilder':
         """Set path prefix for all routes."""
@@ -169,7 +162,7 @@ class ConfigBuilder:
         self.app_config.path_template = template
         return self
 
-    def with_default_methods(self, methods: list[str]) -> 'ConfigBuilder':
+    def with_default_methods(self, methods: List[str]) -> 'ConfigBuilder':
         """Set default HTTP methods."""
         self.app_config.default_methods = methods
         return self
@@ -183,7 +176,7 @@ class ConfigBuilder:
         """Start configuring a specific function."""
         return FunctionConfigBuilder(self, func)
 
-    def build(self) -> tuple[AppConfig, dict[Callable, RouteConfig]]:
+    def build(self) -> tuple[AppConfig, Dict[Callable, RouteConfig]]:
         """Build final configuration."""
         return self.app_config, self.route_configs
 
@@ -201,7 +194,7 @@ class FunctionConfigBuilder:
         self.config.path = path
         return self
 
-    def with_methods(self, methods: list[str]) -> 'FunctionConfigBuilder':
+    def with_methods(self, methods: List[str]) -> 'FunctionConfigBuilder':
         """Set HTTP methods for this function."""
         self.config.methods = methods
         return self
@@ -211,7 +204,7 @@ class FunctionConfigBuilder:
         self.config.summary = summary
         return self
 
-    def with_tags(self, tags: list[str]) -> 'FunctionConfigBuilder':
+    def with_tags(self, tags: List[str]) -> 'FunctionConfigBuilder':
         """Set OpenAPI tags."""
         self.config.tags = tags
         return self
@@ -224,7 +217,7 @@ class FunctionConfigBuilder:
 
 # Convenience functions for common patterns
 
-def from_dict(config_dict: dict[str, Any]) -> AppConfig:
+def from_dict(config_dict: Dict[str, Any]) -> AppConfig:
     """Create AppConfig from dictionary."""
     return AppConfig(**{
         k: v for k, v in config_dict.items()
@@ -233,8 +226,8 @@ def from_dict(config_dict: dict[str, Any]) -> AppConfig:
 
 
 def normalize_funcs_input(
-    funcs: Callable | list[Callable] | dict[Callable, dict[str, Any]],
-) -> dict[Callable, RouteConfig]:
+    funcs: Union[Callable, List[Callable], Dict[Callable, Dict[str, Any]]],
+) -> Dict[Callable, RouteConfig]:
     """
     Normalize various input formats to Dict[Callable, RouteConfig].
 

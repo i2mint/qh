@@ -4,8 +4,7 @@ Endpoint creation using i2.Wrap to transform functions into FastAPI routes.
 This module bridges Python functions and HTTP endpoints via transformation rules.
 """
 
-from typing import Any, Dict, Optional, get_type_hints
-from collections.abc import Callable
+from typing import Any, Callable, Dict, Optional, get_type_hints
 from fastapi import Request, Response, HTTPException
 from fastapi.responses import JSONResponse
 import inspect
@@ -20,8 +19,8 @@ from qh.config import RouteConfig
 
 async def extract_http_params(
     request: Request,
-    param_specs: dict[str, TransformSpec],
-) -> dict[str, Any]:
+    param_specs: Dict[str, TransformSpec],
+) -> Dict[str, Any]:
     """
     Extract parameters from HTTP request based on transformation specs.
 
@@ -99,9 +98,9 @@ async def extract_http_params(
 
 
 def apply_ingress_transforms(
-    params: dict[str, Any],
-    param_specs: dict[str, TransformSpec],
-) -> dict[str, Any]:
+    params: Dict[str, Any],
+    param_specs: Dict[str, TransformSpec],
+) -> Dict[str, Any]:
     """Apply ingress transformations to extracted parameters."""
     transformed = {}
 
@@ -117,7 +116,7 @@ def apply_ingress_transforms(
 
 def apply_egress_transform(
     result: Any,
-    egress: Callable[[Any], Any] | None,
+    egress: Optional[Callable[[Any], Any]],
 ) -> Any:
     """Apply egress transformation to function result."""
     if egress:
@@ -143,52 +142,14 @@ def make_endpoint(
     sig = inspect.signature(func)
     is_async = inspect.iscoroutinefunction(func)
 
-    # Detect path parameters from route path
-    import re
-    from typing import get_type_hints
-    path_param_names = set()
-    if route_config.path:
-        path_param_names = set(re.findall(r'\{(\w+)\}', route_config.path))
-
-    # Check if this uses query params (GET-only routes without POST/PUT/PATCH)
-    # Routes with POST/PUT/PATCH should use JSON body even if GET is also supported
-    methods = route_config.methods or []
-    has_body_methods = any(m in methods for m in ['POST', 'PUT', 'PATCH'])
-    use_query_params = 'GET' in methods and not has_body_methods
-
     # Resolve transformation specs for each parameter
     rule_chain = route_config.rule_chain
-    param_specs: dict[str, TransformSpec] = {}
-
-    # Get type hints for type conversion
-    type_hints = get_type_hints(func) if hasattr(func, '__annotations__') else {}
+    param_specs: Dict[str, TransformSpec] = {}
 
     for param_name in sig.parameters:
         # Check for parameter-specific override
         if param_name in route_config.param_overrides:
             param_specs[param_name] = route_config.param_overrides[param_name]
-        # Check if this is a path parameter
-        elif param_name in path_param_names:
-            # Path parameters should be extracted from the URL path
-            param_specs[param_name] = TransformSpec(http_location=HttpLocation.PATH)
-        # For GET-only requests, non-path parameters come from query string
-        elif use_query_params:
-            param_type = type_hints.get(param_name, str)
-
-            # Create type converter for query params (they come as strings)
-            def make_query_converter(target_type):
-                def convert(value):
-                    if value is None:
-                        return None
-                    if isinstance(value, target_type):
-                        return value
-                    return target_type(value)
-                return convert
-
-            param_specs[param_name] = TransformSpec(
-                http_location=HttpLocation.QUERY,
-                ingress=make_query_converter(param_type) if param_type != str else None
-            )
         else:
             # Resolve from rule chain
             param_specs[param_name] = resolve_transform(
@@ -258,8 +219,6 @@ def make_endpoint(
     # Set endpoint metadata
     endpoint.__name__ = f"{func.__name__}_endpoint"
     endpoint.__doc__ = func.__doc__
-    # Store original function for OpenAPI/client generation
-    endpoint._qh_original_func = func  # type: ignore
 
     return endpoint
 

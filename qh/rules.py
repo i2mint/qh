@@ -12,8 +12,7 @@ Supports multi-dimensional matching:
 Rules are layered with first-match semantics, from specific to general.
 """
 
-from typing import Any, Dict, Optional, Protocol, Union, TypeVar, get_type_hints
-from collections.abc import Callable
+from typing import Any, Callable, Dict, Optional, Protocol, Union, TypeVar, get_type_hints
 from dataclasses import dataclass, field
 from enum import Enum
 import inspect
@@ -41,16 +40,16 @@ class TransformSpec:
     http_location: HttpLocation = HttpLocation.JSON_BODY
 
     # Transform input (from HTTP to Python)
-    ingress: Callable[[Any], Any] | None = None
+    ingress: Optional[Callable[[Any], Any]] = None
 
     # Transform output (from Python to HTTP)
-    egress: Callable[[Any], Any] | None = None
+    egress: Optional[Callable[[Any], Any]] = None
 
     # HTTP-level name (may differ from Python parameter name)
-    http_name: str | None = None
+    http_name: Optional[str] = None
 
     # Additional metadata
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: Dict[str, Any] = field(default_factory=dict)
 
 
 class Rule(Protocol):
@@ -64,7 +63,7 @@ class Rule(Protocol):
         param_default: Any,
         func: Callable,
         func_name: str,
-    ) -> TransformSpec | None:
+    ) -> Optional[TransformSpec]:
         """
         Check if this rule matches the given parameter context.
 
@@ -78,7 +77,7 @@ class Rule(Protocol):
 class TypeRule:
     """Rule that matches based on parameter type."""
 
-    type_map: dict[type, TransformSpec]
+    type_map: Dict[type, TransformSpec]
 
     def match(
         self,
@@ -88,7 +87,7 @@ class TypeRule:
         param_default: Any,
         func: Callable,
         func_name: str,
-    ) -> TransformSpec | None:
+    ) -> Optional[TransformSpec]:
         """Match by type, including type hierarchy."""
         # Exact match first
         if param_type in self.type_map:
@@ -106,7 +105,7 @@ class TypeRule:
 class NameRule:
     """Rule that matches based on parameter name."""
 
-    name_map: dict[str, TransformSpec]
+    name_map: Dict[str, TransformSpec]
 
     def match(
         self,
@@ -116,7 +115,7 @@ class NameRule:
         param_default: Any,
         func: Callable,
         func_name: str,
-    ) -> TransformSpec | None:
+    ) -> Optional[TransformSpec]:
         """Match by parameter name."""
         return self.name_map.get(param_name)
 
@@ -126,7 +125,7 @@ class FuncRule:
     """Rule that matches based on function."""
 
     # Map from function object to param specs
-    func_map: dict[Callable, dict[str, TransformSpec]]
+    func_map: Dict[Callable, Dict[str, TransformSpec]]
 
     def match(
         self,
@@ -136,7 +135,7 @@ class FuncRule:
         param_default: Any,
         func: Callable,
         func_name: str,
-    ) -> TransformSpec | None:
+    ) -> Optional[TransformSpec]:
         """Match by function object and parameter name."""
         if func in self.func_map:
             param_specs = self.func_map[func]
@@ -149,7 +148,7 @@ class FuncNameRule:
     """Rule that matches based on function name pattern."""
 
     # Map from function name pattern to param specs
-    pattern_map: dict[str, dict[str, TransformSpec]]
+    pattern_map: Dict[str, Dict[str, TransformSpec]]
 
     def match(
         self,
@@ -159,7 +158,7 @@ class FuncNameRule:
         param_default: Any,
         func: Callable,
         func_name: str,
-    ) -> TransformSpec | None:
+    ) -> Optional[TransformSpec]:
         """Match by function name pattern."""
         # TODO: Support regex patterns
         if func_name in self.pattern_map:
@@ -184,7 +183,7 @@ class DefaultValueRule:
         param_default: Any,
         func: Callable,
         func_name: str,
-    ) -> TransformSpec | None:
+    ) -> Optional[TransformSpec]:
         """Match if predicate returns True for default value."""
         if param_default is not inspect.Parameter.empty:
             if self.predicate(param_default):
@@ -208,7 +207,7 @@ class CompositeRule:
         param_default: Any,
         func: Callable,
         func_name: str,
-    ) -> TransformSpec | None:
+    ) -> Optional[TransformSpec]:
         """Match based on combination of sub-rules."""
         results = [
             rule.match(
@@ -240,7 +239,7 @@ class RuleChain:
     Rules are tried from most specific to most general.
     """
 
-    def __init__(self, rules: list[Rule] | None = None):
+    def __init__(self, rules: Optional[list[Rule]] = None):
         self.rules = rules or []
 
     def add_rule(self, rule: Rule, priority: int = 0):
@@ -254,9 +253,9 @@ class RuleChain:
         param_name: str,
         param_type: type = type(None),
         param_default: Any = inspect.Parameter.empty,
-        func: Callable | None = None,
+        func: Optional[Callable] = None,
         func_name: str = "",
-    ) -> TransformSpec | None:
+    ) -> Optional[TransformSpec]:
         """
         Find first matching rule.
 
@@ -313,7 +312,7 @@ DEFAULT_RULE_CHAIN = RuleChain()
 DEFAULT_RULE_CHAIN.add_rule(_make_builtin_type_rules(), priority=-1000)  # Lowest priority
 
 
-def extract_param_context(func: Callable, param_name: str) -> dict[str, Any]:
+def extract_param_context(func: Callable, param_name: str) -> Dict[str, Any]:
     """Extract context information for a parameter."""
     sig = inspect.signature(func)
     param = sig.parameters.get(param_name)
@@ -337,15 +336,10 @@ def extract_param_context(func: Callable, param_name: str) -> dict[str, Any]:
 def resolve_transform(
     func: Callable,
     param_name: str,
-    rule_chain: RuleChain | None = None,
+    rule_chain: Optional[RuleChain] = None,
 ) -> TransformSpec:
     """
     Resolve transformation specification for a parameter.
-
-    Resolution order:
-    1. Rule chain (explicit rules)
-    2. Type registry (registered types)
-    3. Default fallback (JSON body, no transformation)
 
     Args:
         func: The function containing the parameter
@@ -358,18 +352,7 @@ def resolve_transform(
     chain = rule_chain or DEFAULT_RULE_CHAIN
     context = extract_param_context(func, param_name)
 
-    # Try rule chain first
     spec = chain.match(**context)
-
-    # If no rule matched, check type registry
-    if spec is None:
-        try:
-            from qh.types import get_transform_spec_for_type
-            param_type = context['param_type']
-            spec = get_transform_spec_for_type(param_type)
-        except ImportError:
-            # Type registry not available
-            pass
 
     # Ultimate fallback: JSON body with no transformation
     if spec is None:
