@@ -25,6 +25,7 @@ from qh.types import register_type, register_json_type, TypeRegistry
 # OpenAPI and client generation (Phase 3)
 from qh.openapi import export_openapi, enhance_openapi_schema
 from qh.client import mk_client_from_openapi, mk_client_from_url, mk_client_from_app, HttpClient
+from qh.jsclient import export_js_client, export_ts_client
 
 # Legacy API (for backward compatibility)
 try:
@@ -69,4 +70,6 @@ __all__ = [
     'mk_client_from_url',
     'mk_client_from_app',
     'HttpClient',
+    'export_js_client',
+    'export_ts_client',
 ]
