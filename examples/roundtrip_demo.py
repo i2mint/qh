@@ -72,7 +72,7 @@ def test_simple_types():
 # Example 2: Complex Types
 # ============================================================================
 
-def analyze_data(numbers: list[int], weights: list[float] | None = None) -> dict[str, float]:
+def analyze_data(numbers: List[int], weights: Optional[List[float]] = None) -> Dict[str, float]:
     """
     Analyze numbers with optional weights.
 
@@ -308,10 +308,10 @@ def test_dataclass_types():
 # ============================================================================
 
 def process_order(
-    items: list[dict[str, any]],
-    shipping_address: dict[str, str],
-    discount_code: str | None = None
-) -> dict[str, any]:
+    items: List[Dict[str, any]],
+    shipping_address: Dict[str, str],
+    discount_code: Optional[str] = None
+) -> Dict[str, any]:
     """
     Process an order with items and shipping info.
 
