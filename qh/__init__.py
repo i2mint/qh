@@ -22,6 +22,10 @@ from qh.rules import (
 # Type registry
 from qh.types import register_type, register_json_type, TypeRegistry
 
+# OpenAPI and client generation (Phase 3)
+from qh.openapi import export_openapi, enhance_openapi_schema
+from qh.client import mk_client_from_openapi, mk_client_from_url, mk_client_from_app, HttpClient
+
 # Legacy API (for backward compatibility)
 try:
     from py2http.service import run_app
@@ -36,7 +40,7 @@ except ImportError:
     # py2http not available, skip legacy imports
     pass
 
-__version__ = '0.3.0'  # Phase 2 complete
+__version__ = '0.4.0'  # Phase 3: OpenAPI & Client Generation
 __all__ = [
     # Primary API
     'mk_app',
@@ -58,4 +62,11 @@ __all__ = [
     'register_type',
     'register_json_type',
     'TypeRegistry',
+    # OpenAPI & Client (Phase 3)
+    'export_openapi',
+    'enhance_openapi_schema',
+    'mk_client_from_openapi',
+    'mk_client_from_url',
+    'mk_client_from_app',
+    'HttpClient',
 ]

@@ -229,6 +229,8 @@ def make_endpoint(
     # Set endpoint metadata
     endpoint.__name__ = f"{func.__name__}_endpoint"
     endpoint.__doc__ = func.__doc__
+    # Store original function for OpenAPI/client generation
+    endpoint._qh_original_func = func  # type: ignore
 
     return endpoint
 
