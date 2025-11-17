@@ -1,7 +1,7 @@
 """Dispatching a store"""
 
 from dataclasses import dataclass
-from typing import MutableMapping
+from collections.abc import MutableMapping
 
 backend_test_data = {'test_key': 'test_value', 'test_key_2': 2, 'test_key_3': [1, 2, 3]}
 
@@ -40,11 +40,12 @@ class StoreAccess:
 
 from fastapi import FastAPI, HTTPException, Depends, Body
 from functools import partial
-from typing import Callable, Dict, Any
+from typing import Dict, Any
+from collections.abc import Callable
 
 
 def mk_app(
-    constructor: Callable, constructor_arg_name: str, routes: Dict[str, Dict[str, Any]]
+    constructor: Callable, constructor_arg_name: str, routes: dict[str, dict[str, Any]]
 ):
     app = FastAPI()
 
@@ -83,9 +84,10 @@ def mk_app(
 
 from fastapi import FastAPI, HTTPException, Depends, Body, Query
 from functools import partial
-from typing import Callable, Dict, Any
+from typing import Dict, Any
+from collections.abc import Callable
 
-def mk_app(constructor: Callable, constructor_arg_name: str, routes: Dict[str, Dict[str, Any]]):
+def mk_app(constructor: Callable, constructor_arg_name: str, routes: dict[str, dict[str, Any]]):
     app = FastAPI()
 
     def endpoint_wrapper(constructor: Callable, method_name: str, constructor_arg: str, **kwargs):
@@ -135,9 +137,10 @@ def mk_app(constructor: Callable, constructor_arg_name: str, routes: Dict[str, D
 
 from fastapi import FastAPI, HTTPException, Body, Path
 from functools import partial
-from typing import Callable, Dict, Any, Optional
+from typing import Dict, Any, Optional
+from collections.abc import Callable
 
-def mk_app(constructor: Callable, constructor_arg_name: str, routes: Dict[str, Dict[str, Any]]):
+def mk_app(constructor: Callable, constructor_arg_name: str, routes: dict[str, dict[str, Any]]):
     app = FastAPI()
 
     def endpoint_wrapper(constructor: Callable, method_name: str, *args, **kwargs):

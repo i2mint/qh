@@ -4,7 +4,8 @@ Endpoint creation using i2.Wrap to transform functions into FastAPI routes.
 This module bridges Python functions and HTTP endpoints via transformation rules.
 """
 
-from typing import Any, Callable, Dict, Optional, get_type_hints
+from typing import Any, Dict, Optional, get_type_hints
+from collections.abc import Callable
 from fastapi import Request, Response, HTTPException
 from fastapi.responses import JSONResponse
 import inspect
@@ -19,8 +20,8 @@ from qh.config import RouteConfig
 
 async def extract_http_params(
     request: Request,
-    param_specs: Dict[str, TransformSpec],
-) -> Dict[str, Any]:
+    param_specs: dict[str, TransformSpec],
+) -> dict[str, Any]:
     """
     Extract parameters from HTTP request based on transformation specs.
 
@@ -98,9 +99,9 @@ async def extract_http_params(
 
 
 def apply_ingress_transforms(
-    params: Dict[str, Any],
-    param_specs: Dict[str, TransformSpec],
-) -> Dict[str, Any]:
+    params: dict[str, Any],
+    param_specs: dict[str, TransformSpec],
+) -> dict[str, Any]:
     """Apply ingress transformations to extracted parameters."""
     transformed = {}
 
@@ -116,7 +117,7 @@ def apply_ingress_transforms(
 
 def apply_egress_transform(
     result: Any,
-    egress: Optional[Callable[[Any], Any]],
+    egress: Callable[[Any], Any] | None,
 ) -> Any:
     """Apply egress transformation to function result."""
     if egress:
@@ -157,7 +158,7 @@ def make_endpoint(
 
     # Resolve transformation specs for each parameter
     rule_chain = route_config.rule_chain
-    param_specs: Dict[str, TransformSpec] = {}
+    param_specs: dict[str, TransformSpec] = {}
 
     # Get type hints for type conversion
     type_hints = get_type_hints(func) if hasattr(func, '__annotations__') else {}

@@ -68,8 +68,8 @@ class AppRunner:
         self.host = host
         self.port = port
         self.server_timeout = server_timeout
-        self._client: Optional[TestClient] = None
-        self._server_thread: Optional[threading.Thread] = None
+        self._client: TestClient | None = None
+        self._server_thread: threading.Thread | None = None
         self._server_running = False
 
     def __enter__(self):

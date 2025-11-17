@@ -69,7 +69,7 @@ class TestEnhancedOpenAPI:
     def test_optional_parameters_in_signature(self):
         """Test that Optional parameters are handled correctly."""
 
-        def greet(name: str, title: Optional[str] = None) -> str:
+        def greet(name: str, title: str | None = None) -> str:
             """Greet someone."""
             if title:
                 return f"Hello, {title} {name}!"

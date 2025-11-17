@@ -9,7 +9,8 @@ This is the foundation for the bidirectional transformation capability.
 
 import pytest
 from fastapi.testclient import TestClient
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 import inspect
 
 from qh import mk_app, AppConfig

@@ -4,7 +4,8 @@ Core API for creating FastAPI applications from Python functions.
 This is the primary entry point for qh: mk_app()
 """
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
+from collections.abc import Callable
 from fastapi import FastAPI
 
 from qh.config import (
@@ -23,10 +24,10 @@ from qh.conventions import (
 
 
 def mk_app(
-    funcs: Union[Callable, List[Callable], Dict[Callable, Union[Dict[str, Any], RouteConfig]]],
+    funcs: Callable | list[Callable] | dict[Callable, dict[str, Any] | RouteConfig],
     *,
-    app: Optional[FastAPI] = None,
-    config: Optional[Union[Dict[str, Any], AppConfig]] = None,
+    app: FastAPI | None = None,
+    config: dict[str, Any] | AppConfig | None = None,
     use_conventions: bool = False,
     **kwargs,
 ) -> FastAPI:
@@ -171,7 +172,7 @@ def mk_app(
     return app
 
 
-def inspect_routes(app: FastAPI) -> List[Dict[str, Any]]:
+def inspect_routes(app: FastAPI) -> list[dict[str, Any]]:
     """
     Inspect routes in a FastAPI app.
 

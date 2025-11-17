@@ -29,7 +29,7 @@ def multiply(x: int, y: int) -> int:
     return x * y
 
 
-def calculate_stats(numbers: List[int]) -> Dict[str, float]:
+def calculate_stats(numbers: list[int]) -> dict[str, float]:
     """
     Calculate statistics for a list of numbers.
 

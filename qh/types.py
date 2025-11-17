@@ -11,7 +11,8 @@ The type registry maps Python types to HTTP representations and provides
 automatic conversion functions (ingress/egress transformations).
 """
 
-from typing import Any, Callable, Dict, Optional, Type, TypeVar, get_origin
+from typing import Any, Dict, Optional, Type, TypeVar, get_origin
+from collections.abc import Callable
 from dataclasses import dataclass
 import inspect
 
@@ -34,11 +35,11 @@ class TypeHandler:
         content_type: Optional HTTP content type for binary data
     """
 
-    python_type: Type
+    python_type: type
     to_json: Callable[[Any], Any]
     from_json: Callable[[Any], Any]
     http_location: HttpLocation = HttpLocation.JSON_BODY
-    content_type: Optional[str] = None
+    content_type: str | None = None
 
     def to_transform_spec(self) -> TransformSpec:
         """Convert this handler to a TransformSpec."""
@@ -57,7 +58,7 @@ class TypeRegistry:
     """
 
     def __init__(self):
-        self.handlers: Dict[Type, TypeHandler] = {}
+        self.handlers: dict[type, TypeHandler] = {}
         self._init_builtin_handlers()
 
     def _init_builtin_handlers(self):
@@ -72,12 +73,12 @@ class TypeRegistry:
 
     def register(
         self,
-        python_type: Type[T],
+        python_type: type[T],
         *,
         to_json: Callable[[T], Any],
         from_json: Callable[[Any], T],
         http_location: HttpLocation = HttpLocation.JSON_BODY,
-        content_type: Optional[str] = None,
+        content_type: str | None = None,
     ) -> None:
         """
         Register a type handler.
@@ -98,7 +99,7 @@ class TypeRegistry:
         )
         self.handlers[python_type] = handler
 
-    def get_handler(self, python_type: Type) -> Optional[TypeHandler]:
+    def get_handler(self, python_type: type) -> TypeHandler | None:
         """
         Get handler for a type.
 
@@ -128,14 +129,14 @@ class TypeRegistry:
 
         return None
 
-    def get_transform_spec(self, python_type: Type) -> Optional[TransformSpec]:
+    def get_transform_spec(self, python_type: type) -> TransformSpec | None:
         """Get TransformSpec for a type."""
         handler = self.get_handler(python_type)
         if handler:
             return handler.to_transform_spec()
         return None
 
-    def unregister(self, python_type: Type) -> None:
+    def unregister(self, python_type: type) -> None:
         """Unregister a type handler."""
         self.handlers.pop(python_type, None)
 
@@ -145,12 +146,12 @@ _global_registry = TypeRegistry()
 
 
 def register_type(
-    python_type: Type[T],
+    python_type: type[T],
     *,
     to_json: Callable[[T], Any],
     from_json: Callable[[Any], T],
     http_location: HttpLocation = HttpLocation.JSON_BODY,
-    content_type: Optional[str] = None,
+    content_type: str | None = None,
 ) -> None:
     """
     Register a type in the global registry.
@@ -179,12 +180,12 @@ def register_type(
     )
 
 
-def get_type_handler(python_type: Type) -> Optional[TypeHandler]:
+def get_type_handler(python_type: type) -> TypeHandler | None:
     """Get handler for a type from global registry."""
     return _global_registry.get_handler(python_type)
 
 
-def get_transform_spec_for_type(python_type: Type) -> Optional[TransformSpec]:
+def get_transform_spec_for_type(python_type: type) -> TransformSpec | None:
     """Get TransformSpec for a type from global registry."""
     return _global_registry.get_transform_spec(python_type)
 
@@ -267,10 +268,10 @@ except ImportError:
 
 # Decorator for easy registration
 def register_json_type(
-    cls: Optional[Type[T]] = None,
+    cls: type[T] | None = None,
     *,
-    to_json: Optional[Callable[[T], Any]] = None,
-    from_json: Optional[Callable[[Any], T]] = None,
+    to_json: Callable[[T], Any] | None = None,
+    from_json: Callable[[Any], T] | None = None,
 ):
     """
     Decorator to register a custom type.
@@ -301,7 +302,7 @@ def register_json_type(
         ...         self.y = y
     """
 
-    def decorator(cls_to_register: Type[T]) -> Type[T]:
+    def decorator(cls_to_register: type[T]) -> type[T]:
         # Determine serializers
         _to_json = to_json
         _from_json = from_json

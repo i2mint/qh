@@ -1,4 +1,4 @@
-from typing import Iterable, Callable
+from collections.abc import Iterable, Callable
 
 from py2http import mk_app
 

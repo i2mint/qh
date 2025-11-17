@@ -45,8 +45,8 @@ def typed_function():
     """Function with complex types for testing transformations"""
 
     def process_data(
-        numbers: List[int], multiplier: float = 1.0, metadata: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        numbers: list[int], multiplier: float = 1.0, metadata: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """Process a list of numbers"""
         result = [n * multiplier for n in numbers]
         return {"result": result, "sum": sum(result), "metadata": metadata or {}}
@@ -143,7 +143,7 @@ def test_dict_configuration():
 def test_input_transformation():
     """Test input transformation functionality"""
 
-    def process(data: List[int], factor: int = 2) -> int:
+    def process(data: list[int], factor: int = 2) -> int:
         return sum(data) * factor
 
     # Create ingress that converts string to list of ints
@@ -216,7 +216,7 @@ def test_app_wide_configuration():
 def test_name_based_ingress():
     """Test name-based ingress transformation"""
 
-    def calculate(numbers: List[int], operation: str) -> Any:
+    def calculate(numbers: list[int], operation: str) -> Any:
         if operation == "sum":
             return sum(numbers)
         elif operation == "product":

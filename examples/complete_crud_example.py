@@ -67,7 +67,7 @@ class Post:
     status: str = "draft"
     created_at: str = field(default_factory=lambda: datetime.now().isoformat())
     updated_at: str = field(default_factory=lambda: datetime.now().isoformat())
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
     def to_dict(self):
         return {
@@ -118,9 +118,9 @@ class BlogDatabase:
     """Simple in-memory database for the blog."""
 
     def __init__(self):
-        self.users: Dict[str, User] = {}
-        self.posts: Dict[str, Post] = {}
-        self.comments: Dict[str, Comment] = {}
+        self.users: dict[str, User] = {}
+        self.posts: dict[str, Post] = {}
+        self.comments: dict[str, Comment] = {}
 
     def reset(self):
         """Reset database (useful for testing)."""
@@ -137,7 +137,7 @@ db = BlogDatabase()
 # User API Functions
 # ============================================================================
 
-def create_user(username: str, email: str, full_name: str) -> Dict:
+def create_user(username: str, email: str, full_name: str) -> dict:
     """
     Create a new user.
 
@@ -167,7 +167,7 @@ def create_user(username: str, email: str, full_name: str) -> Dict:
     return user.to_dict()
 
 
-def get_user(user_id: str) -> Dict:
+def get_user(user_id: str) -> dict:
     """
     Get a user by ID.
 
@@ -185,7 +185,7 @@ def get_user(user_id: str) -> Dict:
     return db.users[user_id].to_dict()
 
 
-def list_users(limit: int = 10, offset: int = 0) -> List[Dict]:
+def list_users(limit: int = 10, offset: int = 0) -> list[dict]:
     """
     List users with pagination.
 
@@ -200,8 +200,8 @@ def list_users(limit: int = 10, offset: int = 0) -> List[Dict]:
     return [u.to_dict() for u in users[offset:offset + limit]]
 
 
-def update_user(user_id: str, email: Optional[str] = None,
-                full_name: Optional[str] = None) -> Dict:
+def update_user(user_id: str, email: str | None = None,
+                full_name: str | None = None) -> dict:
     """
     Update user information.
 
@@ -226,7 +226,7 @@ def update_user(user_id: str, email: Optional[str] = None,
     return user.to_dict()
 
 
-def delete_user(user_id: str) -> Dict[str, str]:
+def delete_user(user_id: str) -> dict[str, str]:
     """
     Delete a user.
 
@@ -248,7 +248,7 @@ def delete_user(user_id: str) -> Dict[str, str]:
 # ============================================================================
 
 def create_post(author_id: str, title: str, content: str,
-                tags: Optional[List[str]] = None) -> Dict:
+                tags: list[str] | None = None) -> dict:
     """
     Create a new blog post.
 
@@ -277,15 +277,15 @@ def create_post(author_id: str, title: str, content: str,
     return post.to_dict()
 
 
-def get_post(post_id: str) -> Dict:
+def get_post(post_id: str) -> dict:
     """Get a post by ID."""
     if post_id not in db.posts:
         raise ValueError(f"Post {post_id} not found")
     return db.posts[post_id]
 
 
-def list_posts(author_id: Optional[str] = None, status: Optional[str] = None,
-               limit: int = 10, offset: int = 0) -> List[Dict]:
+def list_posts(author_id: str | None = None, status: str | None = None,
+               limit: int = 10, offset: int = 0) -> list[dict]:
     """
     List posts with filtering and pagination.
 
@@ -312,9 +312,9 @@ def list_posts(author_id: Optional[str] = None, status: Optional[str] = None,
     return [p.to_dict() for p in posts[offset:offset + limit]]
 
 
-def update_post(post_id: str, title: Optional[str] = None,
-                content: Optional[str] = None, status: Optional[str] = None,
-                tags: Optional[List[str]] = None) -> Dict:
+def update_post(post_id: str, title: str | None = None,
+                content: str | None = None, status: str | None = None,
+                tags: list[str] | None = None) -> dict:
     """
     Update a blog post.
 
@@ -349,7 +349,7 @@ def update_post(post_id: str, title: Optional[str] = None,
     return post.to_dict()
 
 
-def delete_post(post_id: str) -> Dict[str, str]:
+def delete_post(post_id: str) -> dict[str, str]:
     """Delete a post."""
     if post_id not in db.posts:
         raise ValueError(f"Post {post_id} not found")
@@ -371,7 +371,7 @@ def delete_post(post_id: str) -> Dict[str, str]:
 # Comment API Functions
 # ============================================================================
 
-def create_comment(post_id: str, author_id: str, content: str) -> Dict:
+def create_comment(post_id: str, author_id: str, content: str) -> dict:
     """Create a comment on a post."""
     if post_id not in db.posts:
         raise ValueError(f"Post {post_id} not found")
@@ -389,7 +389,7 @@ def create_comment(post_id: str, author_id: str, content: str) -> Dict:
     return comment.to_dict()
 
 
-def list_comments_for_post(post_id: str) -> List[Dict]:
+def list_comments_for_post(post_id: str) -> list[dict]:
     """List all comments for a post."""
     if post_id not in db.posts:
         raise ValueError(f"Post {post_id} not found")
@@ -399,7 +399,7 @@ def list_comments_for_post(post_id: str) -> List[Dict]:
     return [c.to_dict() for c in comments]
 
 
-def delete_comment(comment_id: str) -> Dict[str, str]:
+def delete_comment(comment_id: str) -> dict[str, str]:
     """Delete a comment."""
     if comment_id not in db.comments:
         raise ValueError(f"Comment {comment_id} not found")
@@ -412,7 +412,7 @@ def delete_comment(comment_id: str) -> Dict[str, str]:
 # Statistics Functions
 # ============================================================================
 
-def get_blog_stats() -> Dict[str, int]:
+def get_blog_stats() -> dict[str, int]:
     """Get overall blog statistics."""
     return {
         'total_users': len(db.users),
@@ -423,7 +423,7 @@ def get_blog_stats() -> Dict[str, int]:
     }
 
 
-def get_user_stats(user_id: str) -> Dict[str, any]:
+def get_user_stats(user_id: str) -> dict[str, any]:
     """Get statistics for a specific user."""
     if user_id not in db.users:
         raise ValueError(f"User {user_id} not found")
