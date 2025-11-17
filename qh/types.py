@@ -267,6 +267,8 @@ except ImportError:
 
 # Decorator for easy registration
 def register_json_type(
+    cls: Optional[Type[T]] = None,
+    *,
     to_json: Optional[Callable[[T], Any]] = None,
     from_json: Optional[Callable[[Any], T]] = None,
 ):
@@ -299,42 +301,43 @@ def register_json_type(
         ...         self.y = y
     """
 
-    def decorator(cls: Type[T]) -> Type[T]:
-        nonlocal to_json, from_json
+    def decorator(cls_to_register: Type[T]) -> Type[T]:
+        # Determine serializers
+        _to_json = to_json
+        _from_json = from_json
 
         # Auto-detect serialization methods if not provided
-        if to_json is None:
-            if hasattr(cls, 'to_dict'):
-                to_json = lambda obj: obj.to_dict()
-            elif hasattr(cls, '__dict__'):
-                to_json = lambda obj: obj.__dict__
+        if _to_json is None:
+            if hasattr(cls_to_register, 'to_dict'):
+                _to_json = lambda obj: obj.to_dict()
+            elif hasattr(cls_to_register, '__dict__'):
+                _to_json = lambda obj: obj.__dict__
             else:
-                raise ValueError(f"Cannot auto-detect serialization for {cls}")
+                raise ValueError(f"Cannot auto-detect serialization for {cls_to_register}")
 
-        if from_json is None:
-            if hasattr(cls, 'from_dict'):
-                from_json = cls.from_dict
-            elif hasattr(cls, '__init__'):
+        if _from_json is None:
+            if hasattr(cls_to_register, 'from_dict'):
+                _from_json = cls_to_register.from_dict
+            elif hasattr(cls_to_register, '__init__'):
                 # Try to call constructor with dict unpacking
-                from_json = lambda data: cls(**data)
+                _from_json = lambda data: cls_to_register(**data)
             else:
-                raise ValueError(f"Cannot auto-detect deserialization for {cls}")
+                raise ValueError(f"Cannot auto-detect deserialization for {cls_to_register}")
 
         # Register the type
         register_type(
-            cls,
-            to_json=to_json,
-            from_json=from_json,
+            cls_to_register,
+            to_json=_to_json,
+            from_json=_from_json,
         )
 
-        return cls
+        return cls_to_register
 
     # Support both @register_json_type and @register_json_type(...)
-    if to_json is None and from_json is None:
-        # Called as @register_json_type (no parens)
-        # Return the decorator
-        return decorator
+    if cls is not None:
+        # Called as @register_json_type (no parens) - cls is the class being decorated
+        return decorator(cls)
     else:
-        # Called as @register_json_type(...) (with params)
-        # This is already the decorator
+        # Called as @register_json_type(...) (with keyword params)
+        # Return the decorator to be applied
         return decorator
