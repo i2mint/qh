@@ -9,6 +9,7 @@ from typing import (
     Any,
     Callable,
     Iterator,
+    List,
     Mapping,
     MutableMapping,
     Optional,
@@ -133,7 +134,12 @@ def _dispatch_mapping_method(
     return method(*args, **kwargs)
 
 
-def create_method_endpoint(method_name: str, config: Dict, get_obj_fn: Callable):
+def create_method_endpoint(
+    method_name: str,
+    config: Dict,
+    get_obj_fn: Callable,
+    path_params: Optional[List[str]] = None
+):
     """
     Create an endpoint function for a specific mapping method.
 
@@ -141,104 +147,201 @@ def create_method_endpoint(method_name: str, config: Dict, get_obj_fn: Callable)
         method_name: The mapping method to dispatch (e.g., '__iter__', '__getitem__')
         config: Configuration for the endpoint
         get_obj_fn: Function to retrieve the object to operate on
+        path_params: List of path parameter names (e.g., ['user_id', 'store_key'])
 
     Returns:
         An async endpoint function compatible with FastAPI
     """
     http_method = config.get("method", "get")
+    path_params = path_params or ["user_id"]
 
     if method_name == "__iter__":
-
-        async def endpoint(user_id: str = Path(..., description="User ID")):
-            obj = get_obj_fn(user_id)
-            return list(_dispatch_mapping_method(obj, method_name))
+        # Generate endpoint dynamically based on path_params
+        if len(path_params) == 1:
+            async def endpoint(user_id: str = Path(..., description="User ID")):
+                obj = get_obj_fn(user_id)
+                return list(_dispatch_mapping_method(obj, method_name))
+        elif len(path_params) == 2:
+            async def endpoint(
+                user_id: str = Path(..., description="User ID"),
+                store_key: str = Path(..., description="Store key"),
+            ):
+                obj = get_obj_fn(user_id, store_key)
+                return list(_dispatch_mapping_method(obj, method_name))
+        else:
+            raise ValueError(f"Unsupported number of path params: {len(path_params)}")
 
         return endpoint
 
     elif method_name == "__getitem__":
-
-        async def endpoint(
-            user_id: str = Path(..., description="User ID"),
-            item_key: str = Path(..., description="Item key"),
-        ):
-            obj = get_obj_fn(user_id)
-            try:
-                value = _dispatch_mapping_method(obj, method_name, item_key)
-                return JSONResponse(content={"value": _serialize_value(value)})
-            except KeyError:
-                raise HTTPException(
-                    status_code=404, detail=f"Item not found: {item_key}"
-                )
+        # Generate endpoint dynamically based on path_params
+        if len(path_params) == 1:
+            async def endpoint(
+                user_id: str = Path(..., description="User ID"),
+                item_key: str = Path(..., description="Item key"),
+            ):
+                obj = get_obj_fn(user_id)
+                try:
+                    value = _dispatch_mapping_method(obj, method_name, item_key)
+                    return JSONResponse(content={"value": _serialize_value(value)})
+                except KeyError:
+                    raise HTTPException(
+                        status_code=404, detail=f"Item not found: {item_key}"
+                    )
+        elif len(path_params) == 2:
+            async def endpoint(
+                user_id: str = Path(..., description="User ID"),
+                store_key: str = Path(..., description="Store key"),
+                item_key: str = Path(..., description="Item key"),
+            ):
+                obj = get_obj_fn(user_id, store_key)
+                try:
+                    value = _dispatch_mapping_method(obj, method_name, item_key)
+                    return JSONResponse(content={"value": _serialize_value(value)})
+                except KeyError:
+                    raise HTTPException(
+                        status_code=404, detail=f"Item not found: {item_key}"
+                    )
+        else:
+            raise ValueError(f"Unsupported number of path params: {len(path_params)}")
 
         return endpoint
 
     elif method_name == "__setitem__":
-
-        async def endpoint(
-            user_id: str = Path(..., description="User ID"),
-            item_key: str = Path(..., description="Item key"),
-            body: StoreValue = Body(..., description="Value to set"),
-        ):
-            obj = get_obj_fn(user_id)
-            try:
-                _dispatch_mapping_method(obj, method_name, item_key, body.value)
-                return {"message": "Item set successfully", "key": item_key}
-            except Exception as e:
-                raise HTTPException(
-                    status_code=400, detail=f"Failed to set item: {str(e)}"
-                )
+        if len(path_params) == 1:
+            async def endpoint(
+                user_id: str = Path(..., description="User ID"),
+                item_key: str = Path(..., description="Item key"),
+                body: StoreValue = Body(..., description="Value to set"),
+            ):
+                obj = get_obj_fn(user_id)
+                try:
+                    _dispatch_mapping_method(obj, method_name, item_key, body.value)
+                    return {"message": "Item set successfully", "key": item_key}
+                except Exception as e:
+                    raise HTTPException(
+                        status_code=400, detail=f"Failed to set item: {str(e)}"
+                    )
+        elif len(path_params) == 2:
+            async def endpoint(
+                user_id: str = Path(..., description="User ID"),
+                store_key: str = Path(..., description="Store key"),
+                item_key: str = Path(..., description="Item key"),
+                body: StoreValue = Body(..., description="Value to set"),
+            ):
+                obj = get_obj_fn(user_id, store_key)
+                try:
+                    _dispatch_mapping_method(obj, method_name, item_key, body.value)
+                    return {"message": "Item set successfully", "key": item_key}
+                except Exception as e:
+                    raise HTTPException(
+                        status_code=400, detail=f"Failed to set item: {str(e)}"
+                    )
+        else:
+            raise ValueError(f"Unsupported number of path params: {len(path_params)}")
 
         return endpoint
 
     elif method_name == "__delitem__":
-
-        async def endpoint(
-            user_id: str = Path(..., description="User ID"),
-            item_key: str = Path(..., description="Item key"),
-        ):
-            obj = get_obj_fn(user_id)
-            try:
-                _dispatch_mapping_method(obj, method_name, item_key)
-                return {"message": "Item deleted successfully", "key": item_key}
-            except KeyError:
-                raise HTTPException(
-                    status_code=404, detail=f"Item not found: {item_key}"
-                )
-            except Exception as e:
-                raise HTTPException(
-                    status_code=400, detail=f"Failed to delete item: {str(e)}"
-                )
+        if len(path_params) == 1:
+            async def endpoint(
+                user_id: str = Path(..., description="User ID"),
+                item_key: str = Path(..., description="Item key"),
+            ):
+                obj = get_obj_fn(user_id)
+                try:
+                    _dispatch_mapping_method(obj, method_name, item_key)
+                    return {"message": "Item deleted successfully", "key": item_key}
+                except KeyError:
+                    raise HTTPException(
+                        status_code=404, detail=f"Item not found: {item_key}"
+                    )
+                except Exception as e:
+                    raise HTTPException(
+                        status_code=400, detail=f"Failed to delete item: {str(e)}"
+                    )
+        elif len(path_params) == 2:
+            async def endpoint(
+                user_id: str = Path(..., description="User ID"),
+                store_key: str = Path(..., description="Store key"),
+                item_key: str = Path(..., description="Item key"),
+            ):
+                obj = get_obj_fn(user_id, store_key)
+                try:
+                    _dispatch_mapping_method(obj, method_name, item_key)
+                    return {"message": "Item deleted successfully", "key": item_key}
+                except KeyError:
+                    raise HTTPException(
+                        status_code=404, detail=f"Item not found: {item_key}"
+                    )
+                except Exception as e:
+                    raise HTTPException(
+                        status_code=400, detail=f"Failed to delete item: {str(e)}"
+                    )
+        else:
+            raise ValueError(f"Unsupported number of path params: {len(path_params)}")
 
         return endpoint
 
     elif method_name == "__contains__":
-
-        async def endpoint(
-            user_id: str = Path(..., description="User ID"),
-            item_key: str = Path(..., description="Item key"),
-        ):
-            obj = get_obj_fn(user_id)
-            try:
-                exists = _dispatch_mapping_method(obj, method_name, item_key)
-                return exists
-            except Exception as e:
-                raise HTTPException(
-                    status_code=400, detail=f"Failed to check if item exists: {str(e)}"
-                )
+        if len(path_params) == 1:
+            async def endpoint(
+                user_id: str = Path(..., description="User ID"),
+                item_key: str = Path(..., description="Item key"),
+            ):
+                obj = get_obj_fn(user_id)
+                try:
+                    exists = _dispatch_mapping_method(obj, method_name, item_key)
+                    return exists
+                except Exception as e:
+                    raise HTTPException(
+                        status_code=400, detail=f"Failed to check if item exists: {str(e)}"
+                    )
+        elif len(path_params) == 2:
+            async def endpoint(
+                user_id: str = Path(..., description="User ID"),
+                store_key: str = Path(..., description="Store key"),
+                item_key: str = Path(..., description="Item key"),
+            ):
+                obj = get_obj_fn(user_id, store_key)
+                try:
+                    exists = _dispatch_mapping_method(obj, method_name, item_key)
+                    return exists
+                except Exception as e:
+                    raise HTTPException(
+                        status_code=400, detail=f"Failed to check if item exists: {str(e)}"
+                    )
+        else:
+            raise ValueError(f"Unsupported number of path params: {len(path_params)}")
 
         return endpoint
 
     elif method_name == "__len__":
-
-        async def endpoint(user_id: str = Path(..., description="User ID")):
-            obj = get_obj_fn(user_id)
-            try:
-                count = _dispatch_mapping_method(obj, method_name)
-                return count
-            except Exception as e:
-                raise HTTPException(
-                    status_code=400, detail=f"Failed to get item count: {str(e)}"
-                )
+        if len(path_params) == 1:
+            async def endpoint(user_id: str = Path(..., description="User ID")):
+                obj = get_obj_fn(user_id)
+                try:
+                    count = _dispatch_mapping_method(obj, method_name)
+                    return count
+                except Exception as e:
+                    raise HTTPException(
+                        status_code=400, detail=f"Failed to get item count: {str(e)}"
+                    )
+        elif len(path_params) == 2:
+            async def endpoint(
+                user_id: str = Path(..., description="User ID"),
+                store_key: str = Path(..., description="Store key"),
+            ):
+                obj = get_obj_fn(user_id, store_key)
+                try:
+                    count = _dispatch_mapping_method(obj, method_name)
+                    return count
+                except Exception as e:
+                    raise HTTPException(
+                        status_code=400, detail=f"Failed to get item count: {str(e)}"
+                    )
+        else:
+            raise ValueError(f"Unsupported number of path params: {len(path_params)}")
 
         return endpoint
 
@@ -298,6 +401,14 @@ def add_store_access(
     get_obj_dispatch = get_obj_dispatch or DEFAULT_GET_OBJ_DISPATCH
     methods = methods or DEFAULT_METHODS.copy()
 
+    # Extract path parameters from base_path or get_obj_dispatch
+    import re
+    if "path_params" in get_obj_dispatch:
+        path_params = get_obj_dispatch["path_params"]
+    else:
+        # Extract from base_path
+        path_params = re.findall(r'\{(\w+)\}', base_path)
+
     # Process methods dict to apply defaults
     for method_name, config in list(methods.items()):
         if config is None:
@@ -318,14 +429,14 @@ def add_store_access(
                 # No default available for this method
                 continue
 
-    def _get_obj_or_error(user_id: str) -> Mapping:
+    def _get_obj_or_error(*args) -> Mapping:
         """Get object or raise HTTP exception."""
         try:
-            obj = get_obj(user_id)
+            obj = get_obj(*args)
             if obj is None:
-                error_message = get_obj_dispatch["error_message"].format(
-                    user_id=user_id
-                )
+                # Format error message with all path params
+                error_params = {param: arg for param, arg in zip(path_params, args)}
+                error_message = get_obj_dispatch["error_message"].format(**error_params)
                 raise HTTPException(
                     status_code=get_obj_dispatch["error_code"], detail=error_message
                 )
@@ -353,7 +464,7 @@ def add_store_access(
         path = base_path + config.get("path", "")
         http_method = config.get("method", "get")
         description = config.get("description", f"Execute {method_name} on the store")
-        endpoint = create_method_endpoint(method_name, config, _get_obj_or_error)
+        endpoint = create_method_endpoint(method_name, config, _get_obj_or_error, path_params)
         getattr(app, http_method)(
             path,
             response_model=config.get("response_model", None),
@@ -367,7 +478,7 @@ def add_store_access(
         path = base_path + config.get("path", "")
         http_method = config.get("method", "get")
         description = config.get("description", f"Execute {method_name} on the store")
-        endpoint = create_method_endpoint(method_name, config, _get_obj_or_error)
+        endpoint = create_method_endpoint(method_name, config, _get_obj_or_error, path_params)
         getattr(app, http_method)(
             path,
             response_model=config.get("response_model", None),
