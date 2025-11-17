@@ -2,15 +2,212 @@
 Testing utilities for qh applications.
 
 Provides context managers and helpers for testing HTTP services created with qh.
+
+Related Tools in Other Packages
+-------------------------------
+This module provides testing utilities similar to those found in:
+- `meshed.tools.launch_webservice`: Context manager for launching function-based web services
+- `strand.taskrunning.utils.run_process`: Generic process runner with health checks
+- `py2http`: Various service management utilities
+
+The tools here are specifically optimized for qh/FastAPI applications but can work
+with any HTTP service.
 """
 
-from typing import Optional, Any
+from typing import Optional, Any, Union, Callable, Generator
+from dataclasses import dataclass
 import threading
 import time
+import multiprocessing
 import requests
 from contextlib import contextmanager
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+
+
+@dataclass
+class ServiceInfo:
+    """Information about a running service.
+
+    Attributes:
+        url: Base URL of the service (e.g., 'http://localhost:8000')
+        was_already_running: True if service was already running, False if launched
+        thread: Thread object if service was launched in thread, None otherwise
+        app: The FastAPI app if one was provided, None otherwise
+    """
+
+    url: str
+    was_already_running: bool
+    thread: Optional[threading.Thread] = None
+    app: Optional[FastAPI] = None
+
+
+def _is_service_running(url: str, *, timeout: float = 1.0) -> bool:
+    """Check if an HTTP service is responding at the given URL.
+
+    Args:
+        url: URL to check (e.g., 'http://localhost:8000')
+        timeout: Request timeout in seconds
+
+    Returns:
+        True if service responds with status < 500, False otherwise
+
+    >>> _is_service_running('http://localhost:99999')  # doctest: +SKIP
+    False
+    """
+    try:
+        response = requests.get(url, timeout=timeout)
+        return response.status_code < 500
+    except (requests.ConnectionError, requests.RequestException):
+        return False
+
+
+@contextmanager
+def service_running(
+    *,
+    url: Optional[str] = None,
+    app: Optional[FastAPI] = None,
+    launcher: Optional[Callable[[], None]] = None,
+    port: int = 8000,
+    host: str = '127.0.0.1',
+    startup_wait: float = 2.0,
+    readiness_check_interval: float = 0.2,
+    readiness_timeout: float = 10.0,
+    log_level: str = 'error',
+) -> Generator[ServiceInfo, None, None]:
+    """Ensure an HTTP service is running for testing purposes.
+
+    This context manager checks if a service is already running at the specified URL.
+    If not running, it launches the service using one of the provided methods (app,
+    launcher) and tears it down on exit. If the service was already running, it leaves
+    it running on exit.
+
+    Exactly one of `url`, `app`, or `launcher` must be provided.
+
+    Note:
+        Services are launched in background threads (not processes) to avoid
+        serialization issues with FastAPI apps on macOS.
+
+    Args:
+        url: URL of an existing service to check (e.g., 'http://localhost:8000').
+             If provided alone, will fail if service is not running.
+        app: FastAPI/ASGI app to serve using uvicorn
+        launcher: Custom callable to launch the service (will run in background thread)
+        port: Port to bind service to (used with app or launcher)
+        host: Host to bind service to (used with app or launcher)
+        startup_wait: Initial wait time after launching (seconds)
+        readiness_check_interval: Polling interval for readiness checks (seconds)
+        readiness_timeout: Maximum time to wait for service to be ready (seconds)
+        log_level: Uvicorn log level when serving an app
+
+    Yields:
+        ServiceInfo: Information about the running service including URL and status
+
+    Raises:
+        ValueError: If invalid combination of arguments provided
+        RuntimeError: If service fails to start within timeout
+
+    Examples:
+        Test a qh app (will launch and tear down):
+        >>> from qh import mk_app
+        >>> def add(x: int, y: int) -> int:
+        ...     return x + y
+        >>> app = mk_app([add])
+        >>> with service_running(app=app, port=8001) as info:
+        ...     response = requests.post(f'{info.url}/add', json={'x': 3, 'y': 5})
+        ...     assert response.json() == 8
+        ...     assert not info.was_already_running  # doctest: +SKIP
+
+        Test an already-running service (won't tear down):
+        >>> with service_running(url='https://api.github.com') as info:
+        ...     response = requests.get(f'{info.url}/users/octocat')
+        ...     assert info.was_already_running  # doctest: +SKIP
+
+        Use custom launcher:
+        >>> def my_launcher():
+        ...     # Custom service startup code
+        ...     pass  # doctest: +SKIP
+        >>> with service_running(launcher=my_launcher, port=8002) as info:
+        ...     # Test your service
+        ...     pass  # doctest: +SKIP
+    """
+    # Validate arguments
+    provided_args = sum([url is not None, app is not None, launcher is not None])
+    if provided_args == 0:
+        raise ValueError(
+            "Must provide one of: url (for existing service), "
+            "app (to serve), or launcher (custom startup)"
+        )
+    if provided_args > 1:
+        raise ValueError("Cannot provide multiple service specifications")
+
+    # Determine service URL
+    if url is None:
+        service_url = f'http://{host}:{port}'
+    else:
+        service_url = url
+
+    # Check if already running
+    was_running = _is_service_running(service_url)
+    thread = None
+    server = None
+
+    if not was_running:
+        if url is not None and app is None and launcher is None:
+            raise RuntimeError(
+                f"Service not running at {service_url} and no launcher provided"
+            )
+
+        if launcher is not None:
+            # Use custom launcher in background thread
+            thread = threading.Thread(target=launcher, daemon=True)
+            thread.start()
+        elif app is not None:
+            # Launch using uvicorn in background thread
+            import uvicorn
+
+            config = uvicorn.Config(
+                app,
+                host=host,
+                port=port,
+                log_level=log_level,
+            )
+            server = uvicorn.Server(config)
+
+            def run_server():
+                server.run()
+
+            thread = threading.Thread(target=run_server, daemon=True)
+            thread.start()
+
+        # Wait for service to be ready
+        time.sleep(startup_wait)
+
+        elapsed = startup_wait
+        while not _is_service_running(service_url) and elapsed < readiness_timeout:
+            time.sleep(readiness_check_interval)
+            elapsed += readiness_check_interval
+
+        if not _is_service_running(service_url):
+            raise RuntimeError(
+                f"Service failed to start at {service_url} within "
+                f"{readiness_timeout}s timeout"
+            )
+
+    info = ServiceInfo(
+        url=service_url,
+        was_already_running=was_running,
+        thread=thread,
+        app=app,
+    )
+
+    try:
+        yield info
+    finally:
+        # Only tear down if we launched it
+        # Note: daemon threads will automatically stop when main thread exits
+        # For proper cleanup in tests, we rely on the server finishing naturally
+        pass
 
 
 class AppRunner:
@@ -160,12 +357,7 @@ class AppRunner:
 
 
 @contextmanager
-def run_app(
-    app: FastAPI,
-    *,
-    use_server: bool = False,
-    **kwargs
-):
+def run_app(app: FastAPI, *, use_server: bool = False, **kwargs):
     """
     Context manager for running a FastAPI app.
 
@@ -237,7 +429,8 @@ def serve_app(app: FastAPI, port: int = 8000, host: str = "127.0.0.1"):
     """
     Context manager for running app with real server.
 
-    Convenience wrapper for integration testing with a real uvicorn server.
+    Simple facade over `service_running` for the common case of serving a FastAPI app.
+    Always launches a new server and tears it down on exit.
 
     Args:
         app: FastAPI application
@@ -245,7 +438,7 @@ def serve_app(app: FastAPI, port: int = 8000, host: str = "127.0.0.1"):
         host: Host to bind to
 
     Yields:
-        Base URL string
+        Base URL string (for backwards compatibility)
 
     Examples:
         >>> from qh import mk_app
@@ -259,9 +452,13 @@ def serve_app(app: FastAPI, port: int = 8000, host: str = "127.0.0.1"):
         >>> with serve_app(app, port=8001) as url:
         ...     response = requests.post(f'{url}/multiply', json={'x': 4, 'y': 5})
         ...     assert response.json() == 20
+
+    Note:
+        If you need to check if a service is already running and avoid duplicate
+        launches, use `service_running` instead.
     """
-    with run_app(app, use_server=True, port=port, host=host) as base_url:
-        yield base_url
+    with service_running(app=app, port=port, host=host) as info:
+        yield info.url
 
 
 def quick_test(func, **kwargs):

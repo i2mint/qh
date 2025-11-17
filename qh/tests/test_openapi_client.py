@@ -82,7 +82,8 @@ class TestEnhancedOpenAPI:
         params = sig['parameters']
 
         title_param = next(p for p in params if p['name'] == 'title')
-        assert 'Optional' in title_param['type']
+        # Python 3.10+ uses UnionType[str, NoneType] for str | None syntax
+        assert 'Optional' in title_param['type'] or 'Union' in title_param['type']
         assert title_param['required'] is False
 
     def test_examples_generation(self):

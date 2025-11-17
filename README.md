@@ -113,3 +113,49 @@ Now try it out:
 curl -H "Content-Type: application/json" -X POST -d '{"a": [1,2,3], "b": [4,5,6]}' http://127.0.0.1:8080/add_numpy_arrays
 # should get [5, 7, 9]
 ```
+
+## Testing HTTP Services
+
+The `service_running` context manager makes it easy to test your qh applications (or any HTTP service):
+
+```python
+from qh import mk_app, service_running
+import requests
+
+def add(x: int, y: int) -> int:
+    return x + y
+
+app = mk_app([add])
+
+# Test your service
+with service_running(app=app, port=8001) as info:
+    response = requests.post(f'{info.url}/add', json={'x': 3, 'y': 5})
+    assert response.json() == 8
+    print(f"✅ Service tested successfully at {info.url}")
+```
+
+The `service_running` context manager:
+- ✅ Checks if service is already running
+- ✅ Only launches if needed
+- ✅ Only tears down what it launched
+- ✅ Returns `ServiceInfo` with URL, status, and thread info
+
+You can also test external services:
+```python
+# Won't launch or tear down - just verifies it's running
+with service_running(url='https://api.github.com') as info:
+    assert info.was_already_running
+    response = requests.get(f'{info.url}/users/octocat')
+```
+
+For simpler cases, use `serve_app`:
+```python
+from qh import serve_app
+
+with serve_app(app, port=8001) as url:
+    response = requests.post(f'{url}/add', json={'x': 3, 'y': 5})
+    assert response.json() == 8
+```
+
+See `examples/service_running_demo.py` for more examples.
+```

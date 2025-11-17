@@ -17,7 +17,11 @@ keywords = [
 ]
 authors = []
 dependencies = [
-    "py2http",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+    "requests>=2.31.0",
+    "pydantic>=2.0.0",
+    "i2",
 ]
 
 [project.license]
@@ -78,7 +82,18 @@ convention = "google"
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = [
-    "tests",
+    "qh/tests",
+]
+norecursedirs = [
+    ".*",
+    "build",
+    "dist",
+    "*.egg",
+    "qh/examples",
+    "qh/scrap",
+    "examples",
+    "scrap",
+    "misc",
 ]
 doctest_optionflags = [
     "NORMALIZE_WHITESPACE",
