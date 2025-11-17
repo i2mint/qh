@@ -16,6 +16,10 @@ from qh.config import (
 )
 from qh.endpoint import make_endpoint, validate_route_config
 from qh.rules import RuleChain
+from qh.conventions import (
+    apply_conventions_to_funcs,
+    merge_convention_config,
+)
 
 
 def mk_app(
@@ -23,6 +27,7 @@ def mk_app(
     *,
     app: Optional[FastAPI] = None,
     config: Optional[Union[Dict[str, Any], AppConfig]] = None,
+    use_conventions: bool = False,
     **kwargs,
 ) -> FastAPI:
     """
@@ -45,6 +50,12 @@ def mk_app(
             - Dict that will be converted to AppConfig
             - None (uses defaults)
 
+        use_conventions: Whether to use convention-based routing.
+            If True, infers paths and methods from function names:
+            - get_user(user_id) → GET /users/{user_id}
+            - list_users() → GET /users
+            - create_user(user) → POST /users
+
         **kwargs: Additional FastAPI() constructor kwargs (if creating new app)
 
     Returns:
@@ -55,6 +66,11 @@ def mk_app(
         >>> def add(x: int, y: int) -> int:
         ...     return x + y
         >>> app = mk_app([add])
+
+        With conventions:
+        >>> def get_user(user_id: str): ...
+        >>> def list_users(): ...
+        >>> app = mk_app([get_user, list_users], use_conventions=True)
 
         With configuration:
         >>> app = mk_app(
@@ -69,6 +85,31 @@ def mk_app(
     """
     # Normalize input formats
     func_configs = normalize_funcs_input(funcs)
+
+    # Apply conventions if requested
+    if use_conventions:
+        # Get list of functions
+        func_list = list(func_configs.keys())
+
+        # Infer convention-based configs
+        convention_configs = apply_conventions_to_funcs(func_list, use_conventions=True)
+
+        # Merge with explicit configs (explicit takes precedence)
+        for func, convention_config in convention_configs.items():
+            if func in func_configs:
+                explicit_config = func_configs[func]
+                # Convert RouteConfig to dict if necessary
+                if isinstance(explicit_config, RouteConfig):
+                    explicit_dict = {
+                        k: getattr(explicit_config, k)
+                        for k in ['path', 'methods', 'summary', 'tags']
+                        if getattr(explicit_config, k, None) is not None
+                    }
+                else:
+                    explicit_dict = explicit_config or {}
+
+                merged = merge_convention_config(convention_config, explicit_dict)
+                func_configs[func] = merged
 
     # Resolve app configuration
     if config is None:
