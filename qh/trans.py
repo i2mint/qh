@@ -1,4 +1,5 @@
-from typing import Mapping, Optional, Callable, Iterable
+from typing import Optional
+from collections.abc import Mapping, Callable, Iterable
 from py2http.decorators import mk_flat, handle_json_req
 
 def _name_func_relationships_to_name_func_pairs(name_func_relationships):
@@ -46,7 +47,7 @@ def transform_mapping_vals_with_name_func_map(mapping, name_func_map: Mapping[st
             yield name, val
 
 
-def mk_json_handler_from_name_mapping(name_func_relationships: Optional[Mapping] = None) -> dict:
+def mk_json_handler_from_name_mapping(name_func_relationships: Mapping | None = None) -> dict:
     if name_func_relationships is None:
         @handle_json_req  # extracts the JSON body and passes it to the input mapper as a dict
         def input_trans(input_kwargs):

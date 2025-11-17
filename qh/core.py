@@ -2,7 +2,8 @@
 
 from fastapi import FastAPI, Request, Response
 import json
-from typing import Iterable, Callable, Optional, Dict, Any
+from typing import Optional, Dict, Any
+from collections.abc import Iterable, Callable
 from i2.wrapper import Wrap
 import inspect
 
@@ -36,9 +37,9 @@ default_configs['output_mapper'] = default_output_mapper
 
 def get_config_for_func(
     func: Callable,
-    default_configs: Dict[str, Any],
-    func_configs: Dict[Callable, Dict[str, Any]],
-) -> Dict[str, Any]:
+    default_configs: dict[str, Any],
+    func_configs: dict[Callable, dict[str, Any]],
+) -> dict[str, Any]:
     """Merge default and per-function configurations."""
     config = default_configs.copy()
     if func in func_configs:
@@ -72,9 +73,9 @@ def mk_wrapped_func(
 
 
 def mk_fastapi_app(
-    funcs: Iterable[Callable] | Dict[Callable, Dict[str, Any]],
-    configs: Optional[Dict[str, Any]] = None,
-    func_configs: Optional[Dict[Callable, Dict[str, Any]]] = None,
+    funcs: Iterable[Callable] | dict[Callable, dict[str, Any]],
+    configs: dict[str, Any] | None = None,
+    func_configs: dict[Callable, dict[str, Any]] | None = None,
 ) -> FastAPI:
     """Create a FastAPI app from a collection of functions."""
     app = FastAPI()

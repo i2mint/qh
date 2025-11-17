@@ -1,7 +1,7 @@
 """Dispatching a store"""
 
 from dataclasses import dataclass
-from typing import MutableMapping
+from collections.abc import MutableMapping
 
 backend_test_data = {'test_key': 'test_value', 'test_key_2': 2, 'test_key_3': [1, 2, 3]}
 

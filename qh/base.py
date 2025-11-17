@@ -2,7 +2,8 @@
 qh.base - Core functionality for dispatching Python functions as HTTP endpoints using FastAPI
 """
 
-from typing import Any, Callable, Dict, List, Optional, Union, Iterable, Tuple
+from typing import Any, Dict, List, Optional, Union, Tuple
+from collections.abc import Callable, Iterable
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.testclient import TestClient as _TestClient
@@ -10,16 +11,16 @@ import inspect
 import fastapi.testclient
 
 # Export RouteConfig and AppConfig as dict aliases for test imports
-RouteConfig = Dict[str, Any]
-AppConfig = Dict[str, Any]
+RouteConfig = dict[str, Any]
+AppConfig = dict[str, Any]
 
 
 def mk_json_ingress(
-    transform_map: Dict[str, Callable[[Any], Any]],
-) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
+    transform_map: dict[str, Callable[[Any], Any]],
+) -> Callable[[dict[str, Any]], dict[str, Any]]:
     """Create an input transformer that applies functions to specific keys in the request JSON."""
 
-    def ingress(data: Dict[str, Any]) -> Dict[str, Any]:
+    def ingress(data: dict[str, Any]) -> dict[str, Any]:
         for key, func in transform_map.items():
             if key in data:
                 data[key] = func(data[key])
@@ -28,13 +29,13 @@ def mk_json_ingress(
     return ingress
 
 
-def name_based_ingress(**kw) -> Callable[[Dict[str, Any]], Dict[str, Any]]:
+def name_based_ingress(**kw) -> Callable[[dict[str, Any]], dict[str, Any]]:
     """Alias for mk_json_ingress with named transforms."""
     return mk_json_ingress(kw)
 
 
 def mk_json_egress(
-    transform_map: Dict[type, Callable[[Any], Any]],
+    transform_map: dict[type, Callable[[Any], Any]],
 ) -> Callable[[Any], Any]:
     """Create an output transformer that applies functions based on the return type."""
 
@@ -49,9 +50,9 @@ def mk_json_egress(
 
 def _mk_endpoint(
     func: Callable,
-    defaults: Dict[str, Any],
-    input_trans: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]],
-    output_trans: Optional[Callable[[Any], Any]],
+    defaults: dict[str, Any],
+    input_trans: Callable[[dict[str, Any]], dict[str, Any]] | None,
+    output_trans: Callable[[Any], Any] | None,
 ) -> Callable:
     """Create a FastAPI endpoint function for a given callable with its configuration."""
     
@@ -100,11 +101,11 @@ def _mk_endpoint(
 
 
 def mk_fastapi_app(
-    funcs: Union[Iterable, Dict],
+    funcs: Iterable | dict,
     *,
-    app: Optional[FastAPI] = None,
+    app: FastAPI | None = None,
     path_prefix: str = '',
-    default_methods: Optional[List[str]] = None,
+    default_methods: list[str] | None = None,
     path_template: str = '/{func_name}',
 ) -> FastAPI:
     """
@@ -120,7 +121,7 @@ def mk_fastapi_app(
     if app is None:
         app = FastAPI()
     methods_default = default_methods or ['POST']
-    spec_list: List[Tuple[Callable, Dict[str, Any]]] = []
+    spec_list: list[tuple[Callable, dict[str, Any]]] = []
 
     # Normalize specs
     if isinstance(funcs, dict):
@@ -159,7 +160,7 @@ def mk_fastapi_app(
         # Create endpoint using the factory function
         endpoint = _mk_endpoint(func, defaults, input_trans, output_trans)
 
-        route_params: Dict[str, Any] = {
+        route_params: dict[str, Any] = {
             'path': path,
             'endpoint': endpoint,
             'methods': methods,
@@ -177,7 +178,7 @@ def mk_fastapi_app(
 
 
 def mk_store_dispatcher(
-    store_getter: Callable[[str], Dict[Any, Any]],
+    store_getter: Callable[[str], dict[Any, Any]],
     *,
     path_prefix: str = '/stores',
     **config,

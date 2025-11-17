@@ -1,10 +1,11 @@
 from fastapi import FastAPI, Depends
-from typing import Callable, List, get_type_hints
+from typing import List, get_type_hints
+from collections.abc import Callable
 from inspect import signature
 from i2 import Sig
 
 
-def mk_http_service_app(functions: List[Callable]):
+def mk_http_service_app(functions: list[Callable]):
     app = FastAPI()
 
     for func in functions:

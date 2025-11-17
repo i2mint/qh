@@ -7,14 +7,11 @@ which are Mappings of MutableMappings (dict of dicts).
 
 from typing import (
     Any,
-    Callable,
-    Iterator,
-    Mapping,
-    MutableMapping,
     Optional,
     Union,
     Dict,
 )
+from collections.abc import Callable, Iterator, Mapping, MutableMapping
 from functools import wraps, partial
 from collections.abc import ItemsView, KeysView, ValuesView
 
@@ -115,7 +112,7 @@ def _serialize_value(value: Any) -> Any:
 
 
 def _dispatch_mapping_method(
-    obj: Union[Mapping, MutableMapping], method_name: str, *args, **kwargs
+    obj: Mapping | MutableMapping, method_name: str, *args, **kwargs
 ) -> Any:
     """
     Dispatch a method call to a mapping object.
@@ -133,7 +130,7 @@ def _dispatch_mapping_method(
     return method(*args, **kwargs)
 
 
-def create_method_endpoint(method_name: str, config: Dict, get_obj_fn: Callable):
+def create_method_endpoint(method_name: str, config: dict, get_obj_fn: Callable):
     """
     Create an endpoint function for a specific mapping method.
 
@@ -262,8 +259,8 @@ def add_store_access(
     get_obj: Callable[[str], Mapping],
     app=None,
     *,
-    methods: Optional[Dict[str, Optional[Dict]]] = None,
-    get_obj_dispatch: Optional[Dict] = None,
+    methods: dict[str, dict | None] | None = None,
+    get_obj_dispatch: dict | None = None,
     base_path: str = "/users/{user_id}/mall/{store_key}",
 ) -> FastAPI:
     """
