@@ -19,6 +19,9 @@ from qh.rules import (
     FuncNameRule,
 )
 
+# Type registry
+from qh.types import register_type, register_json_type, TypeRegistry
+
 # Legacy API (for backward compatibility)
 try:
     from py2http.service import run_app
@@ -33,7 +36,7 @@ except ImportError:
     # py2http not available, skip legacy imports
     pass
 
-__version__ = '0.2.0'
+__version__ = '0.3.0'  # Phase 2 complete
 __all__ = [
     # Primary API
     'mk_app',
@@ -51,4 +54,8 @@ __all__ = [
     'NameRule',
     'FuncRule',
     'FuncNameRule',
+    # Type Registry
+    'register_type',
+    'register_json_type',
+    'TypeRegistry',
 ]

@@ -11,8 +11,7 @@ Supports patterns like:
 - delete_user(user_id: str) → DELETE /users/{user_id}
 """
 
-from typing import Optional, List, Dict, Tuple, Any
-from collections.abc import Callable
+from typing import Callable, Optional, List, Dict, Tuple, Any
 import inspect
 import re
 from dataclasses import dataclass
@@ -98,7 +97,7 @@ def parse_function_name(func_name: str) -> ParsedFunctionName:
     )
 
 
-def infer_http_method(func_name: str, parsed: ParsedFunctionName | None = None) -> str:
+def infer_http_method(func_name: str, parsed: Optional[ParsedFunctionName] = None) -> str:
     """
     Infer HTTP method from function name.
 
@@ -158,7 +157,7 @@ def pluralize(word: str) -> str:
         return word + 's'
 
 
-def get_id_params(func: Callable) -> list[str]:
+def get_id_params(func: Callable) -> List[str]:
     """
     Extract parameters that look like IDs from function signature.
 
@@ -265,7 +264,7 @@ def infer_route_config(
     use_conventions: bool = True,
     base_path: str = '',
     use_plurals: bool = True,
-) -> dict[str, Any]:
+) -> Dict[str, Any]:
     """
     Infer complete route configuration from function.
 
@@ -351,12 +350,12 @@ def infer_route_config(
 
 
 def apply_conventions_to_funcs(
-    funcs: list[Callable],
+    funcs: List[Callable],
     *,
     use_conventions: bool = True,
     base_path: str = '',
     use_plurals: bool = True,
-) -> dict[Callable, dict[str, Any]]:
+) -> Dict[Callable, Dict[str, Any]]:
     """
     Apply conventions to a list of functions.
 
@@ -385,9 +384,9 @@ def apply_conventions_to_funcs(
 
 # Add a helper to merge convention config with explicit config
 def merge_convention_config(
-    convention_config: dict[str, Any],
-    explicit_config: dict[str, Any],
-) -> dict[str, Any]:
+    convention_config: Dict[str, Any],
+    explicit_config: Dict[str, Any],
+) -> Dict[str, Any]:
     """
     Merge convention-based config with explicit config.
 

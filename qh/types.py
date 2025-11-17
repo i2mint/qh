@@ -11,8 +11,7 @@ The type registry maps Python types to HTTP representations and provides
 automatic conversion functions (ingress/egress transformations).
 """
 
-from typing import Any, Dict, Optional, Type, TypeVar, get_origin
-from collections.abc import Callable
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, get_origin
 from dataclasses import dataclass
 import inspect
 
@@ -35,11 +34,11 @@ class TypeHandler:
         content_type: Optional HTTP content type for binary data
     """
 
-    python_type: type
+    python_type: Type
     to_json: Callable[[Any], Any]
     from_json: Callable[[Any], Any]
     http_location: HttpLocation = HttpLocation.JSON_BODY
-    content_type: str | None = None
+    content_type: Optional[str] = None
 
     def to_transform_spec(self) -> TransformSpec:
         """Convert this handler to a TransformSpec."""
@@ -58,7 +57,7 @@ class TypeRegistry:
     """
 
     def __init__(self):
-        self.handlers: dict[type, TypeHandler] = {}
+        self.handlers: Dict[Type, TypeHandler] = {}
         self._init_builtin_handlers()
 
     def _init_builtin_handlers(self):
@@ -73,12 +72,12 @@ class TypeRegistry:
 
     def register(
         self,
-        python_type: type[T],
+        python_type: Type[T],
         *,
         to_json: Callable[[T], Any],
         from_json: Callable[[Any], T],
         http_location: HttpLocation = HttpLocation.JSON_BODY,
-        content_type: str | None = None,
+        content_type: Optional[str] = None,
     ) -> None:
         """
         Register a type handler.
@@ -99,7 +98,7 @@ class TypeRegistry:
         )
         self.handlers[python_type] = handler
 
-    def get_handler(self, python_type: type) -> TypeHandler | None:
+    def get_handler(self, python_type: Type) -> Optional[TypeHandler]:
         """
         Get handler for a type.
 
@@ -129,14 +128,14 @@ class TypeRegistry:
 
         return None
 
-    def get_transform_spec(self, python_type: type) -> TransformSpec | None:
+    def get_transform_spec(self, python_type: Type) -> Optional[TransformSpec]:
         """Get TransformSpec for a type."""
         handler = self.get_handler(python_type)
         if handler:
             return handler.to_transform_spec()
         return None
 
-    def unregister(self, python_type: type) -> None:
+    def unregister(self, python_type: Type) -> None:
         """Unregister a type handler."""
         self.handlers.pop(python_type, None)
 
@@ -146,12 +145,12 @@ _global_registry = TypeRegistry()
 
 
 def register_type(
-    python_type: type[T],
+    python_type: Type[T],
     *,
     to_json: Callable[[T], Any],
     from_json: Callable[[Any], T],
     http_location: HttpLocation = HttpLocation.JSON_BODY,
-    content_type: str | None = None,
+    content_type: Optional[str] = None,
 ) -> None:
     """
     Register a type in the global registry.
@@ -180,12 +179,12 @@ def register_type(
     )
 
 
-def get_type_handler(python_type: type) -> TypeHandler | None:
+def get_type_handler(python_type: Type) -> Optional[TypeHandler]:
     """Get handler for a type from global registry."""
     return _global_registry.get_handler(python_type)
 
 
-def get_transform_spec_for_type(python_type: type) -> TransformSpec | None:
+def get_transform_spec_for_type(python_type: Type) -> Optional[TransformSpec]:
     """Get TransformSpec for a type from global registry."""
     return _global_registry.get_transform_spec(python_type)
 
@@ -268,10 +267,8 @@ except ImportError:
 
 # Decorator for easy registration
 def register_json_type(
-    cls: type[T] | None = None,
-    *,
-    to_json: Callable[[T], Any] | None = None,
-    from_json: Callable[[Any], T] | None = None,
+    to_json: Optional[Callable[[T], Any]] = None,
+    from_json: Optional[Callable[[Any], T]] = None,
 ):
     """
     Decorator to register a custom type.
@@ -302,43 +299,42 @@ def register_json_type(
         ...         self.y = y
     """
 
-    def decorator(cls_to_register: type[T]) -> type[T]:
-        # Determine serializers
-        _to_json = to_json
-        _from_json = from_json
+    def decorator(cls: Type[T]) -> Type[T]:
+        nonlocal to_json, from_json
 
         # Auto-detect serialization methods if not provided
-        if _to_json is None:
-            if hasattr(cls_to_register, 'to_dict'):
-                _to_json = lambda obj: obj.to_dict()
-            elif hasattr(cls_to_register, '__dict__'):
-                _to_json = lambda obj: obj.__dict__
+        if to_json is None:
+            if hasattr(cls, 'to_dict'):
+                to_json = lambda obj: obj.to_dict()
+            elif hasattr(cls, '__dict__'):
+                to_json = lambda obj: obj.__dict__
             else:
-                raise ValueError(f"Cannot auto-detect serialization for {cls_to_register}")
+                raise ValueError(f"Cannot auto-detect serialization for {cls}")
 
-        if _from_json is None:
-            if hasattr(cls_to_register, 'from_dict'):
-                _from_json = cls_to_register.from_dict
-            elif hasattr(cls_to_register, '__init__'):
+        if from_json is None:
+            if hasattr(cls, 'from_dict'):
+                from_json = cls.from_dict
+            elif hasattr(cls, '__init__'):
                 # Try to call constructor with dict unpacking
-                _from_json = lambda data: cls_to_register(**data)
+                from_json = lambda data: cls(**data)
             else:
-                raise ValueError(f"Cannot auto-detect deserialization for {cls_to_register}")
+                raise ValueError(f"Cannot auto-detect deserialization for {cls}")
 
         # Register the type
         register_type(
-            cls_to_register,
-            to_json=_to_json,
-            from_json=_from_json,
+            cls,
+            to_json=to_json,
+            from_json=from_json,
         )
 
-        return cls_to_register
+        return cls
 
     # Support both @register_json_type and @register_json_type(...)
-    if cls is not None:
-        # Called as @register_json_type (no parens) - cls is the class being decorated
-        return decorator(cls)
+    if to_json is None and from_json is None:
+        # Called as @register_json_type (no parens)
+        # Return the decorator
+        return decorator
     else:
-        # Called as @register_json_type(...) (with keyword params)
-        # Return the decorator to be applied
+        # Called as @register_json_type(...) (with params)
+        # This is already the decorator
         return decorator

@@ -341,6 +341,11 @@ def resolve_transform(
     """
     Resolve transformation specification for a parameter.
 
+    Resolution order:
+    1. Rule chain (explicit rules)
+    2. Type registry (registered types)
+    3. Default fallback (JSON body, no transformation)
+
     Args:
         func: The function containing the parameter
         param_name: Name of the parameter
@@ -352,7 +357,18 @@ def resolve_transform(
     chain = rule_chain or DEFAULT_RULE_CHAIN
     context = extract_param_context(func, param_name)
 
+    # Try rule chain first
     spec = chain.match(**context)
+
+    # If no rule matched, check type registry
+    if spec is None:
+        try:
+            from qh.types import get_transform_spec_for_type
+            param_type = context['param_type']
+            spec = get_transform_spec_for_type(param_type)
+        except ImportError:
+            # Type registry not available
+            pass
 
     # Ultimate fallback: JSON body with no transformation
     if spec is None:

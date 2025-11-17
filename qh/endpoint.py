@@ -142,6 +142,12 @@ def make_endpoint(
     sig = inspect.signature(func)
     is_async = inspect.iscoroutinefunction(func)
 
+    # Detect path parameters from route path
+    import re
+    path_param_names = set()
+    if route_config.path:
+        path_param_names = set(re.findall(r'\{(\w+)\}', route_config.path))
+
     # Resolve transformation specs for each parameter
     rule_chain = route_config.rule_chain
     param_specs: Dict[str, TransformSpec] = {}
@@ -150,6 +156,10 @@ def make_endpoint(
         # Check for parameter-specific override
         if param_name in route_config.param_overrides:
             param_specs[param_name] = route_config.param_overrides[param_name]
+        # Check if this is a path parameter
+        elif param_name in path_param_names:
+            # Path parameters should be extracted from the URL path
+            param_specs[param_name] = TransformSpec(http_location=HttpLocation.PATH)
         else:
             # Resolve from rule chain
             param_specs[param_name] = resolve_transform(

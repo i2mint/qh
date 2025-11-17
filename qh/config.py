@@ -102,7 +102,7 @@ DEFAULT_APP_CONFIG = AppConfig()
 def resolve_route_config(
     func: Callable,
     app_config: AppConfig,
-    route_config: Optional[RouteConfig] = None,
+    route_config: Optional[Union[RouteConfig, Dict[str, Any]]] = None,
 ) -> RouteConfig:
     """
     Resolve complete route configuration for a function.
@@ -124,6 +124,12 @@ def resolve_route_config(
 
     # Apply function-specific config
     if route_config is not None:
+        # Convert dict to RouteConfig if necessary
+        if isinstance(route_config, dict):
+            route_config = RouteConfig(**{
+                k: v for k, v in route_config.items()
+                if k in RouteConfig.__dataclass_fields__
+            })
         config = config.merge_with(route_config)
 
     # Auto-generate path if not specified
