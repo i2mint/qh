@@ -9,8 +9,7 @@ This is the foundation for the bidirectional transformation capability.
 
 import pytest
 from fastapi.testclient import TestClient
-from typing import Any
-from collections.abc import Callable
+from typing import Any, Callable
 import inspect
 
 from qh import mk_app, AppConfig
@@ -25,7 +24,6 @@ def make_client_function(app, func_name: str, client: TestClient) -> Callable:
     """
     # Find the route for this function
     from qh import inspect_routes
-
     routes = inspect_routes(app)
     route = next((r for r in routes if r['name'] == func_name), None)
 
@@ -40,7 +38,6 @@ def make_client_function(app, func_name: str, client: TestClient) -> Callable:
         """Client-side function that makes HTTP request."""
         # Extract path parameters
         import re
-
         path_params = re.findall(r'\{(\w+)\}', path)
 
         # Build the actual path
@@ -107,14 +104,17 @@ class TestRoundTrip:
             return {
                 'data_keys': list(data.keys()),
                 'items_count': len(items),
-                'combined': {**data, 'items': items},
+                'combined': {**data, 'items': items}
             }
 
         app = mk_app([process_data])
         client = TestClient(app)
         client_func = make_client_function(app, 'process_data', client)
 
-        result = client_func(data={'a': 1, 'b': 2}, items=[1, 2, 3])
+        result = client_func(
+            data={'a': 1, 'b': 2},
+            items=[1, 2, 3]
+        )
 
         assert result['data_keys'] == ['a', 'b']
         assert result['items_count'] == 3
@@ -147,10 +147,12 @@ class TestRoundTrip:
             return {
                 'item_id': item_id,
                 'detail_level': detail_level,
-                'name': f'Item {item_id}',
+                'name': f'Item {item_id}'
             }
 
-        app = mk_app({get_item: {'path': '/items/{item_id}', 'methods': ['GET']}})
+        app = mk_app({
+            get_item: {'path': '/items/{item_id}', 'methods': ['GET']}
+        })
         client = TestClient(app)
         client_func = make_client_function(app, 'get_item', client)
 
@@ -180,7 +182,7 @@ class TestRoundTrip:
 
         def distance(point: Point) -> float:
             """Calculate distance from origin."""
-            return (point.x**2 + point.y**2) ** 0.5
+            return (point.x ** 2 + point.y ** 2) ** 0.5
 
         app = mk_app([create_point, distance])
         client = TestClient(app)
@@ -203,12 +205,15 @@ class TestRoundTrip:
             return {
                 'user_id': user_id,
                 'name': 'Test User',
-                'email': f'user{user_id}@example.com',
+                'email': f'user{user_id}@example.com'
             }
 
         def list_users(limit: int = 10) -> list:
             """List users."""
-            return [{'user_id': str(i), 'name': f'User {i}'} for i in range(limit)]
+            return [
+                {'user_id': str(i), 'name': f'User {i}'}
+                for i in range(limit)
+            ]
 
         app = mk_app([get_user, list_users], use_conventions=True)
         client = TestClient(app)
@@ -259,14 +264,7 @@ class TestRoundTrip:
             client_func = make_client_function(app, 'multiply_array', client)
 
             result = client_func(data=[1, 2, 3, 4], factor=2.0)
-            # Result may be returned as string representation of numpy array
-            if isinstance(result, str):
-                # Parse the string representation: '[2. 4. 6. 8.]' -> [2, 4, 6, 8]
-                import ast
-
-                result = ast.literal_eval(result.replace('.', ',').replace(',,', '.'))
-                result = [int(x) if x == int(x) else x for x in result]
-            assert result == [2, 4, 6, 8] or result == [2.0, 4.0, 6.0, 8.0]
+            assert result == [2, 4, 6, 8]
 
         except ImportError:
             pytest.skip("NumPy not available")
@@ -305,23 +303,21 @@ class TestRoundTrip:
                 'order_id': order['order_id'],
                 'customer': order['customer'],
                 'total': total,
-                'item_count': len(order['items']),
+                'item_count': len(order['items'])
             }
 
         app = mk_app([process_order])
         client = TestClient(app)
         client_func = make_client_function(app, 'process_order', client)
 
-        result = client_func(
-            order={
-                'order_id': '123',
-                'customer': 'John Doe',
-                'items': [
-                    {'name': 'Widget', 'price': 10.0, 'quantity': 2},
-                    {'name': 'Gadget', 'price': 15.0, 'quantity': 1},
-                ],
-            }
-        )
+        result = client_func(order={
+            'order_id': '123',
+            'customer': 'John Doe',
+            'items': [
+                {'name': 'Widget', 'price': 10.0, 'quantity': 2},
+                {'name': 'Gadget', 'price': 15.0, 'quantity': 1},
+            ]
+        })
 
         assert result['order_id'] == '123'
         assert result['customer'] == 'John Doe'
@@ -382,16 +378,26 @@ class TestMultipleTransformations:
 
         def search(
             category: str,  # Will be path param
-            query: str,  # Will be query param
-            limit: int = 10,  # Will be query param
+            query: str,     # Will be query param
+            limit: int = 10  # Will be query param
         ) -> list:
             """Search in a category."""
             return [
-                {'category': category, 'query': query, 'id': i, 'name': f'Result {i}'}
+                {
+                    'category': category,
+                    'query': query,
+                    'id': i,
+                    'name': f'Result {i}'
+                }
                 for i in range(limit)
             ]
 
-        app = mk_app({search: {'path': '/search/{category}', 'methods': ['GET']}})
+        app = mk_app({
+            search: {
+                'path': '/search/{category}',
+                'methods': ['GET']
+            }
+        })
         client = TestClient(app)
         client_func = make_client_function(app, 'search', client)
 
@@ -417,11 +423,11 @@ class TestMultipleTransformations:
 
         def celsius_to_fahrenheit(temp: Temperature) -> float:
             """Convert temperature to Fahrenheit."""
-            return temp.celsius * 9 / 5 + 32
+            return temp.celsius * 9/5 + 32
 
         def fahrenheit_to_celsius(fahrenheit: float) -> Temperature:
             """Convert Fahrenheit to temperature object."""
-            celsius = (fahrenheit - 32) * 5 / 9
+            celsius = (fahrenheit - 32) * 5/9
             return Temperature(celsius)
 
         app = mk_app([celsius_to_fahrenheit, fahrenheit_to_celsius])
