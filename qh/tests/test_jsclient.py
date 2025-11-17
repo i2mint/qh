@@ -159,7 +159,7 @@ class TestTypeScriptClientGeneration:
     def test_ts_client_optional_params(self):
         """Test TypeScript client with optional parameters."""
 
-        def greet(name: str, title: str | None = None) -> str:
+        def greet(name: str, title: Optional[str] = None) -> str:
             """Greet someone."""
             if title:
                 return f"Hello, {title} {name}!"

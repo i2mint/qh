@@ -51,7 +51,7 @@ def python_type_to_ts_type(python_type: str) -> str:
 
 def generate_ts_interface(
     name: str,
-    signature_info: dict[str, Any]
+    signature_info: Dict[str, Any]
 ) -> str:
     """
     Generate TypeScript interface for function parameters.
@@ -86,7 +86,7 @@ def generate_js_function(
     name: str,
     path: str,
     method: str,
-    signature_info: dict[str, Any] | None = None,
+    signature_info: Optional[Dict[str, Any]] = None,
     use_axios: bool = False,
 ) -> str:
     """
@@ -177,7 +177,7 @@ def generate_ts_function(
     name: str,
     path: str,
     method: str,
-    signature_info: dict[str, Any] | None = None,
+    signature_info: Optional[Dict[str, Any]] = None,
     use_axios: bool = False,
 ) -> str:
     """
@@ -269,7 +269,7 @@ def generate_ts_function(
 
 
 def export_js_client(
-    openapi_spec: dict[str, Any],
+    openapi_spec: Dict[str, Any],
     *,
     class_name: str = "ApiClient",
     use_axios: bool = False,
@@ -337,7 +337,7 @@ def export_js_client(
 
 
 def export_ts_client(
-    openapi_spec: dict[str, Any],
+    openapi_spec: Dict[str, Any],
     *,
     class_name: str = "ApiClient",
     use_axios: bool = False,
