@@ -27,9 +27,12 @@ from qh.openapi import export_openapi, enhance_openapi_schema
 from qh.client import mk_client_from_openapi, mk_client_from_url, mk_client_from_app, HttpClient
 from qh.jsclient import export_js_client, export_ts_client
 
+# Testing utilities
+from qh.testing import AppRunner, run_app, test_app, serve_app, quick_test
+
 # Legacy API (for backward compatibility)
 try:
-    from py2http.service import run_app
+    from py2http.service import run_app as legacy_run_app
     from py2http.decorators import mk_flat, handle_json_req
     from qh.trans import (
         transform_mapping_vals_with_name_func_map,
@@ -72,4 +75,10 @@ __all__ = [
     'HttpClient',
     'export_js_client',
     'export_ts_client',
+    # Testing utilities
+    'AppRunner',
+    'run_app',
+    'test_app',
+    'serve_app',
+    'quick_test',
 ]
