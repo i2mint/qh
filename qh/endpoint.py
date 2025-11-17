@@ -144,13 +144,23 @@ def make_endpoint(
 
     # Detect path parameters from route path
     import re
+    from typing import get_type_hints
     path_param_names = set()
     if route_config.path:
         path_param_names = set(re.findall(r'\{(\w+)\}', route_config.path))
 
+    # Check if this uses query params (GET-only routes without POST/PUT/PATCH)
+    # Routes with POST/PUT/PATCH should use JSON body even if GET is also supported
+    methods = route_config.methods or []
+    has_body_methods = any(m in methods for m in ['POST', 'PUT', 'PATCH'])
+    use_query_params = 'GET' in methods and not has_body_methods
+
     # Resolve transformation specs for each parameter
     rule_chain = route_config.rule_chain
     param_specs: Dict[str, TransformSpec] = {}
+
+    # Get type hints for type conversion
+    type_hints = get_type_hints(func) if hasattr(func, '__annotations__') else {}
 
     for param_name in sig.parameters:
         # Check for parameter-specific override
@@ -160,6 +170,24 @@ def make_endpoint(
         elif param_name in path_param_names:
             # Path parameters should be extracted from the URL path
             param_specs[param_name] = TransformSpec(http_location=HttpLocation.PATH)
+        # For GET-only requests, non-path parameters come from query string
+        elif use_query_params:
+            param_type = type_hints.get(param_name, str)
+
+            # Create type converter for query params (they come as strings)
+            def make_query_converter(target_type):
+                def convert(value):
+                    if value is None:
+                        return None
+                    if isinstance(value, target_type):
+                        return value
+                    return target_type(value)
+                return convert
+
+            param_specs[param_name] = TransformSpec(
+                http_location=HttpLocation.QUERY,
+                ingress=make_query_converter(param_type) if param_type != str else None
+            )
         else:
             # Resolve from rule chain
             param_specs[param_name] = resolve_transform(
