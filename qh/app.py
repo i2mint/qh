@@ -185,12 +185,16 @@ def inspect_routes(app: FastAPI) -> List[Dict[str, Any]]:
 
     for route in app.routes:
         if hasattr(route, 'methods'):
-            routes.append({
+            route_info = {
                 'path': route.path,
                 'methods': list(route.methods),
                 'name': route.name,
                 'endpoint': route.endpoint,
-            })
+            }
+            # Include original function if available (for OpenAPI/client generation)
+            if hasattr(route.endpoint, '_qh_original_func'):
+                route_info['function'] = route.endpoint._qh_original_func
+            routes.append(route_info)
 
     return routes
 

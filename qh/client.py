@@ -5,8 +5,7 @@ Generates client-side Python functions that call HTTP endpoints,
 preserving the original function signatures and behavior.
 """
 
-from typing import Any, Dict, Optional, get_type_hints
-from collections.abc import Callable
+from typing import Any, Callable, Dict, Optional, get_type_hints
 import inspect
 import requests
 from urllib.parse import urljoin
@@ -21,7 +20,7 @@ class HttpClient:
     under the hood.
     """
 
-    def __init__(self, base_url: str, session: requests.Session | None = None):
+    def __init__(self, base_url: str, session: Optional[requests.Session] = None):
         """
         Initialize HTTP client.
 
@@ -31,14 +30,14 @@ class HttpClient:
         """
         self.base_url = base_url.rstrip('/')
         self.session = session or requests.Session()
-        self._functions: dict[str, Callable] = {}
+        self._functions: Dict[str, Callable] = {}
 
     def add_function(
         self,
         name: str,
         path: str,
         method: str,
-        signature_info: dict[str, Any] | None = None,
+        signature_info: Optional[Dict[str, Any]] = None,
     ) -> None:
         """
         Add a function to the client.
@@ -60,7 +59,7 @@ class HttpClient:
         name: str,
         path: str,
         method: str,
-        signature_info: dict[str, Any] | None = None,
+        signature_info: Optional[Dict[str, Any]] = None,
     ) -> Callable:
         """Create a client function that makes HTTP requests."""
 
@@ -138,9 +137,9 @@ class HttpClient:
 
 
 def mk_client_from_openapi(
-    openapi_spec: dict[str, Any],
+    openapi_spec: Dict[str, Any],
     base_url: str = "http://localhost:8000",
-    session: requests.Session | None = None,
+    session: Optional[requests.Session] = None,
 ) -> HttpClient:
     """
     Create an HTTP client from an OpenAPI specification.
@@ -204,8 +203,8 @@ def mk_client_from_openapi(
 
 def mk_client_from_url(
     openapi_url: str,
-    base_url: str | None = None,
-    session: requests.Session | None = None,
+    base_url: Optional[str] = None,
+    session: Optional[requests.Session] = None,
 ) -> HttpClient:
     """
     Create an HTTP client by fetching OpenAPI spec from a URL.

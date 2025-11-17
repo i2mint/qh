@@ -69,7 +69,7 @@ class TestEnhancedOpenAPI:
     def test_optional_parameters_in_signature(self):
         """Test that Optional parameters are handled correctly."""
 
-        def greet(name: str, title: str | None = None) -> str:
+        def greet(name: str, title: Optional[str] = None) -> str:
             """Greet someone."""
             if title:
                 return f"Hello, {title} {name}!"
@@ -82,8 +82,7 @@ class TestEnhancedOpenAPI:
         params = sig['parameters']
 
         title_param = next(p for p in params if p['name'] == 'title')
-        # Python 3.10+ uses UnionType[str, NoneType] for str | None syntax
-        assert 'Optional' in title_param['type'] or 'Union' in title_param['type']
+        assert 'Optional' in title_param['type']
         assert title_param['required'] is False
 
     def test_examples_generation(self):

@@ -10,8 +10,7 @@ Python ↔ HTTP transformation:
 - x-python-examples: Generated examples for testing
 """
 
-from typing import Any, Dict, List, Optional, get_type_hints, get_origin, get_args
-from collections.abc import Callable
+from typing import Any, Dict, List, Optional, Callable, get_type_hints, get_origin, get_args
 import inspect
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
@@ -48,7 +47,7 @@ def get_python_type_name(type_hint: Any) -> str:
     return str(type_hint)
 
 
-def extract_function_signature(func: Callable) -> dict[str, Any]:
+def extract_function_signature(func: Callable) -> Dict[str, Any]:
     """
     Extract detailed signature information from a function.
 
@@ -94,7 +93,7 @@ def extract_function_signature(func: Callable) -> dict[str, Any]:
     }
 
 
-def generate_examples_for_function(func: Callable) -> list[dict[str, Any]]:
+def generate_examples_for_function(func: Callable) -> List[Dict[str, Any]]:
     """
     Generate example requests/responses for a function.
 
@@ -171,7 +170,7 @@ def enhance_openapi_schema(
     include_examples: bool = True,
     include_python_metadata: bool = True,
     include_transformers: bool = False,
-) -> dict[str, Any]:
+) -> Dict[str, Any]:
     """
     Generate enhanced OpenAPI schema with Python-specific extensions.
 
@@ -256,8 +255,8 @@ def export_openapi(
     include_examples: bool = True,
     include_python_metadata: bool = True,
     include_transformers: bool = False,
-    output_file: str | None = None,
-) -> dict[str, Any]:
+    output_file: Optional[str] = None,
+) -> Dict[str, Any]:
     """
     Export enhanced OpenAPI schema.
 
