@@ -231,7 +231,39 @@ def make_endpoint(
                     if param_name not in transformed_params:
                         transformed_params[param_name] = param.default
 
-            # Call the wrapped function
+            # Check if this should be executed as an async task
+            if route_config.async_config is not None:
+                from qh.async_tasks import get_task_manager, should_run_async
+
+                if should_run_async(request, route_config.async_config):
+                    # Execute asynchronously and return task ID
+                    task_manager = get_task_manager(
+                        func.__name__, route_config.async_config
+                    )
+
+                    # Create wrapper that handles sync/async functions
+                    def task_wrapper(**kwargs):
+                        if is_async:
+                            # For async functions, we need to run them in an event loop
+                            import asyncio
+                            loop = asyncio.new_event_loop()
+                            try:
+                                return loop.run_until_complete(func(**kwargs))
+                            finally:
+                                loop.close()
+                        else:
+                            return func(**kwargs)
+
+                    task_id = task_manager.create_task(
+                        task_wrapper, kwargs=transformed_params
+                    )
+
+                    return JSONResponse(
+                        content={"task_id": task_id, "status": "submitted"},
+                        status_code=202,  # Accepted
+                    )
+
+            # Call the wrapped function synchronously
             if is_async:
                 result = await func(**transformed_params)
             else:

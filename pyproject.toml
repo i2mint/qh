@@ -6,8 +6,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "qh"
-version = "0.0.5"
-description = "Quick Http web-service construction"
+version = "0.5.0"
+description = "Quick Http web-service construction with async task processing"
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = [

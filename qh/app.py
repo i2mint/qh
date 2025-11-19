@@ -28,6 +28,8 @@ def mk_app(
     app: Optional[FastAPI] = None,
     config: Optional[Union[Dict[str, Any], AppConfig]] = None,
     use_conventions: bool = False,
+    async_funcs: Optional[List[Union[str, Callable]]] = None,
+    async_config: Optional[Union[Dict[str, Any], 'TaskConfig']] = None,
     **kwargs,
 ) -> FastAPI:
     """
@@ -56,6 +58,15 @@ def mk_app(
             - list_users() → GET /users
             - create_user(user) → POST /users
 
+        async_funcs: List of functions (by name or reference) that should support
+            async task execution. When enabled, clients can add ?async=true to
+            get a task ID instead of blocking for the result.
+
+        async_config: Configuration for async task processing. Can be:
+            - None (uses default TaskConfig for functions in async_funcs)
+            - TaskConfig object (applies to all async_funcs)
+            - Dict mapping function names to TaskConfig objects
+
         **kwargs: Additional FastAPI() constructor kwargs (if creating new app)
 
     Returns:
@@ -82,9 +93,58 @@ def mk_app(
         >>> app = mk_app({
         ...     add: {'methods': ['GET', 'POST'], 'path': '/calculate/add'},
         ... })
+
+        With async support:
+        >>> def expensive_task(n: int) -> int:
+        ...     import time
+        ...     time.sleep(5)
+        ...     return n * 2
+        >>> app = mk_app([expensive_task], async_funcs=['expensive_task'])
+        # Now: POST /expensive_task?async=true returns {"task_id": "..."}
+        #      GET /tasks/{task_id}/result returns the result when ready
     """
     # Normalize input formats
     func_configs = normalize_funcs_input(funcs)
+
+    # Process async configuration
+    if async_funcs:
+        from qh.async_tasks import TaskConfig
+
+        # Normalize async_config
+        if async_config is None:
+            # Use default config for all async functions
+            default_task_config = TaskConfig()
+            async_config_map = {}
+        elif isinstance(async_config, dict):
+            # Dict mapping function names to configs
+            async_config_map = async_config
+            default_task_config = TaskConfig()
+        else:
+            # Single TaskConfig for all functions
+            default_task_config = async_config
+            async_config_map = {}
+
+        # Apply async config to specified functions
+        async_func_names = set()
+        for func_ref in async_funcs:
+            if callable(func_ref):
+                async_func_names.add(func_ref.__name__)
+            else:
+                async_func_names.add(str(func_ref))
+
+        for func, route_config in func_configs.items():
+            if func.__name__ in async_func_names:
+                # Get function-specific config or use default
+                task_config = async_config_map.get(func.__name__, default_task_config)
+
+                # Update route config with async config
+                if isinstance(route_config, RouteConfig):
+                    route_config.async_config = task_config
+                else:
+                    # It's a dict, convert to RouteConfig
+                    route_dict = route_config or {}
+                    route_dict['async_config'] = task_config
+                    func_configs[func] = route_dict
 
     # Apply conventions if requested
     if use_conventions:
@@ -167,6 +227,30 @@ def mk_app(
 
         # Add route to app
         app.add_api_route(**route_kwargs)
+
+    # Add task management endpoints if any async functions were configured
+    if async_funcs:
+        from qh.async_endpoints import add_global_task_endpoints
+
+        # Add global task endpoints (list all tasks)
+        add_global_task_endpoints(app)
+
+        # Add per-function task endpoints
+        for func in func_configs.keys():
+            if func.__name__ in async_func_names:
+                from qh.async_endpoints import add_task_endpoints
+
+                # Get the task config to check if we should create endpoints
+                route_config = func_configs[func]
+                if isinstance(route_config, RouteConfig):
+                    task_config = route_config.async_config
+                elif isinstance(route_config, dict):
+                    task_config = route_config.get('async_config')
+                else:
+                    task_config = None
+
+                if task_config and getattr(task_config, 'create_task_endpoints', True):
+                    add_task_endpoints(app, func.__name__)
 
     return app
 
