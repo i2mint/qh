@@ -8,9 +8,12 @@ Configuration flows from general to specific:
 4. Parameter-level config
 """
 
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
 from dataclasses import dataclass, field, replace
 from qh.rules import RuleChain, DEFAULT_RULE_CHAIN, HttpLocation
+
+if TYPE_CHECKING:
+    from qh.async_tasks import TaskConfig
 
 
 @dataclass
@@ -29,6 +32,9 @@ class RouteConfig:
     # Parameter-specific overrides {param_name: transform_spec}
     param_overrides: Dict[str, Any] = field(default_factory=dict)
 
+    # Async task configuration (None = not async, TaskConfig = async enabled)
+    async_config: Optional['TaskConfig'] = None
+
     # Additional metadata
     summary: Optional[str] = None
     description: Optional[str] = None
@@ -46,6 +52,7 @@ class RouteConfig:
             methods=other.methods if other.methods is not None else self.methods,
             rule_chain=other.rule_chain if other.rule_chain is not None else self.rule_chain,
             param_overrides={**self.param_overrides, **other.param_overrides},
+            async_config=other.async_config if other.async_config is not None else self.async_config,
             summary=other.summary if other.summary is not None else self.summary,
             description=other.description if other.description is not None else self.description,
             tags=other.tags if other.tags is not None else self.tags,

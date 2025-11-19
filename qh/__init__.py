@@ -27,6 +27,19 @@ from qh.openapi import export_openapi, enhance_openapi_schema
 from qh.client import mk_client_from_openapi, mk_client_from_url, mk_client_from_app, HttpClient
 from qh.jsclient import export_js_client, export_ts_client
 
+# Async task processing
+from qh.async_tasks import (
+    TaskConfig,
+    TaskStatus,
+    TaskInfo,
+    TaskStore,
+    InMemoryTaskStore,
+    TaskExecutor,
+    ThreadPoolTaskExecutor,
+    ProcessPoolTaskExecutor,
+    TaskManager,
+)
+
 # Testing utilities
 from qh.testing import AppRunner, run_app, test_app, serve_app, quick_test
 
@@ -44,7 +57,7 @@ except ImportError:
     # py2http not available, skip legacy imports
     pass
 
-__version__ = '0.4.0'  # Phase 3: OpenAPI & Client Generation
+__version__ = '0.5.0'  # Phase 4: Async Task Processing
 __all__ = [
     # Primary API
     'mk_app',
@@ -75,6 +88,16 @@ __all__ = [
     'HttpClient',
     'export_js_client',
     'export_ts_client',
+    # Async Tasks (Phase 4)
+    'TaskConfig',
+    'TaskStatus',
+    'TaskInfo',
+    'TaskStore',
+    'InMemoryTaskStore',
+    'TaskExecutor',
+    'ThreadPoolTaskExecutor',
+    'ProcessPoolTaskExecutor',
+    'TaskManager',
     # Testing utilities
     'AppRunner',
     'run_app',
