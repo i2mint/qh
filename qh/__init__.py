@@ -43,6 +43,27 @@ from qh.async_tasks import (
 # Testing utilities
 from qh.testing import AppRunner, run_app, test_app, serve_app, quick_test
 
+# au integration (optional)
+try:
+    from qh.au_integration import (
+        use_au_backend,
+        use_au_thread_backend,
+        use_au_process_backend,
+        use_au_redis_backend,
+        AuTaskStore,
+        AuTaskExecutor,
+    )
+    __all_au__ = [
+        'use_au_backend',
+        'use_au_thread_backend',
+        'use_au_process_backend',
+        'use_au_redis_backend',
+        'AuTaskStore',
+        'AuTaskExecutor',
+    ]
+except ImportError:
+    __all_au__ = []
+
 # Legacy API (for backward compatibility)
 try:
     from py2http.service import run_app as legacy_run_app
@@ -104,4 +125,4 @@ __all__ = [
     'test_app',
     'serve_app',
     'quick_test',
-]
+] + __all_au__
