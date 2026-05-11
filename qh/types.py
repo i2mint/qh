@@ -163,8 +163,8 @@ def register_type(
         content_type: Optional content type for binary data
 
     Example:
-        >>> import numpy as np
-        >>> register_type(
+        >>> import numpy as np  # doctest: +SKIP
+        >>> register_type(  # doctest: +SKIP
         ...     np.ndarray,
         ...     to_json=lambda arr: arr.tolist(),
         ...     from_json=lambda lst: np.array(lst)
