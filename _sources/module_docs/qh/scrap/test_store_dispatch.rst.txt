@@ -1,0 +1,4 @@
+qh.scrap.test_store_dispatch
+============================
+.. automodule:: qh.scrap.test_store_dispatch
+   :members:

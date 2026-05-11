@@ -1,0 +1,569 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qh.rules &mdash; qh 0.0.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f7cdbf68"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            qh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh.html">qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/app.html">qh.app</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/async_endpoints.html">qh.async_endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/async_tasks.html">qh.async_tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/au_integration.html">qh.au_integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/base.html">qh.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/client.html">qh.client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/config.html">qh.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/conventions.html">qh.conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/core.html">qh.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/endpoint.html">qh.endpoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/examples/async_example.html">qh.examples.async_example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/examples/simple.html">qh.examples.simple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/jsclient.html">qh.jsclient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/openapi.html">qh.openapi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/rules.html">qh.rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap.html">qh.scrap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/simple_fastapi_dispatch.html">qh.scrap.simple_fastapi_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/store_dispatch_1.html">qh.scrap.store_dispatch_1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/store_dispatch_2.html">qh.scrap.store_dispatch_2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/test_store_dispatch.html">qh.scrap.test_store_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/stores_qh.html">qh.stores_qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/testing.html">qh.testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/types.html">qh.types</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">qh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qh.rules</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qh.rules</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Transformation rule system for qh.</span>
+
+<span class="sd">Supports multi-dimensional matching:</span>
+<span class="sd">- Type-based</span>
+<span class="sd">- Argument name-based</span>
+<span class="sd">- Function name-based</span>
+<span class="sd">- Function object-based</span>
+<span class="sd">- Default value-based</span>
+<span class="sd">- Any combination thereof</span>
+
+<span class="sd">Rules are layered with first-match semantics, from specific to general.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">get_type_hints</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+
+
+<div class="viewcode-block" id="HttpLocation">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.HttpLocation">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">HttpLocation</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Where in HTTP request/response to map a parameter.&quot;&quot;&quot;</span>
+    <span class="n">JSON_BODY</span> <span class="o">=</span> <span class="s2">&quot;json_body&quot;</span>  <span class="c1"># Field in JSON payload</span>
+    <span class="n">PATH</span> <span class="o">=</span> <span class="s2">&quot;path&quot;</span>  <span class="c1"># URL path parameter</span>
+    <span class="n">QUERY</span> <span class="o">=</span> <span class="s2">&quot;query&quot;</span>  <span class="c1"># URL query parameter</span>
+    <span class="n">HEADER</span> <span class="o">=</span> <span class="s2">&quot;header&quot;</span>  <span class="c1"># HTTP header</span>
+    <span class="n">COOKIE</span> <span class="o">=</span> <span class="s2">&quot;cookie&quot;</span>  <span class="c1"># HTTP cookie</span>
+    <span class="n">BINARY_BODY</span> <span class="o">=</span> <span class="s2">&quot;binary_body&quot;</span>  <span class="c1"># Raw binary payload</span>
+    <span class="n">FORM_DATA</span> <span class="o">=</span> <span class="s2">&quot;form_data&quot;</span>  <span class="c1"># Multipart form data</span></div>
+
+
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TransformSpec">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.TransformSpec">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TransformSpec</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Specification for how to transform a parameter.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Where this parameter comes from/goes to in HTTP</span>
+    <span class="n">http_location</span><span class="p">:</span> <span class="n">HttpLocation</span> <span class="o">=</span> <span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span>
+
+    <span class="c1"># Transform input (from HTTP to Python)</span>
+    <span class="n">ingress</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Transform output (from Python to HTTP)</span>
+    <span class="n">egress</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># HTTP-level name (may differ from Python parameter name)</span>
+    <span class="n">http_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Additional metadata</span>
+    <span class="n">metadata</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="Rule">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.Rule">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Rule</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Protocol for transformation rules.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Rule.match">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.Rule.match">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">param_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+        <span class="n">param_default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TransformSpec</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if this rule matches the given parameter context.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            TransformSpec if matched, None otherwise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="o">...</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TypeRule">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.TypeRule">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TypeRule</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule that matches based on parameter type.&quot;&quot;&quot;</span>
+
+    <span class="n">type_map</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="n">TransformSpec</span><span class="p">]</span>
+
+<div class="viewcode-block" id="TypeRule.match">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.TypeRule.match">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">param_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+        <span class="n">param_default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TransformSpec</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Match by type, including type hierarchy.&quot;&quot;&quot;</span>
+        <span class="c1"># Exact match first</span>
+        <span class="k">if</span> <span class="n">param_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_map</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_map</span><span class="p">[</span><span class="n">param_type</span><span class="p">]</span>
+
+        <span class="c1"># Check type hierarchy (MRO)</span>
+        <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">param_type</span><span class="p">,</span> <span class="s1">&#39;__mro__&#39;</span><span class="p">,</span> <span class="p">[]):</span>
+            <span class="k">if</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_map</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_map</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="NameRule">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.NameRule">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NameRule</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule that matches based on parameter name.&quot;&quot;&quot;</span>
+
+    <span class="n">name_map</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TransformSpec</span><span class="p">]</span>
+
+<div class="viewcode-block" id="NameRule.match">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.NameRule.match">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">param_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+        <span class="n">param_default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TransformSpec</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Match by parameter name.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="FuncRule">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.FuncRule">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FuncRule</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule that matches based on function.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Map from function object to param specs</span>
+    <span class="n">func_map</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TransformSpec</span><span class="p">]]</span>
+
+<div class="viewcode-block" id="FuncRule.match">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.FuncRule.match">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">param_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+        <span class="n">param_default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TransformSpec</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Match by function object and parameter name.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">func</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">func_map</span><span class="p">:</span>
+            <span class="n">param_specs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">func_map</span><span class="p">[</span><span class="n">func</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">param_specs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="FuncNameRule">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.FuncNameRule">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FuncNameRule</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule that matches based on function name pattern.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Map from function name pattern to param specs</span>
+    <span class="n">pattern_map</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TransformSpec</span><span class="p">]]</span>
+
+<div class="viewcode-block" id="FuncNameRule.match">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.FuncNameRule.match">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">param_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+        <span class="n">param_default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TransformSpec</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Match by function name pattern.&quot;&quot;&quot;</span>
+        <span class="c1"># TODO: Support regex patterns</span>
+        <span class="k">if</span> <span class="n">func_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pattern_map</span><span class="p">:</span>
+            <span class="n">param_specs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pattern_map</span><span class="p">[</span><span class="n">func_name</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">param_specs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="DefaultValueRule">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.DefaultValueRule">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">DefaultValueRule</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule that matches based on default values.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Predicate that checks default value</span>
+    <span class="n">predicate</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span>
+    <span class="n">spec</span><span class="p">:</span> <span class="n">TransformSpec</span>
+
+<div class="viewcode-block" id="DefaultValueRule.match">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.DefaultValueRule.match">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">param_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+        <span class="n">param_default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TransformSpec</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Match if predicate returns True for default value.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">param_default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">predicate</span><span class="p">(</span><span class="n">param_default</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="CompositeRule">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.CompositeRule">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">CompositeRule</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Rule that combines multiple conditions.&quot;&quot;&quot;</span>
+
+    <span class="n">rules</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Rule</span><span class="p">]</span>
+    <span class="n">combine_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span>  <span class="c1"># &#39;all&#39; (AND) or &#39;any&#39; (OR)</span>
+    <span class="n">spec</span><span class="p">:</span> <span class="n">TransformSpec</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="n">TransformSpec</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CompositeRule.match">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.CompositeRule.match">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">param_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+        <span class="n">param_default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TransformSpec</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Match based on combination of sub-rules.&quot;&quot;&quot;</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">rule</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+                <span class="n">param_name</span><span class="o">=</span><span class="n">param_name</span><span class="p">,</span>
+                <span class="n">param_type</span><span class="o">=</span><span class="n">param_type</span><span class="p">,</span>
+                <span class="n">param_default</span><span class="o">=</span><span class="n">param_default</span><span class="p">,</span>
+                <span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="p">,</span>
+                <span class="n">func_name</span><span class="o">=</span><span class="n">func_name</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span>
+        <span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">combine_mode</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+            <span class="c1"># All must match</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">r</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">combine_mode</span> <span class="o">==</span> <span class="s2">&quot;any&quot;</span><span class="p">:</span>
+            <span class="c1"># Any must match</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">r</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="RuleChain">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.RuleChain">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RuleChain</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Chain of rules evaluated in order with first-match semantics.</span>
+
+<span class="sd">    Rules are tried from most specific to most general.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rules</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">Rule</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="n">rules</span> <span class="ow">or</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="RuleChain.add_rule">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.RuleChain.add_rule">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rule</span><span class="p">:</span> <span class="n">Rule</span><span class="p">,</span> <span class="n">priority</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a rule with optional priority (higher = evaluated earlier).&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">priority</span><span class="p">,</span> <span class="n">rule</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># Sort by priority descending</span></div>
+
+
+<div class="viewcode-block" id="RuleChain.match">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.RuleChain.match">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">match</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">param_type</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span>
+        <span class="n">param_default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TransformSpec</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find first matching rule.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            TransformSpec from first matching rule, or None if no match</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">priority</span><span class="p">,</span> <span class="n">rule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">rule</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+                <span class="n">param_name</span><span class="o">=</span><span class="n">param_name</span><span class="p">,</span>
+                <span class="n">param_type</span><span class="o">=</span><span class="n">param_type</span><span class="p">,</span>
+                <span class="n">param_default</span><span class="o">=</span><span class="n">param_default</span><span class="p">,</span>
+                <span class="n">func</span><span class="o">=</span><span class="n">func</span> <span class="ow">or</span> <span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="kc">None</span><span class="p">),</span>
+                <span class="n">func_name</span><span class="o">=</span><span class="n">func_name</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__iadd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rule</span><span class="p">:</span> <span class="n">Rule</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Support += operator for adding rules.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">&#39;RuleChain&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RuleChain&#39;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Combine two rule chains.&quot;&quot;&quot;</span>
+        <span class="n">new_chain</span> <span class="o">=</span> <span class="n">RuleChain</span><span class="p">()</span>
+        <span class="n">new_chain</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rules</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">rules</span>
+        <span class="n">new_chain</span><span class="o">.</span><span class="n">rules</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">new_chain</span></div>
+
+
+
+<span class="c1"># Hardcoded fallback rules for common Python types</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_builtin_type_rules</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">TypeRule</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create default type transformation rules for Python builtins.&quot;&quot;&quot;</span>
+
+    <span class="c1"># For now, builtins pass through to JSON (FastAPI handles this)</span>
+    <span class="c1"># More sophisticated rules can be added later</span>
+    <span class="n">builtin_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="nb">str</span><span class="p">:</span> <span class="n">TransformSpec</span><span class="p">(</span><span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span><span class="p">),</span>
+        <span class="nb">int</span><span class="p">:</span> <span class="n">TransformSpec</span><span class="p">(</span><span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span><span class="p">),</span>
+        <span class="nb">float</span><span class="p">:</span> <span class="n">TransformSpec</span><span class="p">(</span><span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span><span class="p">),</span>
+        <span class="nb">bool</span><span class="p">:</span> <span class="n">TransformSpec</span><span class="p">(</span><span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span><span class="p">),</span>
+        <span class="nb">list</span><span class="p">:</span> <span class="n">TransformSpec</span><span class="p">(</span><span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span><span class="p">),</span>
+        <span class="nb">dict</span><span class="p">:</span> <span class="n">TransformSpec</span><span class="p">(</span><span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span><span class="p">),</span>
+        <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span> <span class="n">TransformSpec</span><span class="p">(</span><span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">TypeRule</span><span class="p">(</span><span class="n">type_map</span><span class="o">=</span><span class="n">builtin_map</span><span class="p">)</span>
+
+
+<span class="c1"># Default global rule chain</span>
+<span class="n">DEFAULT_RULE_CHAIN</span> <span class="o">=</span> <span class="n">RuleChain</span><span class="p">()</span>
+<span class="n">DEFAULT_RULE_CHAIN</span><span class="o">.</span><span class="n">add_rule</span><span class="p">(</span><span class="n">_make_builtin_type_rules</span><span class="p">(),</span> <span class="n">priority</span><span class="o">=-</span><span class="mi">1000</span><span class="p">)</span>  <span class="c1"># Lowest priority</span>
+
+
+<div class="viewcode-block" id="extract_param_context">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.extract_param_context">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_param_context</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract context information for a parameter.&quot;&quot;&quot;</span>
+    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="n">param</span> <span class="o">=</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">param</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Parameter </span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s2"> not found in </span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Get type hint</span>
+    <span class="n">hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;__annotations__&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+    <span class="n">param_type</span> <span class="o">=</span> <span class="n">hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;param_name&#39;</span><span class="p">:</span> <span class="n">param_name</span><span class="p">,</span>
+        <span class="s1">&#39;param_type&#39;</span><span class="p">:</span> <span class="n">param_type</span><span class="p">,</span>
+        <span class="s1">&#39;param_default&#39;</span><span class="p">:</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+        <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">func</span><span class="p">,</span>
+        <span class="s1">&#39;func_name&#39;</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="resolve_transform">
+<a class="viewcode-back" href="../../module_docs/qh/rules.html#qh.rules.resolve_transform">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">resolve_transform</span><span class="p">(</span>
+    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">rule_chain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">RuleChain</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransformSpec</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Resolve transformation specification for a parameter.</span>
+
+<span class="sd">    Resolution order:</span>
+<span class="sd">    1. Rule chain (explicit rules)</span>
+<span class="sd">    2. Type registry (registered types)</span>
+<span class="sd">    3. Default fallback (JSON body, no transformation)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        func: The function containing the parameter</span>
+<span class="sd">        param_name: Name of the parameter</span>
+<span class="sd">        rule_chain: Custom rule chain (uses DEFAULT_RULE_CHAIN if None)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        TransformSpec with transformation details</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">chain</span> <span class="o">=</span> <span class="n">rule_chain</span> <span class="ow">or</span> <span class="n">DEFAULT_RULE_CHAIN</span>
+    <span class="n">context</span> <span class="o">=</span> <span class="n">extract_param_context</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">param_name</span><span class="p">)</span>
+
+    <span class="c1"># Try rule chain first</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">chain</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="o">**</span><span class="n">context</span><span class="p">)</span>
+
+    <span class="c1"># If no rule matched, check type registry</span>
+    <span class="k">if</span> <span class="n">spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">qh.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_transform_spec_for_type</span>
+            <span class="n">param_type</span> <span class="o">=</span> <span class="n">context</span><span class="p">[</span><span class="s1">&#39;param_type&#39;</span><span class="p">]</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">get_transform_spec_for_type</span><span class="p">(</span><span class="n">param_type</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="c1"># Type registry not available</span>
+            <span class="k">pass</span>
+
+    <span class="c1"># Ultimate fallback: JSON body with no transformation</span>
+    <span class="k">if</span> <span class="n">spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">TransformSpec</span><span class="p">(</span><span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">spec</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

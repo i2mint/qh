@@ -1,0 +1,302 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qh.config &mdash; qh 0.0.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f7cdbf68"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="qh.conventions" href="conventions.html" />
+    <link rel="prev" title="qh.client" href="client.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            qh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../qh.html">qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app.html">qh.app</a></li>
+<li class="toctree-l1"><a class="reference internal" href="async_endpoints.html">qh.async_endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="async_tasks.html">qh.async_tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="au_integration.html">qh.au_integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">qh.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">qh.client</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">qh.config</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qh.config.AppConfig"><code class="docutils literal notranslate"><span class="pre">AppConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qh.config.AppConfig.to_fastapi_kwargs"><code class="docutils literal notranslate"><span class="pre">AppConfig.to_fastapi_kwargs()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.config.ConfigBuilder"><code class="docutils literal notranslate"><span class="pre">ConfigBuilder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qh.config.ConfigBuilder.build"><code class="docutils literal notranslate"><span class="pre">ConfigBuilder.build()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.config.ConfigBuilder.for_function"><code class="docutils literal notranslate"><span class="pre">ConfigBuilder.for_function()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.config.ConfigBuilder.with_default_methods"><code class="docutils literal notranslate"><span class="pre">ConfigBuilder.with_default_methods()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.config.ConfigBuilder.with_path_prefix"><code class="docutils literal notranslate"><span class="pre">ConfigBuilder.with_path_prefix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.config.ConfigBuilder.with_path_template"><code class="docutils literal notranslate"><span class="pre">ConfigBuilder.with_path_template()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.config.ConfigBuilder.with_rule_chain"><code class="docutils literal notranslate"><span class="pre">ConfigBuilder.with_rule_chain()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.config.FunctionConfigBuilder"><code class="docutils literal notranslate"><span class="pre">FunctionConfigBuilder</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qh.config.FunctionConfigBuilder.at_path"><code class="docutils literal notranslate"><span class="pre">FunctionConfigBuilder.at_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.config.FunctionConfigBuilder.done"><code class="docutils literal notranslate"><span class="pre">FunctionConfigBuilder.done()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.config.FunctionConfigBuilder.with_methods"><code class="docutils literal notranslate"><span class="pre">FunctionConfigBuilder.with_methods()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.config.FunctionConfigBuilder.with_summary"><code class="docutils literal notranslate"><span class="pre">FunctionConfigBuilder.with_summary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.config.FunctionConfigBuilder.with_tags"><code class="docutils literal notranslate"><span class="pre">FunctionConfigBuilder.with_tags()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.config.RouteConfig"><code class="docutils literal notranslate"><span class="pre">RouteConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qh.config.RouteConfig.merge_with"><code class="docutils literal notranslate"><span class="pre">RouteConfig.merge_with()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.config.from_dict"><code class="docutils literal notranslate"><span class="pre">from_dict()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.config.normalize_funcs_input"><code class="docutils literal notranslate"><span class="pre">normalize_funcs_input()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.config.resolve_route_config"><code class="docutils literal notranslate"><span class="pre">resolve_route_config()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="conventions.html">qh.conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core.html">qh.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="endpoint.html">qh.endpoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/async_example.html">qh.examples.async_example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/simple.html">qh.examples.simple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jsclient.html">qh.jsclient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openapi.html">qh.openapi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rules.html">qh.rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap.html">qh.scrap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/simple_fastapi_dispatch.html">qh.scrap.simple_fastapi_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/store_dispatch_1.html">qh.scrap.store_dispatch_1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/store_dispatch_2.html">qh.scrap.store_dispatch_2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/test_store_dispatch.html">qh.scrap.test_store_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stores_qh.html">qh.stores_qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">qh.testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">qh.types</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">qh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">qh.config</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/qh/config.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qh.config">
+<span id="qh-config"></span><h1>qh.config<a class="headerlink" href="#module-qh.config" title="Link to this heading"></a></h1>
+<p>Configuration system for qh with layered defaults.</p>
+<p>Configuration flows from general to specific:
+1. Global defaults
+2. App-level config
+3. Function-level config
+4. Parameter-level config</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qh.config.AppConfig">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.config.</span></span><span class="sig-name descname"><span class="pre">AppConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_methods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_template</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/{func_name}'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule_chain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="rules.html#qh.rules.RuleChain" title="qh.rules.RuleChain"><span class="pre">RuleChain</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'qh</span> <span class="pre">API'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">version</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'0.1.0'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">docs_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/docs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">redoc_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/redoc'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">openapi_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'/openapi.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fastapi_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~typing.Any]</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qh/config.html#AppConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.AppConfig" title="Link to this definition"></a></dt>
+<dd><p>Global configuration for the entire FastAPI app.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.config.AppConfig.to_fastapi_kwargs">
+<span class="sig-name descname"><span class="pre">to_fastapi_kwargs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/config.html#AppConfig.to_fastapi_kwargs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.AppConfig.to_fastapi_kwargs" title="Link to this definition"></a></dt>
+<dd><p>Convert to FastAPI() constructor kwargs.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qh.config.ConfigBuilder">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.config.</span></span><span class="sig-name descname"><span class="pre">ConfigBuilder</span></span><a class="reference internal" href="../../_modules/qh/config.html#ConfigBuilder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.ConfigBuilder" title="Link to this definition"></a></dt>
+<dd><p>Fluent interface for building configurations.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.config.ConfigBuilder.build">
+<span class="sig-name descname"><span class="pre">build</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qh.config.AppConfig" title="qh.config.AppConfig"><span class="pre">AppConfig</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#qh.config.RouteConfig" title="qh.config.RouteConfig"><span class="pre">RouteConfig</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/config.html#ConfigBuilder.build"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.ConfigBuilder.build" title="Link to this definition"></a></dt>
+<dd><p>Build final configuration.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.config.ConfigBuilder.for_function">
+<span class="sig-name descname"><span class="pre">for_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.config.FunctionConfigBuilder" title="qh.config.FunctionConfigBuilder"><span class="pre">FunctionConfigBuilder</span></a></span></span><a class="reference internal" href="../../_modules/qh/config.html#ConfigBuilder.for_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.ConfigBuilder.for_function" title="Link to this definition"></a></dt>
+<dd><p>Start configuring a specific function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.config.ConfigBuilder.with_default_methods">
+<span class="sig-name descname"><span class="pre">with_default_methods</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.config.ConfigBuilder" title="qh.config.ConfigBuilder"><span class="pre">ConfigBuilder</span></a></span></span><a class="reference internal" href="../../_modules/qh/config.html#ConfigBuilder.with_default_methods"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.ConfigBuilder.with_default_methods" title="Link to this definition"></a></dt>
+<dd><p>Set default HTTP methods.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.config.ConfigBuilder.with_path_prefix">
+<span class="sig-name descname"><span class="pre">with_path_prefix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.config.ConfigBuilder" title="qh.config.ConfigBuilder"><span class="pre">ConfigBuilder</span></a></span></span><a class="reference internal" href="../../_modules/qh/config.html#ConfigBuilder.with_path_prefix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.ConfigBuilder.with_path_prefix" title="Link to this definition"></a></dt>
+<dd><p>Set path prefix for all routes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.config.ConfigBuilder.with_path_template">
+<span class="sig-name descname"><span class="pre">with_path_template</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">template</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.config.ConfigBuilder" title="qh.config.ConfigBuilder"><span class="pre">ConfigBuilder</span></a></span></span><a class="reference internal" href="../../_modules/qh/config.html#ConfigBuilder.with_path_template"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.ConfigBuilder.with_path_template" title="Link to this definition"></a></dt>
+<dd><p>Set path template for auto-generation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.config.ConfigBuilder.with_rule_chain">
+<span class="sig-name descname"><span class="pre">with_rule_chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="rules.html#qh.rules.RuleChain" title="qh.rules.RuleChain"><span class="pre">RuleChain</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.config.ConfigBuilder" title="qh.config.ConfigBuilder"><span class="pre">ConfigBuilder</span></a></span></span><a class="reference internal" href="../../_modules/qh/config.html#ConfigBuilder.with_rule_chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.ConfigBuilder.with_rule_chain" title="Link to this definition"></a></dt>
+<dd><p>Set global rule chain.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qh.config.FunctionConfigBuilder">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.config.</span></span><span class="sig-name descname"><span class="pre">FunctionConfigBuilder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qh.config.ConfigBuilder" title="qh.config.ConfigBuilder"><span class="pre">ConfigBuilder</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qh/config.html#FunctionConfigBuilder"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.FunctionConfigBuilder" title="Link to this definition"></a></dt>
+<dd><p>Fluent interface for building function-specific configuration.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.config.FunctionConfigBuilder.at_path">
+<span class="sig-name descname"><span class="pre">at_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.config.FunctionConfigBuilder" title="qh.config.FunctionConfigBuilder"><span class="pre">FunctionConfigBuilder</span></a></span></span><a class="reference internal" href="../../_modules/qh/config.html#FunctionConfigBuilder.at_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.FunctionConfigBuilder.at_path" title="Link to this definition"></a></dt>
+<dd><p>Set custom path for this function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.config.FunctionConfigBuilder.done">
+<span class="sig-name descname"><span class="pre">done</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.config.ConfigBuilder" title="qh.config.ConfigBuilder"><span class="pre">ConfigBuilder</span></a></span></span><a class="reference internal" href="../../_modules/qh/config.html#FunctionConfigBuilder.done"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.FunctionConfigBuilder.done" title="Link to this definition"></a></dt>
+<dd><p>Finish configuring this function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.config.FunctionConfigBuilder.with_methods">
+<span class="sig-name descname"><span class="pre">with_methods</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">methods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.config.FunctionConfigBuilder" title="qh.config.FunctionConfigBuilder"><span class="pre">FunctionConfigBuilder</span></a></span></span><a class="reference internal" href="../../_modules/qh/config.html#FunctionConfigBuilder.with_methods"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.FunctionConfigBuilder.with_methods" title="Link to this definition"></a></dt>
+<dd><p>Set HTTP methods for this function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.config.FunctionConfigBuilder.with_summary">
+<span class="sig-name descname"><span class="pre">with_summary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">summary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.config.FunctionConfigBuilder" title="qh.config.FunctionConfigBuilder"><span class="pre">FunctionConfigBuilder</span></a></span></span><a class="reference internal" href="../../_modules/qh/config.html#FunctionConfigBuilder.with_summary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.FunctionConfigBuilder.with_summary" title="Link to this definition"></a></dt>
+<dd><p>Set OpenAPI summary.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.config.FunctionConfigBuilder.with_tags">
+<span class="sig-name descname"><span class="pre">with_tags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.config.FunctionConfigBuilder" title="qh.config.FunctionConfigBuilder"><span class="pre">FunctionConfigBuilder</span></a></span></span><a class="reference internal" href="../../_modules/qh/config.html#FunctionConfigBuilder.with_tags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.FunctionConfigBuilder.with_tags" title="Link to this definition"></a></dt>
+<dd><p>Set OpenAPI tags.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qh.config.RouteConfig">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.config.</span></span><span class="sig-name descname"><span class="pre">RouteConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">methods</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule_chain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="rules.html#qh.rules.RuleChain" title="qh.rules.RuleChain"><span class="pre">RuleChain</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_overrides</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~typing.Any]</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">async_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="async_tasks.html#qh.async_tasks.TaskConfig" title="qh.async_tasks.TaskConfig"><span class="pre">TaskConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">summary</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tags</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">type</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_in_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deprecated</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qh/config.html#RouteConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.RouteConfig" title="Link to this definition"></a></dt>
+<dd><p>Configuration for a single route (function endpoint).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.config.RouteConfig.merge_with">
+<span class="sig-name descname"><span class="pre">merge_with</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qh.config.RouteConfig" title="qh.config.RouteConfig"><span class="pre">RouteConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.config.RouteConfig" title="qh.config.RouteConfig"><span class="pre">RouteConfig</span></a></span></span><a class="reference internal" href="../../_modules/qh/config.html#RouteConfig.merge_with"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.RouteConfig.merge_with" title="Link to this definition"></a></dt>
+<dd><p>Merge with another config, other takes precedence.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.config.from_dict">
+<span class="sig-prename descclassname"><span class="pre">qh.config.</span></span><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.config.AppConfig" title="qh.config.AppConfig"><span class="pre">AppConfig</span></a></span></span><a class="reference internal" href="../../_modules/qh/config.html#from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.from_dict" title="Link to this definition"></a></dt>
+<dd><p>Create AppConfig from dictionary.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.config.normalize_funcs_input">
+<span class="sig-prename descclassname"><span class="pre">qh.config.</span></span><span class="sig-name descname"><span class="pre">normalize_funcs_input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">funcs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#qh.config.RouteConfig" title="qh.config.RouteConfig"><span class="pre">RouteConfig</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/config.html#normalize_funcs_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.normalize_funcs_input" title="Link to this definition"></a></dt>
+<dd><p>Normalize various input formats to Dict[Callable, RouteConfig].</p>
+<p>Supports:
+- Single callable
+- List of callables
+- Dict mapping callable to config dict
+- Dict mapping callable to RouteConfig</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.config.resolve_route_config">
+<span class="sig-prename descclassname"><span class="pre">qh.config.</span></span><span class="sig-name descname"><span class="pre">resolve_route_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">app_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qh.config.AppConfig" title="qh.config.AppConfig"><span class="pre">AppConfig</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">route_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qh.config.RouteConfig" title="qh.config.RouteConfig"><span class="pre">RouteConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.config.RouteConfig" title="qh.config.RouteConfig"><span class="pre">RouteConfig</span></a></span></span><a class="reference internal" href="../../_modules/qh/config.html#resolve_route_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.config.resolve_route_config" title="Link to this definition"></a></dt>
+<dd><p>Resolve complete route configuration for a function.</p>
+<p>Precedence (highest to lowest):
+1. route_config (function-specific)
+2. app_config (app-level defaults)
+3. DEFAULT_ROUTE_CONFIG (global defaults)</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="client.html" class="btn btn-neutral float-left" title="qh.client" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="conventions.html" class="btn btn-neutral float-right" title="qh.conventions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,462 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qh.app &mdash; qh 0.0.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f7cdbf68"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            qh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh.html">qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/app.html">qh.app</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/async_endpoints.html">qh.async_endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/async_tasks.html">qh.async_tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/au_integration.html">qh.au_integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/base.html">qh.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/client.html">qh.client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/config.html">qh.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/conventions.html">qh.conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/core.html">qh.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/endpoint.html">qh.endpoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/examples/async_example.html">qh.examples.async_example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/examples/simple.html">qh.examples.simple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/jsclient.html">qh.jsclient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/openapi.html">qh.openapi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/rules.html">qh.rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap.html">qh.scrap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/simple_fastapi_dispatch.html">qh.scrap.simple_fastapi_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/store_dispatch_1.html">qh.scrap.store_dispatch_1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/store_dispatch_2.html">qh.scrap.store_dispatch_2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/test_store_dispatch.html">qh.scrap.test_store_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/stores_qh.html">qh.stores_qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/testing.html">qh.testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/types.html">qh.types</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">qh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qh.app</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qh.app</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Core API for creating FastAPI applications from Python functions.</span>
+
+<span class="sd">This is the primary entry point for qh: mk_app()</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">qh.config</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AppConfig</span><span class="p">,</span>
+    <span class="n">RouteConfig</span><span class="p">,</span>
+    <span class="n">DEFAULT_APP_CONFIG</span><span class="p">,</span>
+    <span class="n">normalize_funcs_input</span><span class="p">,</span>
+    <span class="n">resolve_route_config</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qh.endpoint</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_endpoint</span><span class="p">,</span> <span class="n">validate_route_config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qh.rules</span><span class="w"> </span><span class="kn">import</span> <span class="n">RuleChain</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">qh.conventions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">apply_conventions_to_funcs</span><span class="p">,</span>
+    <span class="n">merge_convention_config</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="mk_app">
+<a class="viewcode-back" href="../../module_docs/qh/app.html#qh.app.mk_app">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">mk_app</span><span class="p">(</span>
+    <span class="n">funcs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">RouteConfig</span><span class="p">]]],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">app</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FastAPI</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">AppConfig</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_conventions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">async_funcs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">async_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="s1">&#39;TaskConfig&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a FastAPI application from Python functions.</span>
+
+<span class="sd">    This is the primary API for qh. It supports multiple input formats for maximum</span>
+<span class="sd">    flexibility while maintaining simplicity for common cases.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        funcs: Functions to expose as HTTP endpoints. Can be:</span>
+<span class="sd">            - A single callable</span>
+<span class="sd">            - A list of callables</span>
+<span class="sd">            - A dict mapping callables to their route configurations</span>
+
+<span class="sd">        app: Optional existing FastAPI app to add routes to.</span>
+<span class="sd">             If None, creates a new app.</span>
+
+<span class="sd">        config: Optional app-level configuration. Can be:</span>
+<span class="sd">            - AppConfig object</span>
+<span class="sd">            - Dict that will be converted to AppConfig</span>
+<span class="sd">            - None (uses defaults)</span>
+
+<span class="sd">        use_conventions: Whether to use convention-based routing.</span>
+<span class="sd">            If True, infers paths and methods from function names:</span>
+<span class="sd">            - get_user(user_id) → GET /users/{user_id}</span>
+<span class="sd">            - list_users() → GET /users</span>
+<span class="sd">            - create_user(user) → POST /users</span>
+
+<span class="sd">        async_funcs: List of functions (by name or reference) that should support</span>
+<span class="sd">            async task execution. When enabled, clients can add ?async=true to</span>
+<span class="sd">            get a task ID instead of blocking for the result.</span>
+
+<span class="sd">        async_config: Configuration for async task processing. Can be:</span>
+<span class="sd">            - None (uses default TaskConfig for functions in async_funcs)</span>
+<span class="sd">            - TaskConfig object (applies to all async_funcs)</span>
+<span class="sd">            - Dict mapping function names to TaskConfig objects</span>
+
+<span class="sd">        **kwargs: Additional FastAPI() constructor kwargs (if creating new app)</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        FastAPI application with routes added</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        Simple case - just functions:</span>
+<span class="sd">        &gt;&gt;&gt; def add(x: int, y: int) -&gt; int:</span>
+<span class="sd">        ...     return x + y</span>
+<span class="sd">        &gt;&gt;&gt; app = mk_app([add])</span>
+
+<span class="sd">        With conventions:</span>
+<span class="sd">        &gt;&gt;&gt; def get_user(user_id: str): ...</span>
+<span class="sd">        &gt;&gt;&gt; def list_users(): ...</span>
+<span class="sd">        &gt;&gt;&gt; app = mk_app([get_user, list_users], use_conventions=True)</span>
+
+<span class="sd">        With configuration:</span>
+<span class="sd">        &gt;&gt;&gt; app = mk_app(</span>
+<span class="sd">        ...     [add],</span>
+<span class="sd">        ...     config={&#39;path_prefix&#39;: &#39;/api&#39;, &#39;default_methods&#39;: [&#39;POST&#39;]}</span>
+<span class="sd">        ... )</span>
+
+<span class="sd">        Per-function configuration:</span>
+<span class="sd">        &gt;&gt;&gt; app = mk_app({</span>
+<span class="sd">        ...     add: {&#39;methods&#39;: [&#39;GET&#39;, &#39;POST&#39;], &#39;path&#39;: &#39;/calculate/add&#39;},</span>
+<span class="sd">        ... })</span>
+
+<span class="sd">        With async support:</span>
+<span class="sd">        &gt;&gt;&gt; def expensive_task(n: int) -&gt; int:</span>
+<span class="sd">        ...     import time</span>
+<span class="sd">        ...     time.sleep(5)</span>
+<span class="sd">        ...     return n * 2</span>
+<span class="sd">        &gt;&gt;&gt; app = mk_app([expensive_task], async_funcs=[&#39;expensive_task&#39;])</span>
+
+<span class="sd">        # Now: POST /expensive_task?async=true returns {&quot;task_id&quot;: &quot;...&quot;}</span>
+<span class="sd">        # And: GET /tasks/{task_id}/result returns the result when ready</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Normalize input formats</span>
+    <span class="n">func_configs</span> <span class="o">=</span> <span class="n">normalize_funcs_input</span><span class="p">(</span><span class="n">funcs</span><span class="p">)</span>
+
+    <span class="c1"># Process async configuration</span>
+    <span class="k">if</span> <span class="n">async_funcs</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">qh.async_tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">TaskConfig</span>
+
+        <span class="c1"># Normalize async_config</span>
+        <span class="k">if</span> <span class="n">async_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Use default config for all async functions</span>
+            <span class="n">default_task_config</span> <span class="o">=</span> <span class="n">TaskConfig</span><span class="p">()</span>
+            <span class="n">async_config_map</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">async_config</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="c1"># Dict mapping function names to configs</span>
+            <span class="n">async_config_map</span> <span class="o">=</span> <span class="n">async_config</span>
+            <span class="n">default_task_config</span> <span class="o">=</span> <span class="n">TaskConfig</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Single TaskConfig for all functions</span>
+            <span class="n">default_task_config</span> <span class="o">=</span> <span class="n">async_config</span>
+            <span class="n">async_config_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1"># Apply async config to specified functions</span>
+        <span class="n">async_func_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">func_ref</span> <span class="ow">in</span> <span class="n">async_funcs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">func_ref</span><span class="p">):</span>
+                <span class="n">async_func_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">func_ref</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">async_func_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">func_ref</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">func</span><span class="p">,</span> <span class="n">route_config</span> <span class="ow">in</span> <span class="n">func_configs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">in</span> <span class="n">async_func_names</span><span class="p">:</span>
+                <span class="c1"># Get function-specific config or use default</span>
+                <span class="n">task_config</span> <span class="o">=</span> <span class="n">async_config_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">default_task_config</span><span class="p">)</span>
+
+                <span class="c1"># Update route config with async config</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">route_config</span><span class="p">,</span> <span class="n">RouteConfig</span><span class="p">):</span>
+                    <span class="n">route_config</span><span class="o">.</span><span class="n">async_config</span> <span class="o">=</span> <span class="n">task_config</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># It&#39;s a dict, convert to RouteConfig</span>
+                    <span class="n">route_dict</span> <span class="o">=</span> <span class="n">route_config</span> <span class="ow">or</span> <span class="p">{}</span>
+                    <span class="n">route_dict</span><span class="p">[</span><span class="s1">&#39;async_config&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_config</span>
+                    <span class="n">func_configs</span><span class="p">[</span><span class="n">func</span><span class="p">]</span> <span class="o">=</span> <span class="n">route_dict</span>
+
+    <span class="c1"># Apply conventions if requested</span>
+    <span class="k">if</span> <span class="n">use_conventions</span><span class="p">:</span>
+        <span class="c1"># Get list of functions</span>
+        <span class="n">func_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">func_configs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="c1"># Infer convention-based configs</span>
+        <span class="n">convention_configs</span> <span class="o">=</span> <span class="n">apply_conventions_to_funcs</span><span class="p">(</span><span class="n">func_list</span><span class="p">,</span> <span class="n">use_conventions</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Merge with explicit configs (explicit takes precedence)</span>
+        <span class="k">for</span> <span class="n">func</span><span class="p">,</span> <span class="n">convention_config</span> <span class="ow">in</span> <span class="n">convention_configs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">func_configs</span><span class="p">:</span>
+                <span class="n">explicit_config</span> <span class="o">=</span> <span class="n">func_configs</span><span class="p">[</span><span class="n">func</span><span class="p">]</span>
+                <span class="c1"># Convert RouteConfig to dict if necessary</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">explicit_config</span><span class="p">,</span> <span class="n">RouteConfig</span><span class="p">):</span>
+                    <span class="n">explicit_dict</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="n">k</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">explicit_config</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="s1">&#39;methods&#39;</span><span class="p">,</span> <span class="s1">&#39;summary&#39;</span><span class="p">,</span> <span class="s1">&#39;tags&#39;</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">explicit_config</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="p">}</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">explicit_dict</span> <span class="o">=</span> <span class="n">explicit_config</span> <span class="ow">or</span> <span class="p">{}</span>
+
+                <span class="n">merged</span> <span class="o">=</span> <span class="n">merge_convention_config</span><span class="p">(</span><span class="n">convention_config</span><span class="p">,</span> <span class="n">explicit_dict</span><span class="p">)</span>
+                <span class="n">func_configs</span><span class="p">[</span><span class="n">func</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged</span>
+
+    <span class="c1"># Resolve app configuration</span>
+    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">app_config</span> <span class="o">=</span> <span class="n">DEFAULT_APP_CONFIG</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">AppConfig</span><span class="p">):</span>
+        <span class="n">app_config</span> <span class="o">=</span> <span class="n">config</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">app_config</span> <span class="o">=</span> <span class="n">AppConfig</span><span class="p">(</span><span class="o">**</span><span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">AppConfig</span><span class="o">.</span><span class="n">__dataclass_fields__</span>
+        <span class="p">})</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid config type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">config</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Create or use existing FastAPI app</span>
+    <span class="k">if</span> <span class="n">app</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fastapi_kwargs</span> <span class="o">=</span> <span class="n">app_config</span><span class="o">.</span><span class="n">to_fastapi_kwargs</span><span class="p">()</span>
+        <span class="n">fastapi_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="p">(</span><span class="o">**</span><span class="n">fastapi_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Process each function</span>
+    <span class="k">for</span> <span class="n">func</span><span class="p">,</span> <span class="n">route_config</span> <span class="ow">in</span> <span class="n">func_configs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Resolve complete configuration for this route</span>
+        <span class="n">resolved_config</span> <span class="o">=</span> <span class="n">resolve_route_config</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">app_config</span><span class="p">,</span> <span class="n">route_config</span><span class="p">)</span>
+
+        <span class="c1"># Validate configuration</span>
+        <span class="n">validate_route_config</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">resolved_config</span><span class="p">)</span>
+
+        <span class="c1"># Create endpoint</span>
+        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">make_endpoint</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">resolved_config</span><span class="p">)</span>
+
+        <span class="c1"># Compute full path</span>
+        <span class="n">full_path</span> <span class="o">=</span> <span class="n">app_config</span><span class="o">.</span><span class="n">path_prefix</span> <span class="o">+</span> <span class="n">resolved_config</span><span class="o">.</span><span class="n">path</span>
+
+        <span class="c1"># Prepare route kwargs</span>
+        <span class="n">route_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="n">full_path</span><span class="p">,</span>
+            <span class="s1">&#39;endpoint&#39;</span><span class="p">:</span> <span class="n">endpoint</span><span class="p">,</span>
+            <span class="s1">&#39;methods&#39;</span><span class="p">:</span> <span class="n">resolved_config</span><span class="o">.</span><span class="n">methods</span><span class="p">,</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Add optional metadata</span>
+        <span class="k">if</span> <span class="n">resolved_config</span><span class="o">.</span><span class="n">summary</span><span class="p">:</span>
+            <span class="n">route_kwargs</span><span class="p">[</span><span class="s1">&#39;summary&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resolved_config</span><span class="o">.</span><span class="n">summary</span>
+        <span class="k">if</span> <span class="n">resolved_config</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+            <span class="n">route_kwargs</span><span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resolved_config</span><span class="o">.</span><span class="n">description</span>
+        <span class="k">if</span> <span class="n">resolved_config</span><span class="o">.</span><span class="n">tags</span><span class="p">:</span>
+            <span class="n">route_kwargs</span><span class="p">[</span><span class="s1">&#39;tags&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resolved_config</span><span class="o">.</span><span class="n">tags</span>
+        <span class="k">if</span> <span class="n">resolved_config</span><span class="o">.</span><span class="n">response_model</span><span class="p">:</span>
+            <span class="n">route_kwargs</span><span class="p">[</span><span class="s1">&#39;response_model&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resolved_config</span><span class="o">.</span><span class="n">response_model</span>
+
+        <span class="n">route_kwargs</span><span class="p">[</span><span class="s1">&#39;include_in_schema&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resolved_config</span><span class="o">.</span><span class="n">include_in_schema</span>
+        <span class="n">route_kwargs</span><span class="p">[</span><span class="s1">&#39;deprecated&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">resolved_config</span><span class="o">.</span><span class="n">deprecated</span>
+
+        <span class="c1"># Add route to app</span>
+        <span class="n">app</span><span class="o">.</span><span class="n">add_api_route</span><span class="p">(</span><span class="o">**</span><span class="n">route_kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Add task management endpoints if any async functions were configured</span>
+    <span class="k">if</span> <span class="n">async_funcs</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">qh.async_endpoints</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_global_task_endpoints</span>
+
+        <span class="c1"># Add global task endpoints (list all tasks)</span>
+        <span class="n">add_global_task_endpoints</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+
+        <span class="c1"># Add per-function task endpoints</span>
+        <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">func_configs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">in</span> <span class="n">async_func_names</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">qh.async_endpoints</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_task_endpoints</span>
+
+                <span class="c1"># Get the task config to check if we should create endpoints</span>
+                <span class="n">route_config</span> <span class="o">=</span> <span class="n">func_configs</span><span class="p">[</span><span class="n">func</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">route_config</span><span class="p">,</span> <span class="n">RouteConfig</span><span class="p">):</span>
+                    <span class="n">task_config</span> <span class="o">=</span> <span class="n">route_config</span><span class="o">.</span><span class="n">async_config</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">route_config</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="n">task_config</span> <span class="o">=</span> <span class="n">route_config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;async_config&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">task_config</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="k">if</span> <span class="n">task_config</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">task_config</span><span class="p">,</span> <span class="s1">&#39;create_task_endpoints&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+                    <span class="n">add_task_endpoints</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">app</span></div>
+
+
+
+<div class="viewcode-block" id="inspect_routes">
+<a class="viewcode-back" href="../../module_docs/qh/app.html#qh.app.inspect_routes">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">inspect_routes</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Inspect routes in a FastAPI app.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app: FastAPI application</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List of route information dicts</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">routes</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">route</span> <span class="ow">in</span> <span class="n">app</span><span class="o">.</span><span class="n">routes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">route</span><span class="p">,</span> <span class="s1">&#39;methods&#39;</span><span class="p">):</span>
+            <span class="n">route_info</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="n">route</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
+                <span class="s1">&#39;methods&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="n">methods</span><span class="p">),</span>
+                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">route</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="s1">&#39;endpoint&#39;</span><span class="p">:</span> <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span>
+            <span class="p">}</span>
+            <span class="c1"># Include original function if available (for OpenAPI/client generation)</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span> <span class="s1">&#39;_qh_original_func&#39;</span><span class="p">):</span>
+                <span class="n">route_info</span><span class="p">[</span><span class="s1">&#39;function&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="o">.</span><span class="n">_qh_original_func</span>
+            <span class="n">routes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">route_info</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">routes</span></div>
+
+
+
+<div class="viewcode-block" id="print_routes">
+<a class="viewcode-back" href="../../module_docs/qh/app.html#qh.app.print_routes">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">print_routes</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Print formatted route table for a FastAPI app.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app: FastAPI application</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">routes</span> <span class="o">=</span> <span class="n">inspect_routes</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">routes</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No routes found&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># Find max widths for formatting</span>
+    <span class="n">max_methods</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;methods&#39;</span><span class="p">]))</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">)</span>
+    <span class="n">max_path</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">)</span>
+
+    <span class="c1"># Print header</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;METHODS&#39;</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_methods</span><span class="si">}}</span><span class="s2">  </span><span class="si">{</span><span class="s1">&#39;PATH&#39;</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_path</span><span class="si">}}</span><span class="s2">  ENDPOINT&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="n">max_methods</span> <span class="o">+</span> <span class="n">max_path</span> <span class="o">+</span> <span class="mi">50</span><span class="p">))</span>
+
+    <span class="c1"># Print routes</span>
+    <span class="k">for</span> <span class="n">route</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">:</span>
+        <span class="n">methods</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">route</span><span class="p">[</span><span class="s1">&#39;methods&#39;</span><span class="p">]))</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">route</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">route</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Try to get endpoint signature</span>
+        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">route</span><span class="p">[</span><span class="s1">&#39;endpoint&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="s1">&#39;__wrapped__&#39;</span><span class="p">):</span>
+            <span class="n">endpoint</span> <span class="o">=</span> <span class="n">endpoint</span><span class="o">.</span><span class="n">__wrapped__</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">methods</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_methods</span><span class="si">}}</span><span class="s2">  </span><span class="si">{</span><span class="n">path</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_path</span><span class="si">}}</span><span class="s2">  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># Convenience aliases</span>
+<span class="n">create_app</span> <span class="o">=</span> <span class="n">mk_app</span>
+<span class="n">make_app</span> <span class="o">=</span> <span class="n">mk_app</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

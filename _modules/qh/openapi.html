@@ -1,0 +1,435 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qh.openapi &mdash; qh 0.0.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f7cdbf68"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            qh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh.html">qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/app.html">qh.app</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/async_endpoints.html">qh.async_endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/async_tasks.html">qh.async_tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/au_integration.html">qh.au_integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/base.html">qh.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/client.html">qh.client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/config.html">qh.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/conventions.html">qh.conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/core.html">qh.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/endpoint.html">qh.endpoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/examples/async_example.html">qh.examples.async_example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/examples/simple.html">qh.examples.simple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/jsclient.html">qh.jsclient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/openapi.html">qh.openapi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/rules.html">qh.rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap.html">qh.scrap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/simple_fastapi_dispatch.html">qh.scrap.simple_fastapi_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/store_dispatch_1.html">qh.scrap.store_dispatch_1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/store_dispatch_2.html">qh.scrap.store_dispatch_2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/test_store_dispatch.html">qh.scrap.test_store_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/stores_qh.html">qh.stores_qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/testing.html">qh.testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/types.html">qh.types</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">qh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qh.openapi</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qh.openapi</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Enhanced OpenAPI generation for qh.</span>
+
+<span class="sd">Extends FastAPI&#39;s OpenAPI generation with metadata needed for bidirectional</span>
+<span class="sd">Python ↔ HTTP transformation:</span>
+
+<span class="sd">- x-python-signature: Full function signature with defaults</span>
+<span class="sd">- x-python-module: Module path for imports</span>
+<span class="sd">- x-python-transformers: Type transformation metadata</span>
+<span class="sd">- x-python-examples: Generated examples for testing</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">get_type_hints</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">get_args</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.openapi.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_openapi</span>
+
+
+<div class="viewcode-block" id="get_python_type_name">
+<a class="viewcode-back" href="../../module_docs/qh/openapi.html#qh.openapi.get_python_type_name">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_python_type_name</span><span class="p">(</span><span class="n">type_hint</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a string representation of a Python type.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        int → &quot;int&quot;</span>
+<span class="sd">        str → &quot;str&quot;</span>
+<span class="sd">        list[int] → &quot;list[int]&quot;</span>
+<span class="sd">        Optional[str] → &quot;Optional[str]&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;Any&quot;</span>
+
+    <span class="c1"># Handle basic types</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="s1">&#39;__name__&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">type_hint</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="c1"># Handle typing generics</span>
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">origin_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s1">&#39;__name__&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">origin</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">args_str</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_python_type_name</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">origin_name</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">args_str</span><span class="si">}</span><span class="s2">]&quot;</span>
+        <span class="k">return</span> <span class="n">origin_name</span>
+
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="extract_function_signature">
+<a class="viewcode-back" href="../../module_docs/qh/openapi.html#qh.openapi.extract_function_signature">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_function_signature</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract detailed signature information from a function.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dictionary with signature metadata:</span>
+<span class="sd">        - name: function name</span>
+<span class="sd">        - module: module path</span>
+<span class="sd">        - parameters: list of parameter info</span>
+<span class="sd">        - return_type: return type annotation</span>
+<span class="sd">        - docstring: function docstring</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;__annotations__&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">param_type</span> <span class="o">=</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">annotation</span><span class="p">)</span>
+
+        <span class="n">param_info</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">param_name</span><span class="p">,</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">get_python_type_name</span><span class="p">(</span><span class="n">param_type</span><span class="p">),</span>
+            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="c1"># Try to serialize default value</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+                <span class="n">param_info</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">default</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">param_info</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+
+        <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_info</span><span class="p">)</span>
+
+    <span class="n">return_type</span> <span class="o">=</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;return&#39;</span><span class="p">,</span> <span class="n">sig</span><span class="o">.</span><span class="n">return_annotation</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+        <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span>
+        <span class="s1">&#39;parameters&#39;</span><span class="p">:</span> <span class="n">parameters</span><span class="p">,</span>
+        <span class="s1">&#39;return_type&#39;</span><span class="p">:</span> <span class="n">get_python_type_name</span><span class="p">(</span><span class="n">return_type</span><span class="p">),</span>
+        <span class="s1">&#39;docstring&#39;</span><span class="p">:</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">func</span><span class="p">),</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="generate_examples_for_function">
+<a class="viewcode-back" href="../../module_docs/qh/openapi.html#qh.openapi.generate_examples_for_function">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_examples_for_function</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate example requests/responses for a function.</span>
+
+<span class="sd">    Uses type hints to generate sensible example values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;__annotations__&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+
+    <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># Generate a basic example</span>
+    <span class="n">example_request</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">param_type</span> <span class="o">=</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">annotation</span><span class="p">)</span>
+
+        <span class="c1"># Use default if available</span>
+        <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+                <span class="k">continue</span>  <span class="c1"># Skip optional params with defaults in minimal example</span>
+
+        <span class="c1"># Generate example value based on type</span>
+        <span class="n">example_value</span> <span class="o">=</span> <span class="n">_generate_example_value</span><span class="p">(</span><span class="n">param_type</span><span class="p">,</span> <span class="n">param_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">example_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">example_request</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">example_value</span>
+
+    <span class="k">if</span> <span class="n">example_request</span><span class="p">:</span>
+        <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
+            <span class="s1">&#39;summary&#39;</span><span class="p">:</span> <span class="s1">&#39;Basic example&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">example_request</span>
+        <span class="p">})</span>
+
+    <span class="k">return</span> <span class="n">examples</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_generate_example_value</span><span class="p">(</span><span class="n">type_hint</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate an example value for a given type.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;example_value&quot;</span>
+
+    <span class="c1"># Handle basic types</span>
+    <span class="k">if</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+        <span class="c1"># Use param name hints</span>
+        <span class="k">if</span> <span class="s1">&#39;id&#39;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">return</span> <span class="mi">123</span>
+        <span class="k">elif</span> <span class="s1">&#39;count&#39;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;num&#39;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">return</span> <span class="mi">10</span>
+        <span class="k">return</span> <span class="mi">42</span>
+    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s2">&quot;example_name&quot;</span>
+        <span class="k">elif</span> <span class="s1">&#39;id&#39;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s2">&quot;abc123&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;example&quot;</span>
+    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">float</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s1">&#39;float&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mf">3.14</span>
+    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">list</span> <span class="ow">or</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">item_example</span> <span class="o">=</span> <span class="n">_generate_example_value</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;item&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">item_example</span><span class="p">]</span> <span class="k">if</span> <span class="n">item_example</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">or</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;value&quot;</span><span class="p">}</span>
+
+    <span class="c1"># For custom types, return a placeholder</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<div class="viewcode-block" id="enhance_openapi_schema">
+<a class="viewcode-back" href="../../module_docs/qh/openapi.html#qh.openapi.enhance_openapi_schema">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">enhance_openapi_schema</span><span class="p">(</span>
+    <span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">include_examples</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">include_python_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">include_transformers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate enhanced OpenAPI schema with Python-specific extensions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app: FastAPI application</span>
+<span class="sd">        include_examples: Add example requests/responses</span>
+<span class="sd">        include_python_metadata: Add x-python-* extensions</span>
+<span class="sd">        include_transformers: Add transformation metadata</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Enhanced OpenAPI schema dictionary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get base OpenAPI schema from FastAPI</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">get_openapi</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+        <span class="n">version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+        <span class="n">openapi_version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">openapi_version</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+        <span class="n">routes</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">routes</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Store function metadata by operation_id</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">qh.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">inspect_routes</span>
+    <span class="n">routes</span> <span class="o">=</span> <span class="n">inspect_routes</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+
+    <span class="c1"># Enhance each endpoint with Python metadata</span>
+    <span class="k">for</span> <span class="n">route_info</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">:</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;function&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">func</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">path</span> <span class="o">=</span> <span class="n">route_info</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">]</span>
+        <span class="n">methods</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;methods&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+
+        <span class="c1"># Skip OpenAPI/docs routes</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;/openapi.json&#39;</span><span class="p">,</span> <span class="s1">&#39;/docs&#39;</span><span class="p">,</span> <span class="s1">&#39;/redoc&#39;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Find the operation in the schema</span>
+        <span class="n">path_item</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;paths&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">{})</span>
+
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
+            <span class="n">method_lower</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="n">operation</span> <span class="o">=</span> <span class="n">path_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">method_lower</span><span class="p">,</span> <span class="p">{})</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">operation</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Add Python metadata</span>
+            <span class="k">if</span> <span class="n">include_python_metadata</span><span class="p">:</span>
+                <span class="n">sig_info</span> <span class="o">=</span> <span class="n">extract_function_signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+                <span class="n">operation</span><span class="p">[</span><span class="s1">&#39;x-python-signature&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_info</span>
+
+            <span class="c1"># Add examples</span>
+            <span class="k">if</span> <span class="n">include_examples</span><span class="p">:</span>
+                <span class="n">examples</span> <span class="o">=</span> <span class="n">generate_examples_for_function</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">examples</span> <span class="ow">and</span> <span class="s1">&#39;requestBody&#39;</span> <span class="ow">in</span> <span class="n">operation</span><span class="p">:</span>
+                    <span class="n">content</span> <span class="o">=</span> <span class="n">operation</span><span class="p">[</span><span class="s1">&#39;requestBody&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">,</span> <span class="p">{})</span>
+                    <span class="n">json_content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;application/json&#39;</span><span class="p">,</span> <span class="p">{})</span>
+                    <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;examples&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="sa">f</span><span class="s2">&quot;example_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">ex</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ex</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
+                    <span class="p">}</span>
+
+            <span class="c1"># Add transformer metadata (if requested)</span>
+            <span class="k">if</span> <span class="n">include_transformers</span><span class="p">:</span>
+                <span class="c1"># This would include information about how types are transformed</span>
+                <span class="c1"># For now, we&#39;ll add a placeholder</span>
+                <span class="n">operation</span><span class="p">[</span><span class="s1">&#39;x-python-transformers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;note&#39;</span><span class="p">:</span> <span class="s1">&#39;Type transformation metadata would go here&#39;</span>
+                <span class="p">}</span>
+
+            <span class="n">path_item</span><span class="p">[</span><span class="n">method_lower</span><span class="p">]</span> <span class="o">=</span> <span class="n">operation</span>
+
+        <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="n">path_item</span>
+
+    <span class="k">return</span> <span class="n">schema</span></div>
+
+
+
+<div class="viewcode-block" id="export_openapi">
+<a class="viewcode-back" href="../../module_docs/qh/openapi.html#qh.openapi.export_openapi">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">export_openapi</span><span class="p">(</span>
+    <span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">include_examples</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">include_python_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">include_transformers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Export enhanced OpenAPI schema.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app: FastAPI application</span>
+<span class="sd">        include_examples: Include example requests/responses</span>
+<span class="sd">        include_python_metadata: Include x-python-* extensions</span>
+<span class="sd">        include_transformers: Include transformation metadata</span>
+<span class="sd">        output_file: Optional file path to write JSON output</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Enhanced OpenAPI schema dictionary</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; from qh import mk_app  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; from qh.openapi import export_openapi  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; app = mk_app([my_func])  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; spec = export_openapi(app, include_examples=True)  # doctest: +SKIP</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">schema</span> <span class="o">=</span> <span class="n">enhance_openapi_schema</span><span class="p">(</span>
+        <span class="n">app</span><span class="p">,</span>
+        <span class="n">include_examples</span><span class="o">=</span><span class="n">include_examples</span><span class="p">,</span>
+        <span class="n">include_python_metadata</span><span class="o">=</span><span class="n">include_python_metadata</span><span class="p">,</span>
+        <span class="n">include_transformers</span><span class="o">=</span><span class="n">include_transformers</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">output_file</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">schema</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

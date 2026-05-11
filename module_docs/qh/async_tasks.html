@@ -1,0 +1,512 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qh.async_tasks &mdash; qh 0.0.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f7cdbf68"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="qh.au_integration" href="au_integration.html" />
+    <link rel="prev" title="qh.async_endpoints" href="async_endpoints.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            qh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../qh.html">qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app.html">qh.app</a></li>
+<li class="toctree-l1"><a class="reference internal" href="async_endpoints.html">qh.async_endpoints</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">qh.async_tasks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qh.async_tasks.InMemoryTaskStore"><code class="docutils literal notranslate"><span class="pre">InMemoryTaskStore</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.InMemoryTaskStore.create_task"><code class="docutils literal notranslate"><span class="pre">InMemoryTaskStore.create_task()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.InMemoryTaskStore.delete_task"><code class="docutils literal notranslate"><span class="pre">InMemoryTaskStore.delete_task()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.InMemoryTaskStore.get_task"><code class="docutils literal notranslate"><span class="pre">InMemoryTaskStore.get_task()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.InMemoryTaskStore.list_tasks"><code class="docutils literal notranslate"><span class="pre">InMemoryTaskStore.list_tasks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.InMemoryTaskStore.update_task"><code class="docutils literal notranslate"><span class="pre">InMemoryTaskStore.update_task()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.async_tasks.ProcessPoolTaskExecutor"><code class="docutils literal notranslate"><span class="pre">ProcessPoolTaskExecutor</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.ProcessPoolTaskExecutor.shutdown"><code class="docutils literal notranslate"><span class="pre">ProcessPoolTaskExecutor.shutdown()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.ProcessPoolTaskExecutor.submit_task"><code class="docutils literal notranslate"><span class="pre">ProcessPoolTaskExecutor.submit_task()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.async_tasks.TaskConfig"><code class="docutils literal notranslate"><span class="pre">TaskConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskConfig.get_executor"><code class="docutils literal notranslate"><span class="pre">TaskConfig.get_executor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskConfig.get_store"><code class="docutils literal notranslate"><span class="pre">TaskConfig.get_store()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.async_tasks.TaskExecutor"><code class="docutils literal notranslate"><span class="pre">TaskExecutor</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskExecutor.shutdown"><code class="docutils literal notranslate"><span class="pre">TaskExecutor.shutdown()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskExecutor.submit_task"><code class="docutils literal notranslate"><span class="pre">TaskExecutor.submit_task()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.async_tasks.TaskInfo"><code class="docutils literal notranslate"><span class="pre">TaskInfo</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskInfo.to_dict"><code class="docutils literal notranslate"><span class="pre">TaskInfo.to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.async_tasks.TaskManager"><code class="docutils literal notranslate"><span class="pre">TaskManager</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskManager.cancel_task"><code class="docutils literal notranslate"><span class="pre">TaskManager.cancel_task()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskManager.create_task"><code class="docutils literal notranslate"><span class="pre">TaskManager.create_task()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskManager.get_result"><code class="docutils literal notranslate"><span class="pre">TaskManager.get_result()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskManager.get_status"><code class="docutils literal notranslate"><span class="pre">TaskManager.get_status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskManager.list_tasks"><code class="docutils literal notranslate"><span class="pre">TaskManager.list_tasks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskManager.shutdown"><code class="docutils literal notranslate"><span class="pre">TaskManager.shutdown()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.async_tasks.TaskStatus"><code class="docutils literal notranslate"><span class="pre">TaskStatus</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.async_tasks.TaskStore"><code class="docutils literal notranslate"><span class="pre">TaskStore</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskStore.create_task"><code class="docutils literal notranslate"><span class="pre">TaskStore.create_task()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskStore.delete_task"><code class="docutils literal notranslate"><span class="pre">TaskStore.delete_task()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskStore.get_task"><code class="docutils literal notranslate"><span class="pre">TaskStore.get_task()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskStore.list_tasks"><code class="docutils literal notranslate"><span class="pre">TaskStore.list_tasks()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.TaskStore.update_task"><code class="docutils literal notranslate"><span class="pre">TaskStore.update_task()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.async_tasks.ThreadPoolTaskExecutor"><code class="docutils literal notranslate"><span class="pre">ThreadPoolTaskExecutor</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.ThreadPoolTaskExecutor.shutdown"><code class="docutils literal notranslate"><span class="pre">ThreadPoolTaskExecutor.shutdown()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#qh.async_tasks.ThreadPoolTaskExecutor.submit_task"><code class="docutils literal notranslate"><span class="pre">ThreadPoolTaskExecutor.submit_task()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.async_tasks.get_task_manager"><code class="docutils literal notranslate"><span class="pre">get_task_manager()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.async_tasks.should_run_async"><code class="docutils literal notranslate"><span class="pre">should_run_async()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="au_integration.html">qh.au_integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">qh.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">qh.client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">qh.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conventions.html">qh.conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core.html">qh.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="endpoint.html">qh.endpoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/async_example.html">qh.examples.async_example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/simple.html">qh.examples.simple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jsclient.html">qh.jsclient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openapi.html">qh.openapi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rules.html">qh.rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap.html">qh.scrap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/simple_fastapi_dispatch.html">qh.scrap.simple_fastapi_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/store_dispatch_1.html">qh.scrap.store_dispatch_1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/store_dispatch_2.html">qh.scrap.store_dispatch_2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/test_store_dispatch.html">qh.scrap.test_store_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stores_qh.html">qh.stores_qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">qh.testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">qh.types</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">qh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">qh.async_tasks</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/qh/async_tasks.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qh.async_tasks">
+<span id="qh-async-tasks"></span><h1>qh.async_tasks<a class="headerlink" href="#module-qh.async_tasks" title="Link to this heading"></a></h1>
+<p>Async task processing for qh.</p>
+<p>Provides a minimal, boilerplate-free way to handle long-running operations
+by returning task IDs immediately and allowing clients to poll for results.</p>
+<p>Terminology (standard async task processing):
+- Task: An asynchronous computation
+- Task ID: Unique identifier for tracking a task
+- Task Status: State of the task (pending, running, completed, failed)
+- Task Result: The output of the completed task</p>
+<p>Design Philosophy:
+- Convention over configuration with escape hatches
+- Pluggable backends (in-memory, file-based, au, Celery, etc.)
+- HTTP-first patterns (query params, standard endpoints)</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qh.async_tasks.InMemoryTaskStore">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.async_tasks.</span></span><span class="sig-name descname"><span class="pre">InMemoryTaskStore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qh/async_tasks.html#InMemoryTaskStore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.InMemoryTaskStore" title="Link to this definition"></a></dt>
+<dd><p>Simple in-memory task storage (not persistent, single-process only).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.InMemoryTaskStore.create_task">
+<span class="sig-name descname"><span class="pre">create_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.async_tasks.TaskInfo" title="qh.async_tasks.TaskInfo"><span class="pre">TaskInfo</span></a></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#InMemoryTaskStore.create_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.InMemoryTaskStore.create_task" title="Link to this definition"></a></dt>
+<dd><p>Create a new task record.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.InMemoryTaskStore.delete_task">
+<span class="sig-name descname"><span class="pre">delete_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#InMemoryTaskStore.delete_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.InMemoryTaskStore.delete_task" title="Link to this definition"></a></dt>
+<dd><p>Delete a task. Returns True if deleted, False if not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.InMemoryTaskStore.get_task">
+<span class="sig-name descname"><span class="pre">get_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.async_tasks.TaskInfo" title="qh.async_tasks.TaskInfo"><span class="pre">TaskInfo</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#InMemoryTaskStore.get_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.InMemoryTaskStore.get_task" title="Link to this definition"></a></dt>
+<dd><p>Retrieve task information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.InMemoryTaskStore.list_tasks">
+<span class="sig-name descname"><span class="pre">list_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qh.async_tasks.TaskInfo" title="qh.async_tasks.TaskInfo"><span class="pre">TaskInfo</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#InMemoryTaskStore.list_tasks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.InMemoryTaskStore.list_tasks" title="Link to this definition"></a></dt>
+<dd><p>List recent tasks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.InMemoryTaskStore.update_task">
+<span class="sig-name descname"><span class="pre">update_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qh.async_tasks.TaskInfo" title="qh.async_tasks.TaskInfo"><span class="pre">TaskInfo</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#InMemoryTaskStore.update_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.InMemoryTaskStore.update_task" title="Link to this definition"></a></dt>
+<dd><p>Update task information.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qh.async_tasks.ProcessPoolTaskExecutor">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.async_tasks.</span></span><span class="sig-name descname"><span class="pre">ProcessPoolTaskExecutor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qh/async_tasks.html#ProcessPoolTaskExecutor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.ProcessPoolTaskExecutor" title="Link to this definition"></a></dt>
+<dd><p>Execute tasks using a process pool (good for CPU-bound tasks).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.ProcessPoolTaskExecutor.shutdown">
+<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#ProcessPoolTaskExecutor.shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.ProcessPoolTaskExecutor.shutdown" title="Link to this definition"></a></dt>
+<dd><p>Shutdown the executor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.ProcessPoolTaskExecutor.submit_task">
+<span class="sig-name descname"><span class="pre">submit_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Exception</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#ProcessPoolTaskExecutor.submit_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.ProcessPoolTaskExecutor.submit_task" title="Link to this definition"></a></dt>
+<dd><p>Submit a task for execution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task_id</strong> – Unique task identifier</p></li>
+<li><p><strong>func</strong> – Function to execute</p></li>
+<li><p><strong>args</strong> – Positional arguments</p></li>
+<li><p><strong>kwargs</strong> – Keyword arguments</p></li>
+<li><p><strong>callback</strong> – Called when task completes with (task_id, result, error)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskConfig">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.async_tasks.</span></span><span class="sig-name descname"><span class="pre">TaskConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">store</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qh.async_tasks.TaskStore" title="qh.async_tasks.TaskStore"><span class="pre">TaskStore</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">executor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qh.async_tasks.TaskExecutor" title="qh.async_tasks.TaskExecutor"><span class="pre">TaskExecutor</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3600</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">async_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'query'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">async_param</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'async'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">async_header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'X-Async'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">create_task_endpoints</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_executor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'thread'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskConfig" title="Link to this definition"></a></dt>
+<dd><p>Configuration for async task processing.</p>
+<p>This is the explicit configuration. The convention is to use sane defaults.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskConfig.get_executor">
+<span class="sig-name descname"><span class="pre">get_executor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.async_tasks.TaskExecutor" title="qh.async_tasks.TaskExecutor"><span class="pre">TaskExecutor</span></a></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskConfig.get_executor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskConfig.get_executor" title="Link to this definition"></a></dt>
+<dd><p>Get or create the task executor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskConfig.get_store">
+<span class="sig-name descname"><span class="pre">get_store</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.async_tasks.TaskStore" title="qh.async_tasks.TaskStore"><span class="pre">TaskStore</span></a></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskConfig.get_store"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskConfig.get_store" title="Link to this definition"></a></dt>
+<dd><p>Get or create the task store.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskExecutor">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.async_tasks.</span></span><span class="sig-name descname"><span class="pre">TaskExecutor</span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskExecutor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskExecutor" title="Link to this definition"></a></dt>
+<dd><p>Abstract interface for task execution backends.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskExecutor.shutdown">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskExecutor.shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskExecutor.shutdown" title="Link to this definition"></a></dt>
+<dd><p>Shutdown the executor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskExecutor.submit_task">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">submit_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Exception</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskExecutor.submit_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskExecutor.submit_task" title="Link to this definition"></a></dt>
+<dd><p>Submit a task for execution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task_id</strong> – Unique task identifier</p></li>
+<li><p><strong>func</strong> – Function to execute</p></li>
+<li><p><strong>args</strong> – Positional arguments</p></li>
+<li><p><strong>kwargs</strong> – Keyword arguments</p></li>
+<li><p><strong>callback</strong> – Called when task completes with (task_id, result, error)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskInfo">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.async_tasks.</span></span><span class="sig-name descname"><span class="pre">TaskInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qh.async_tasks.TaskStatus" title="qh.async_tasks.TaskStatus"><span class="pre">TaskStatus</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">created_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">started_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">completed_at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traceback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskInfo" title="Link to this definition"></a></dt>
+<dd><p>Information about a task’s state.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskInfo.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskInfo.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskInfo.to_dict" title="Link to this definition"></a></dt>
+<dd><p>Convert to dictionary for JSON serialization.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskManager">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.async_tasks.</span></span><span class="sig-name descname"><span class="pre">TaskManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qh.async_tasks.TaskConfig" title="qh.async_tasks.TaskConfig"><span class="pre">TaskConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskManager" title="Link to this definition"></a></dt>
+<dd><p>Manages async task execution and state.</p>
+<p>This is the main coordinator between stores, executors, and HTTP handlers.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskManager.cancel_task">
+<span class="sig-name descname"><span class="pre">cancel_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskManager.cancel_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskManager.cancel_task" title="Link to this definition"></a></dt>
+<dd><p>Cancel a task (if possible).</p>
+<p>Note: Cancellation is best-effort and may not work for all executors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>True if task was cancelled or deleted</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskManager.create_task">
+<span class="sig-name descname"><span class="pre">create_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskManager.create_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskManager.create_task" title="Link to this definition"></a></dt>
+<dd><p>Create and submit a new task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> – Function to execute asynchronously</p></li>
+<li><p><strong>args</strong> – Positional arguments</p></li>
+<li><p><strong>kwargs</strong> – Keyword arguments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Task ID</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskManager.get_result">
+<span class="sig-name descname"><span class="pre">get_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskManager.get_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskManager.get_result" title="Link to this definition"></a></dt>
+<dd><p>Get task result.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task_id</strong> – Task identifier</p></li>
+<li><p><strong>wait</strong> – Whether to block until task completes</p></li>
+<li><p><strong>timeout</strong> – Maximum time to wait in seconds (None = wait forever)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Task result if completed</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ValueError</strong> – If task not found or failed</p></li>
+<li><p><strong>TimeoutError</strong> – If wait times out</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskManager.get_status">
+<span class="sig-name descname"><span class="pre">get_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.async_tasks.TaskInfo" title="qh.async_tasks.TaskInfo"><span class="pre">TaskInfo</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskManager.get_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskManager.get_status" title="Link to this definition"></a></dt>
+<dd><p>Get task status and metadata.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskManager.list_tasks">
+<span class="sig-name descname"><span class="pre">list_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qh.async_tasks.TaskInfo" title="qh.async_tasks.TaskInfo"><span class="pre">TaskInfo</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskManager.list_tasks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskManager.list_tasks" title="Link to this definition"></a></dt>
+<dd><p>List recent tasks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskManager.shutdown">
+<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskManager.shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskManager.shutdown" title="Link to this definition"></a></dt>
+<dd><p>Shutdown the task manager and its executor.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskStatus">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.async_tasks.</span></span><span class="sig-name descname"><span class="pre">TaskStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskStatus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskStatus" title="Link to this definition"></a></dt>
+<dd><p>Standard task status values.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskStore">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.async_tasks.</span></span><span class="sig-name descname"><span class="pre">TaskStore</span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskStore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskStore" title="Link to this definition"></a></dt>
+<dd><p>Abstract interface for task storage backends.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskStore.create_task">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">create_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.async_tasks.TaskInfo" title="qh.async_tasks.TaskInfo"><span class="pre">TaskInfo</span></a></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskStore.create_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskStore.create_task" title="Link to this definition"></a></dt>
+<dd><p>Create a new task record.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskStore.delete_task">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">delete_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskStore.delete_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskStore.delete_task" title="Link to this definition"></a></dt>
+<dd><p>Delete a task. Returns True if deleted, False if not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskStore.get_task">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.async_tasks.TaskInfo" title="qh.async_tasks.TaskInfo"><span class="pre">TaskInfo</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskStore.get_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskStore.get_task" title="Link to this definition"></a></dt>
+<dd><p>Retrieve task information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskStore.list_tasks">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">list_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#qh.async_tasks.TaskInfo" title="qh.async_tasks.TaskInfo"><span class="pre">TaskInfo</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskStore.list_tasks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskStore.list_tasks" title="Link to this definition"></a></dt>
+<dd><p>List recent tasks.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskStore.update_task">
+<span class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">update_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qh.async_tasks.TaskInfo" title="qh.async_tasks.TaskInfo"><span class="pre">TaskInfo</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#TaskStore.update_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.TaskStore.update_task" title="Link to this definition"></a></dt>
+<dd><p>Update task information.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="qh.async_tasks.ThreadPoolTaskExecutor">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.async_tasks.</span></span><span class="sig-name descname"><span class="pre">ThreadPoolTaskExecutor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qh/async_tasks.html#ThreadPoolTaskExecutor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.ThreadPoolTaskExecutor" title="Link to this definition"></a></dt>
+<dd><p>Execute tasks using a thread pool (good for I/O-bound tasks).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.ThreadPoolTaskExecutor.shutdown">
+<span class="sig-name descname"><span class="pre">shutdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#ThreadPoolTaskExecutor.shutdown"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.ThreadPoolTaskExecutor.shutdown" title="Link to this definition"></a></dt>
+<dd><p>Shutdown the executor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.ThreadPoolTaskExecutor.submit_task">
+<span class="sig-name descname"><span class="pre">submit_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Exception</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#ThreadPoolTaskExecutor.submit_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.ThreadPoolTaskExecutor.submit_task" title="Link to this definition"></a></dt>
+<dd><p>Submit a task for execution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>task_id</strong> – Unique task identifier</p></li>
+<li><p><strong>func</strong> – Function to execute</p></li>
+<li><p><strong>args</strong> – Positional arguments</p></li>
+<li><p><strong>kwargs</strong> – Keyword arguments</p></li>
+<li><p><strong>callback</strong> – Called when task completes with (task_id, result, error)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.async_tasks.get_task_manager">
+<span class="sig-prename descclassname"><span class="pre">qh.async_tasks.</span></span><span class="sig-name descname"><span class="pre">get_task_manager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qh.async_tasks.TaskConfig" title="qh.async_tasks.TaskConfig"><span class="pre">TaskConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.async_tasks.TaskManager" title="qh.async_tasks.TaskManager"><span class="pre">TaskManager</span></a></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#get_task_manager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.get_task_manager" title="Link to this definition"></a></dt>
+<dd><p>Get or create a task manager for a function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func_name</strong> – Name of the function</p></li>
+<li><p><strong>config</strong> – Task configuration (only used when creating new manager)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TaskManager instance</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.async_tasks.should_run_async">
+<span class="sig-prename descclassname"><span class="pre">qh.async_tasks.</span></span><span class="sig-name descname"><span class="pre">should_run_async</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qh.async_tasks.TaskConfig" title="qh.async_tasks.TaskConfig"><span class="pre">TaskConfig</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../_modules/qh/async_tasks.html#should_run_async"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.async_tasks.should_run_async" title="Link to this definition"></a></dt>
+<dd><p>Determine if a request should be executed asynchronously.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> – FastAPI Request object</p></li>
+<li><p><strong>config</strong> – Task configuration</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if request should be async</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="async_endpoints.html" class="btn btn-neutral float-left" title="qh.async_endpoints" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="au_integration.html" class="btn btn-neutral float-right" title="qh.au_integration" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

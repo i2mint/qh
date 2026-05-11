@@ -1,0 +1,238 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qh.openapi &mdash; qh 0.0.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f7cdbf68"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="qh.rules" href="rules.html" />
+    <link rel="prev" title="qh.jsclient" href="jsclient.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            qh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../qh.html">qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app.html">qh.app</a></li>
+<li class="toctree-l1"><a class="reference internal" href="async_endpoints.html">qh.async_endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="async_tasks.html">qh.async_tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="au_integration.html">qh.au_integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">qh.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">qh.client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">qh.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="conventions.html">qh.conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="core.html">qh.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="endpoint.html">qh.endpoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/async_example.html">qh.examples.async_example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/simple.html">qh.examples.simple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jsclient.html">qh.jsclient</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">qh.openapi</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qh.openapi.enhance_openapi_schema"><code class="docutils literal notranslate"><span class="pre">enhance_openapi_schema()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.openapi.export_openapi"><code class="docutils literal notranslate"><span class="pre">export_openapi()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.openapi.extract_function_signature"><code class="docutils literal notranslate"><span class="pre">extract_function_signature()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.openapi.generate_examples_for_function"><code class="docutils literal notranslate"><span class="pre">generate_examples_for_function()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.openapi.get_python_type_name"><code class="docutils literal notranslate"><span class="pre">get_python_type_name()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rules.html">qh.rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap.html">qh.scrap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/simple_fastapi_dispatch.html">qh.scrap.simple_fastapi_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/store_dispatch_1.html">qh.scrap.store_dispatch_1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/store_dispatch_2.html">qh.scrap.store_dispatch_2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/test_store_dispatch.html">qh.scrap.test_store_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stores_qh.html">qh.stores_qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">qh.testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">qh.types</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">qh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">qh.openapi</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/qh/openapi.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qh.openapi">
+<span id="qh-openapi"></span><h1>qh.openapi<a class="headerlink" href="#module-qh.openapi" title="Link to this heading"></a></h1>
+<p>Enhanced OpenAPI generation for qh.</p>
+<p>Extends FastAPI’s OpenAPI generation with metadata needed for bidirectional
+Python ↔ HTTP transformation:</p>
+<ul class="simple">
+<li><p>x-python-signature: Full function signature with defaults</p></li>
+<li><p>x-python-module: Module path for imports</p></li>
+<li><p>x-python-transformers: Type transformation metadata</p></li>
+<li><p>x-python-examples: Generated examples for testing</p></li>
+</ul>
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.openapi.enhance_openapi_schema">
+<span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">enhance_openapi_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FastAPI</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_examples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_python_metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_transformers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/openapi.html#enhance_openapi_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.openapi.enhance_openapi_schema" title="Link to this definition"></a></dt>
+<dd><p>Generate enhanced OpenAPI schema with Python-specific extensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>app</strong> – FastAPI application</p></li>
+<li><p><strong>include_examples</strong> – Add example requests/responses</p></li>
+<li><p><strong>include_python_metadata</strong> – Add x-python-* extensions</p></li>
+<li><p><strong>include_transformers</strong> – Add transformation metadata</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Enhanced OpenAPI schema dictionary</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.openapi.export_openapi">
+<span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">export_openapi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FastAPI</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_examples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_python_metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_transformers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/openapi.html#export_openapi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.openapi.export_openapi" title="Link to this definition"></a></dt>
+<dd><p>Export enhanced OpenAPI schema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>app</strong> – FastAPI application</p></li>
+<li><p><strong>include_examples</strong> – Include example requests/responses</p></li>
+<li><p><strong>include_python_metadata</strong> – Include x-python-* extensions</p></li>
+<li><p><strong>include_transformers</strong> – Include transformation metadata</p></li>
+<li><p><strong>output_file</strong> – Optional file path to write JSON output</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Enhanced OpenAPI schema dictionary</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">qh.openapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">export_openapi</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">([</span><span class="n">my_func</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spec</span> <span class="o">=</span> <span class="n">export_openapi</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">include_examples</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.openapi.extract_function_signature">
+<span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">extract_function_signature</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/openapi.html#extract_function_signature"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.openapi.extract_function_signature" title="Link to this definition"></a></dt>
+<dd><p>Extract detailed signature information from a function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>name: function name</p></li>
+<li><p>module: module path</p></li>
+<li><p>parameters: list of parameter info</p></li>
+<li><p>return_type: return type annotation</p></li>
+<li><p>docstring: function docstring</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary with signature metadata</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.openapi.generate_examples_for_function">
+<span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">generate_examples_for_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/openapi.html#generate_examples_for_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.openapi.generate_examples_for_function" title="Link to this definition"></a></dt>
+<dd><p>Generate example requests/responses for a function.</p>
+<p>Uses type hints to generate sensible example values.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.openapi.get_python_type_name">
+<span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">get_python_type_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_hint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/qh/openapi.html#get_python_type_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.openapi.get_python_type_name" title="Link to this definition"></a></dt>
+<dd><p>Get a string representation of a Python type.</p>
+<p class="rubric">Examples</p>
+<p>int → “int”
+str → “str”
+list[int] → “list[int]”
+Optional[str] → “Optional[str]”</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="jsclient.html" class="btn btn-neutral float-left" title="qh.jsclient" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="rules.html" class="btn btn-neutral float-right" title="qh.rules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

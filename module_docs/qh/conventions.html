@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qh.conventions &mdash; qh 0.0.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f7cdbf68"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="qh.core" href="core.html" />
+    <link rel="prev" title="qh.config" href="config.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            qh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../qh.html">qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="app.html">qh.app</a></li>
+<li class="toctree-l1"><a class="reference internal" href="async_endpoints.html">qh.async_endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="async_tasks.html">qh.async_tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="au_integration.html">qh.au_integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="base.html">qh.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">qh.client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="config.html">qh.config</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">qh.conventions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qh.conventions.ParsedFunctionName"><code class="docutils literal notranslate"><span class="pre">ParsedFunctionName</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.conventions.apply_conventions_to_funcs"><code class="docutils literal notranslate"><span class="pre">apply_conventions_to_funcs()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.conventions.get_id_params"><code class="docutils literal notranslate"><span class="pre">get_id_params()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.conventions.infer_http_method"><code class="docutils literal notranslate"><span class="pre">infer_http_method()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.conventions.infer_path_from_function"><code class="docutils literal notranslate"><span class="pre">infer_path_from_function()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.conventions.infer_route_config"><code class="docutils literal notranslate"><span class="pre">infer_route_config()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.conventions.merge_convention_config"><code class="docutils literal notranslate"><span class="pre">merge_convention_config()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.conventions.parse_function_name"><code class="docutils literal notranslate"><span class="pre">parse_function_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.conventions.pluralize"><code class="docutils literal notranslate"><span class="pre">pluralize()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.conventions.singularize"><code class="docutils literal notranslate"><span class="pre">singularize()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="core.html">qh.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="endpoint.html">qh.endpoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/async_example.html">qh.examples.async_example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/simple.html">qh.examples.simple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jsclient.html">qh.jsclient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="openapi.html">qh.openapi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rules.html">qh.rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap.html">qh.scrap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/simple_fastapi_dispatch.html">qh.scrap.simple_fastapi_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/store_dispatch_1.html">qh.scrap.store_dispatch_1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/store_dispatch_2.html">qh.scrap.store_dispatch_2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scrap/test_store_dispatch.html">qh.scrap.test_store_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stores_qh.html">qh.stores_qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="testing.html">qh.testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="types.html">qh.types</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">qh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">qh.conventions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/qh/conventions.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-qh.conventions">
+<span id="qh-conventions"></span><h1>qh.conventions<a class="headerlink" href="#module-qh.conventions" title="Link to this heading"></a></h1>
+<p>Convention-based routing for qh.</p>
+<p>Automatically infer HTTP paths and methods from function names and signatures.</p>
+<p>Supports patterns like:
+- get_user(user_id: str) → GET /users/{user_id}
+- list_users(limit: int = 100) → GET /users?limit=100
+- create_user(user: User) → POST /users
+- update_user(user_id: str, user: User) → PUT /users/{user_id}
+- delete_user(user_id: str) → DELETE /users/{user_id}</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="qh.conventions.ParsedFunctionName">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.conventions.</span></span><span class="sig-name descname"><span class="pre">ParsedFunctionName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">verb</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resource</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_plural</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_collection_operation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/qh/conventions.html#ParsedFunctionName"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.conventions.ParsedFunctionName" title="Link to this definition"></a></dt>
+<dd><p>Result of parsing a function name.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.conventions.apply_conventions_to_funcs">
+<span class="sig-prename descclassname"><span class="pre">qh.conventions.</span></span><span class="sig-name descname"><span class="pre">apply_conventions_to_funcs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">funcs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_conventions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_plurals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/conventions.html#apply_conventions_to_funcs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.conventions.apply_conventions_to_funcs" title="Link to this definition"></a></dt>
+<dd><p>Apply conventions to a list of functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>funcs</strong> – List of functions</p></li>
+<li><p><strong>use_conventions</strong> – Whether to use conventions</p></li>
+<li><p><strong>base_path</strong> – Base path to prepend to all routes</p></li>
+<li><p><strong>use_plurals</strong> – Whether to use plural resource names</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dict mapping functions to their inferred configurations</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.conventions.get_id_params">
+<span class="sig-prename descclassname"><span class="pre">qh.conventions.</span></span><span class="sig-name descname"><span class="pre">get_id_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/conventions.html#get_id_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.conventions.get_id_params" title="Link to this definition"></a></dt>
+<dd><p>Extract parameters that look like IDs from function signature.</p>
+<p>ID parameters typically:
+- End with ‘_id’
+- Are named ‘id’
+- Are the first parameter (for item operations)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>func</strong> – Function to analyze</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of parameter names that are likely IDs</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.conventions.infer_http_method">
+<span class="sig-prename descclassname"><span class="pre">qh.conventions.</span></span><span class="sig-name descname"><span class="pre">infer_http_method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parsed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#qh.conventions.ParsedFunctionName" title="qh.conventions.ParsedFunctionName"><span class="pre">ParsedFunctionName</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/qh/conventions.html#infer_http_method"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.conventions.infer_http_method" title="Link to this definition"></a></dt>
+<dd><p>Infer HTTP method from function name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func_name</strong> – Function name</p></li>
+<li><p><strong>parsed</strong> – Optional pre-parsed function name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>HTTP method (‘GET’, ‘POST’, ‘PUT’, ‘PATCH’, ‘DELETE’)</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">infer_http_method</span><span class="p">(</span><span class="s1">&#39;get_user&#39;</span><span class="p">)</span>
+<span class="go">&#39;GET&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">infer_http_method</span><span class="p">(</span><span class="s1">&#39;create_user&#39;</span><span class="p">)</span>
+<span class="go">&#39;POST&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">infer_http_method</span><span class="p">(</span><span class="s1">&#39;update_user&#39;</span><span class="p">)</span>
+<span class="go">&#39;PUT&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">infer_http_method</span><span class="p">(</span><span class="s1">&#39;delete_user&#39;</span><span class="p">)</span>
+<span class="go">&#39;DELETE&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.conventions.infer_path_from_function">
+<span class="sig-prename descclassname"><span class="pre">qh.conventions.</span></span><span class="sig-name descname"><span class="pre">infer_path_from_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_plurals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/qh/conventions.html#infer_path_from_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.conventions.infer_path_from_function" title="Link to this definition"></a></dt>
+<dd><p>Infer RESTful path from function name and signature.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> – Function to analyze</p></li>
+<li><p><strong>use_plurals</strong> – Whether to use plural resource names for collections</p></li>
+<li><p><strong>base_path</strong> – Base path to prepend</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Inferred path</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">get_user</span><span class="p">(</span><span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">infer_path_from_function</span><span class="p">(</span><span class="n">get_user</span><span class="p">)</span>
+<span class="go">&#39;/users/{user_id}&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">list_users</span><span class="p">(</span><span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">infer_path_from_function</span><span class="p">(</span><span class="n">list_users</span><span class="p">)</span>
+<span class="go">&#39;/users&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">create_user</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">infer_path_from_function</span><span class="p">(</span><span class="n">create_user</span><span class="p">)</span>
+<span class="go">&#39;/users&#39;</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">update_user</span><span class="p">(</span><span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span> <span class="k">pass</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">infer_path_from_function</span><span class="p">(</span><span class="n">update_user</span><span class="p">)</span>
+<span class="go">&#39;/users/{user_id}&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.conventions.infer_route_config">
+<span class="sig-prename descclassname"><span class="pre">qh.conventions.</span></span><span class="sig-name descname"><span class="pre">infer_route_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_conventions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_plurals</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/conventions.html#infer_route_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.conventions.infer_route_config" title="Link to this definition"></a></dt>
+<dd><p>Infer complete route configuration from function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> – Function to analyze</p></li>
+<li><p><strong>use_conventions</strong> – Whether to use conventions (if False, returns empty dict)</p></li>
+<li><p><strong>base_path</strong> – Base path to prepend</p></li>
+<li><p><strong>use_plurals</strong> – Whether to use plural resource names</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Route configuration dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.conventions.merge_convention_config">
+<span class="sig-prename descclassname"><span class="pre">qh.conventions.</span></span><span class="sig-name descname"><span class="pre">merge_convention_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">convention_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">explicit_config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/conventions.html#merge_convention_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.conventions.merge_convention_config" title="Link to this definition"></a></dt>
+<dd><p>Merge convention-based config with explicit config.</p>
+<p>Explicit config takes precedence.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>convention_config</strong> – Config inferred from conventions</p></li>
+<li><p><strong>explicit_config</strong> – User-provided config</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Merged config</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.conventions.parse_function_name">
+<span class="sig-prename descclassname"><span class="pre">qh.conventions.</span></span><span class="sig-name descname"><span class="pre">parse_function_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#qh.conventions.ParsedFunctionName" title="qh.conventions.ParsedFunctionName"><span class="pre">ParsedFunctionName</span></a></span></span><a class="reference internal" href="../../_modules/qh/conventions.html#parse_function_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.conventions.parse_function_name" title="Link to this definition"></a></dt>
+<dd><p>Parse a function name to extract verb and resource.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_function_name</span><span class="p">(</span><span class="s1">&#39;get_user&#39;</span><span class="p">)</span>
+<span class="go">ParsedFunctionName(verb=&#39;get&#39;, resource=&#39;user&#39;, is_plural=False, is_collection_operation=False)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_function_name</span><span class="p">(</span><span class="s1">&#39;list_users&#39;</span><span class="p">)</span>
+<span class="go">ParsedFunctionName(verb=&#39;list&#39;, resource=&#39;users&#39;, is_plural=True, is_collection_operation=True)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_function_name</span><span class="p">(</span><span class="s1">&#39;create_order_item&#39;</span><span class="p">)</span>
+<span class="go">ParsedFunctionName(verb=&#39;create&#39;, resource=&#39;order_item&#39;, is_plural=True, is_collection_operation=True)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.conventions.pluralize">
+<span class="sig-prename descclassname"><span class="pre">qh.conventions.</span></span><span class="sig-name descname"><span class="pre">pluralize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">word</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/qh/conventions.html#pluralize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.conventions.pluralize" title="Link to this definition"></a></dt>
+<dd><p>Simple pluralization.</p>
+<p>More sophisticated rules can be added later.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.conventions.singularize">
+<span class="sig-prename descclassname"><span class="pre">qh.conventions.</span></span><span class="sig-name descname"><span class="pre">singularize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">word</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../_modules/qh/conventions.html#singularize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.conventions.singularize" title="Link to this definition"></a></dt>
+<dd><p>Simple singularization (just removes trailing ‘s’ for now).</p>
+<p>More sophisticated rules can be added later.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="config.html" class="btn btn-neutral float-left" title="qh.config" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="core.html" class="btn btn-neutral float-right" title="qh.core" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

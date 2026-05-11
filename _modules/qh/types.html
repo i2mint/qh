@@ -1,0 +1,505 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qh.types &mdash; qh 0.0.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=f7cdbf68"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            qh
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh.html">qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/app.html">qh.app</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/async_endpoints.html">qh.async_endpoints</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/async_tasks.html">qh.async_tasks</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/au_integration.html">qh.au_integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/base.html">qh.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/client.html">qh.client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/config.html">qh.config</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/conventions.html">qh.conventions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/core.html">qh.core</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/endpoint.html">qh.endpoint</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/examples/async_example.html">qh.examples.async_example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/examples/simple.html">qh.examples.simple</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/jsclient.html">qh.jsclient</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/openapi.html">qh.openapi</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/rules.html">qh.rules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap.html">qh.scrap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/simple_fastapi_dispatch.html">qh.scrap.simple_fastapi_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/store_dispatch_1.html">qh.scrap.store_dispatch_1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/store_dispatch_2.html">qh.scrap.store_dispatch_2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/scrap/test_store_dispatch.html">qh.scrap.test_store_dispatch</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/stores_qh.html">qh.stores_qh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/testing.html">qh.testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/qh/types.html">qh.types</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">qh</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">qh.types</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for qh.types</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Type registry for qh - automatic serialization/deserialization for custom types.</span>
+
+<span class="sd">Supports:</span>
+<span class="sd">- NumPy arrays and dtypes</span>
+<span class="sd">- Pandas DataFrames and Series</span>
+<span class="sd">- Custom user types</span>
+<span class="sd">- Pydantic models</span>
+
+<span class="sd">The type registry maps Python types to HTTP representations and provides</span>
+<span class="sd">automatic conversion functions (ingress/egress transformations).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">get_origin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">qh.rules</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransformSpec</span><span class="p">,</span> <span class="n">HttpLocation</span>
+
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="TypeHandler">
+<a class="viewcode-back" href="../../module_docs/qh/types.html#qh.types.TypeHandler">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TypeHandler</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Handler for serializing/deserializing a specific type.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        python_type: The Python type this handler manages</span>
+<span class="sd">        to_json: Function to serialize Python object to JSON-compatible format</span>
+<span class="sd">        from_json: Function to deserialize JSON to Python object</span>
+<span class="sd">        http_location: Where in HTTP request/response this appears</span>
+<span class="sd">        content_type: Optional HTTP content type for binary data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">python_type</span><span class="p">:</span> <span class="n">Type</span>
+    <span class="n">to_json</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span>
+    <span class="n">from_json</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]</span>
+    <span class="n">http_location</span><span class="p">:</span> <span class="n">HttpLocation</span> <span class="o">=</span> <span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span>
+    <span class="n">content_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="TypeHandler.to_transform_spec">
+<a class="viewcode-back" href="../../module_docs/qh/types.html#qh.types.TypeHandler.to_transform_spec">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_transform_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TransformSpec</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert this handler to a TransformSpec.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">TransformSpec</span><span class="p">(</span>
+            <span class="n">http_location</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">http_location</span><span class="p">,</span>
+            <span class="n">ingress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">from_json</span><span class="p">,</span>
+            <span class="n">egress</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">to_json</span><span class="p">,</span>
+        <span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="TypeRegistry">
+<a class="viewcode-back" href="../../module_docs/qh/types.html#qh.types.TypeRegistry">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">TypeRegistry</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Registry for type handlers.</span>
+
+<span class="sd">    Manages conversion between Python types and HTTP representations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">TypeHandler</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_builtin_handlers</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_builtin_handlers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize handlers for Python builtins.&quot;&quot;&quot;</span>
+        <span class="c1"># Builtins pass through (FastAPI handles them)</span>
+        <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+                <span class="n">typ</span><span class="p">,</span>
+                <span class="n">to_json</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+                <span class="n">from_json</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="TypeRegistry.register">
+<a class="viewcode-back" href="../../module_docs/qh/types.html#qh.types.TypeRegistry.register">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">python_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">to_json</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
+        <span class="n">from_json</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">T</span><span class="p">],</span>
+        <span class="n">http_location</span><span class="p">:</span> <span class="n">HttpLocation</span> <span class="o">=</span> <span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span><span class="p">,</span>
+        <span class="n">content_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Register a type handler.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            python_type: The Python type</span>
+<span class="sd">            to_json: Function to serialize to JSON-compatible format</span>
+<span class="sd">            from_json: Function to deserialize from JSON</span>
+<span class="sd">            http_location: Where this appears in HTTP</span>
+<span class="sd">            content_type: Optional content type for binary data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="n">TypeHandler</span><span class="p">(</span>
+            <span class="n">python_type</span><span class="o">=</span><span class="n">python_type</span><span class="p">,</span>
+            <span class="n">to_json</span><span class="o">=</span><span class="n">to_json</span><span class="p">,</span>
+            <span class="n">from_json</span><span class="o">=</span><span class="n">from_json</span><span class="p">,</span>
+            <span class="n">http_location</span><span class="o">=</span><span class="n">http_location</span><span class="p">,</span>
+            <span class="n">content_type</span><span class="o">=</span><span class="n">content_type</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="p">[</span><span class="n">python_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">handler</span></div>
+
+
+<div class="viewcode-block" id="TypeRegistry.get_handler">
+<a class="viewcode-back" href="../../module_docs/qh/types.html#qh.types.TypeRegistry.get_handler">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">python_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TypeHandler</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get handler for a type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            python_type: The type to look up</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            TypeHandler if registered, None otherwise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Exact match first</span>
+        <span class="k">if</span> <span class="n">python_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="p">[</span><span class="n">python_type</span><span class="p">]</span>
+
+        <span class="c1"># Check type hierarchy</span>
+        <span class="k">for</span> <span class="n">registered_type</span><span class="p">,</span> <span class="n">handler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">python_type</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">python_type</span><span class="p">,</span> <span class="n">registered_type</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">handler</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="c1"># Not a class</span>
+                <span class="k">pass</span>
+
+        <span class="c1"># Check generic types</span>
+        <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">python_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">origin</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="p">[</span><span class="n">origin</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="TypeRegistry.get_transform_spec">
+<a class="viewcode-back" href="../../module_docs/qh/types.html#qh.types.TypeRegistry.get_transform_spec">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_transform_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">python_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TransformSpec</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get TransformSpec for a type.&quot;&quot;&quot;</span>
+        <span class="n">handler</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_handler</span><span class="p">(</span><span class="n">python_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">handler</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">handler</span><span class="o">.</span><span class="n">to_transform_spec</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="TypeRegistry.unregister">
+<a class="viewcode-back" href="../../module_docs/qh/types.html#qh.types.TypeRegistry.unregister">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unregister</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">python_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Unregister a type handler.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">python_type</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="c1"># Global type registry</span>
+<span class="n">_global_registry</span> <span class="o">=</span> <span class="n">TypeRegistry</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="register_type">
+<a class="viewcode-back" href="../../module_docs/qh/types.html#qh.types.register_type">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_type</span><span class="p">(</span>
+    <span class="n">python_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">to_json</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">from_json</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">T</span><span class="p">],</span>
+    <span class="n">http_location</span><span class="p">:</span> <span class="n">HttpLocation</span> <span class="o">=</span> <span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span><span class="p">,</span>
+    <span class="n">content_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Register a type in the global registry.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        python_type: The Python type</span>
+<span class="sd">        to_json: Function to serialize to JSON-compatible format</span>
+<span class="sd">        from_json: Function to deserialize from JSON</span>
+<span class="sd">        http_location: Where this appears in HTTP</span>
+<span class="sd">        content_type: Optional content type for binary data</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np  # doctest: +SKIP</span>
+<span class="sd">        &gt;&gt;&gt; register_type(  # doctest: +SKIP</span>
+<span class="sd">        ...     np.ndarray,</span>
+<span class="sd">        ...     to_json=lambda arr: arr.tolist(),</span>
+<span class="sd">        ...     from_json=lambda lst: np.array(lst)</span>
+<span class="sd">        ... )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_global_registry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span>
+        <span class="n">python_type</span><span class="p">,</span>
+        <span class="n">to_json</span><span class="o">=</span><span class="n">to_json</span><span class="p">,</span>
+        <span class="n">from_json</span><span class="o">=</span><span class="n">from_json</span><span class="p">,</span>
+        <span class="n">http_location</span><span class="o">=</span><span class="n">http_location</span><span class="p">,</span>
+        <span class="n">content_type</span><span class="o">=</span><span class="n">content_type</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_type_handler">
+<a class="viewcode-back" href="../../module_docs/qh/types.html#qh.types.get_type_handler">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_type_handler</span><span class="p">(</span><span class="n">python_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TypeHandler</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get handler for a type from global registry.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_global_registry</span><span class="o">.</span><span class="n">get_handler</span><span class="p">(</span><span class="n">python_type</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_transform_spec_for_type">
+<a class="viewcode-back" href="../../module_docs/qh/types.html#qh.types.get_transform_spec_for_type">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_transform_spec_for_type</span><span class="p">(</span><span class="n">python_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TransformSpec</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get TransformSpec for a type from global registry.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_global_registry</span><span class="o">.</span><span class="n">get_transform_spec</span><span class="p">(</span><span class="n">python_type</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># NumPy support (if available)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">numpy_array_to_json</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert NumPy array to JSON-compatible format.&quot;&quot;&quot;</span>
+        <span class="c1"># Handle different dtypes</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">arr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">arr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">arr</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">arr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Generic fallback</span>
+            <span class="k">return</span> <span class="n">arr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">numpy_array_from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert JSON data to NumPy array.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># Register NumPy array</span>
+    <span class="n">register_type</span><span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">to_json</span><span class="o">=</span><span class="n">numpy_array_to_json</span><span class="p">,</span>
+        <span class="n">from_json</span><span class="o">=</span><span class="n">numpy_array_from_json</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c1"># NumPy not available</span>
+    <span class="k">pass</span>
+
+
+<span class="c1"># Pandas support (if available)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">dataframe_to_json</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert DataFrame to JSON-compatible format.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">dataframe_from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert JSON data to DataFrame.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot convert </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2"> to DataFrame&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">series_to_json</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert Series to JSON-compatible format.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">series</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">series_from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert JSON data to Series.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c1"># Register Pandas types</span>
+    <span class="n">register_type</span><span class="p">(</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">to_json</span><span class="o">=</span><span class="n">dataframe_to_json</span><span class="p">,</span>
+        <span class="n">from_json</span><span class="o">=</span><span class="n">dataframe_from_json</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">register_type</span><span class="p">(</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+        <span class="n">to_json</span><span class="o">=</span><span class="n">series_to_json</span><span class="p">,</span>
+        <span class="n">from_json</span><span class="o">=</span><span class="n">series_from_json</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c1"># Pandas not available</span>
+    <span class="k">pass</span>
+
+
+<span class="c1"># Decorator for easy registration</span>
+<div class="viewcode-block" id="register_json_type">
+<a class="viewcode-back" href="../../module_docs/qh/types.html#qh.types.register_json_type">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">register_json_type</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">to_json</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">from_json</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">T</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator to register a custom type.</span>
+
+<span class="sd">    Can be used as:</span>
+<span class="sd">    1. Class decorator (auto-detect to_dict/from_dict methods)</span>
+<span class="sd">    2. With explicit serializers</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; @register_json_type</span>
+<span class="sd">        ... class Point:</span>
+<span class="sd">        ...     def __init__(self, x, y):</span>
+<span class="sd">        ...         self.x = x</span>
+<span class="sd">        ...         self.y = y</span>
+<span class="sd">        ...     def to_dict(self):</span>
+<span class="sd">        ...         return {&#39;x&#39;: self.x, &#39;y&#39;: self.y}</span>
+<span class="sd">        ...     @classmethod</span>
+<span class="sd">        ...     def from_dict(cls, data):</span>
+<span class="sd">        ...         return cls(data[&#39;x&#39;], data[&#39;y&#39;])</span>
+
+<span class="sd">        &gt;&gt;&gt; @register_json_type(</span>
+<span class="sd">        ...     to_json=lambda p: [p.x, p.y],</span>
+<span class="sd">        ...     from_json=lambda data: Point(data[0], data[1])</span>
+<span class="sd">        ... )</span>
+<span class="sd">        ... class Point:</span>
+<span class="sd">        ...     def __init__(self, x, y):</span>
+<span class="sd">        ...         self.x = x</span>
+<span class="sd">        ...         self.y = y</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+        <span class="c1"># Determine serializers</span>
+        <span class="n">_to_json</span> <span class="o">=</span> <span class="n">to_json</span>
+        <span class="n">_from_json</span> <span class="o">=</span> <span class="n">from_json</span>
+
+        <span class="c1"># Auto-detect serialization methods if not provided</span>
+        <span class="k">if</span> <span class="n">_to_json</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">,</span> <span class="s1">&#39;to_dict&#39;</span><span class="p">):</span>
+                <span class="n">_to_json</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">obj</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">,</span> <span class="s1">&#39;__dict__&#39;</span><span class="p">):</span>
+                <span class="n">_to_json</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">obj</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot auto-detect serialization for </span><span class="si">{</span><span class="n">cls_to_register</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">_from_json</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">,</span> <span class="s1">&#39;from_dict&#39;</span><span class="p">):</span>
+                <span class="n">_from_json</span> <span class="o">=</span> <span class="n">cls_to_register</span><span class="o">.</span><span class="n">from_dict</span>
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">,</span> <span class="s1">&#39;__init__&#39;</span><span class="p">):</span>
+                <span class="c1"># Try to call constructor with dict unpacking</span>
+                <span class="n">_from_json</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">:</span> <span class="n">cls_to_register</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot auto-detect deserialization for </span><span class="si">{</span><span class="n">cls_to_register</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Register the type</span>
+        <span class="n">register_type</span><span class="p">(</span>
+            <span class="n">cls_to_register</span><span class="p">,</span>
+            <span class="n">to_json</span><span class="o">=</span><span class="n">_to_json</span><span class="p">,</span>
+            <span class="n">from_json</span><span class="o">=</span><span class="n">_from_json</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cls_to_register</span>
+
+    <span class="c1"># Support both @register_json_type and @register_json_type(...)</span>
+    <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Called as @register_json_type (no parens) - cls is the class being decorated</span>
+        <span class="k">return</span> <span class="n">decorator</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Called as @register_json_type(...) (with keyword params)</span>
+        <span class="c1"># Return the decorator to be applied</span>
+        <span class="k">return</span> <span class="n">decorator</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
