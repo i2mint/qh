@@ -41,7 +41,15 @@ from qh.async_tasks import (
 )
 
 # Testing utilities
-from qh.testing import AppRunner, run_app, test_app, serve_app, quick_test
+from qh.testing import (
+    AppRunner,
+    run_app,
+    test_app,
+    serve_app,
+    quick_test,
+    service_running,
+    ServiceInfo,
+)
 
 # au integration (optional)
 try:
@@ -125,4 +133,6 @@ __all__ = [
     'test_app',
     'serve_app',
     'quick_test',
+    'service_running',
+    'ServiceInfo',
 ] + __all_au__
