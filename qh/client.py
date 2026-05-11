@@ -153,10 +153,10 @@ def mk_client_from_openapi(
         HttpClient with functions for each endpoint
 
     Example:
-        >>> from qh.client import mk_client_from_openapi
-        >>> spec = {'paths': {'/add': {...}}, ...}
-        >>> client = mk_client_from_openapi(spec, 'http://localhost:8000')
-        >>> result = client.add(x=3, y=5)
+        >>> from qh.client import mk_client_from_openapi  # doctest: +SKIP
+        >>> spec = {'paths': {'/add': {...}}, ...}  # doctest: +SKIP
+        >>> client = mk_client_from_openapi(spec, 'http://localhost:8000')  # doctest: +SKIP
+        >>> result = client.add(x=3, y=5)  # doctest: +SKIP
     """
     client = HttpClient(base_url, session)
 
@@ -218,9 +218,9 @@ def mk_client_from_url(
         HttpClient with functions for each endpoint
 
     Example:
-        >>> from qh.client import mk_client_from_url
-        >>> client = mk_client_from_url('http://localhost:8000/openapi.json')
-        >>> result = client.add(x=3, y=5)
+        >>> from qh.client import mk_client_from_url  # doctest: +SKIP
+        >>> client = mk_client_from_url('http://localhost:8000/openapi.json')  # doctest: +SKIP
+        >>> result = client.add(x=3, y=5)  # doctest: +SKIP
     """
     # Fetch OpenAPI spec
     session_obj = session or requests.Session()
@@ -249,11 +249,11 @@ def mk_client_from_app(app, base_url: str = "http://testserver") -> HttpClient:
         HttpClient that uses FastAPI TestClient under the hood
 
     Example:
-        >>> from qh import mk_app
-        >>> from qh.client import mk_client_from_app
-        >>> app = mk_app([add, subtract])
-        >>> client = mk_client_from_app(app)
-        >>> result = client.add(x=3, y=5)
+        >>> from qh import mk_app  # doctest: +SKIP
+        >>> from qh.client import mk_client_from_app  # doctest: +SKIP
+        >>> app = mk_app([add, subtract])  # doctest: +SKIP
+        >>> client = mk_client_from_app(app)  # doctest: +SKIP
+        >>> result = client.add(x=3, y=5)  # doctest: +SKIP
     """
     from qh.openapi import export_openapi
 

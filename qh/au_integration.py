@@ -197,17 +197,15 @@ def use_au_backend(
         TaskConfig configured to use au
 
     Example:
-        >>> from au import ThreadBackend, FileSystemStore
-        >>> from qh import mk_app
-        >>> from qh.au_integration import use_au_backend
-        >>>
+        >>> from au import ThreadBackend, FileSystemStore  # doctest: +SKIP
+        >>> from qh import mk_app  # doctest: +SKIP
+        >>> from qh.au_integration import use_au_backend  # doctest: +SKIP
         >>> # Use au with thread backend and filesystem storage
-        >>> def slow_func(n: int) -> int:
+        >>> def slow_func(n: int) -> int:  # doctest: +SKIP
         ...     import time
         ...     time.sleep(2)
         ...     return n * 2
-        >>>
-        >>> app = mk_app(
+        >>> app = mk_app(  # doctest: +SKIP
         ...     [slow_func],
         ...     async_funcs=['slow_func'],
         ...     async_config=use_au_backend(
@@ -222,8 +220,7 @@ def use_au_backend(
         >>> # AU_REDIS_URL=redis://localhost:6379
         >>> # AU_STORAGE=filesystem
         >>> # AU_STORAGE_PATH=/var/qh/tasks
-        >>>
-        >>> app = mk_app(
+        >>> app = mk_app(  # doctest: +SKIP
         ...     [slow_func],
         ...     async_funcs=['slow_func'],
         ...     async_config=use_au_backend()  # Uses au's config

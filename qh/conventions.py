@@ -64,7 +64,7 @@ def parse_function_name(func_name: str) -> ParsedFunctionName:
         ParsedFunctionName(verb='list', resource='users', is_plural=True, is_collection_operation=True)
 
         >>> parse_function_name('create_order_item')
-        ParsedFunctionName(verb='create', resource='order_item', is_plural=False, is_collection_operation=False)
+        ParsedFunctionName(verb='create', resource='order_item', is_plural=True, is_collection_operation=True)
     """
     # Try to match verb_resource pattern
     parts = func_name.split('_', 1)

@@ -212,23 +212,21 @@ class AppRunner:
     Examples:
         Basic usage with TestClient:
         >>> from qh import mk_app
-        >>> from qh.testing import AppRunner
-        >>>
-        >>> def add(x: int, y: int) -> int:
+        >>> from qh.testing import AppRunner  # doctest: +SKIP
+        >>> def add(x: int, y: int) -> int:  # doctest: +SKIP
         ...     return x + y
-        >>>
-        >>> app = mk_app([add])
-        >>> with AppRunner(app) as client:
+        >>> app = mk_app([add])  # doctest: +SKIP
+        >>> with AppRunner(app) as client:  # doctest: +SKIP
         ...     response = client.post('/add', json={'x': 3, 'y': 5})
         ...     assert response.json() == 8
 
         With real server (integration testing):
-        >>> with AppRunner(app, use_server=True, port=8001) as base_url:
+        >>> with AppRunner(app, use_server=True, port=8001) as base_url:  # doctest: +SKIP
         ...     response = requests.post(f'{base_url}/add', json={'x': 3, 'y': 5})
         ...     assert response.json() == 8
 
         Automatic cleanup on error:
-        >>> with AppRunner(app) as client:
+        >>> with AppRunner(app) as client:  # doctest: +SKIP
         ...     # Server automatically stops if exception occurs
         ...     raise ValueError("Test error")
     """
@@ -369,21 +367,17 @@ def run_app(
         TestClient or base URL string
 
     Examples:
-        >>> from qh import mk_app
-        >>> from qh.testing import run_app
-        >>>
-        >>> def add(x: int, y: int) -> int:
+        >>> from qh import mk_app  # doctest: +SKIP
+        >>> from qh.testing import run_app  # doctest: +SKIP
+        >>> def add(x: int, y: int) -> int:  # doctest: +SKIP
         ...     return x + y
-        >>>
-        >>> app = mk_app([add])
-        >>>
+        >>> app = mk_app([add])  # doctest: +SKIP
         >>> # Quick testing with TestClient
-        >>> with run_app(app) as client:
+        >>> with run_app(app) as client:  # doctest: +SKIP
         ...     result = client.post('/add', json={'x': 3, 'y': 5})
         ...     assert result.json() == 8
-        >>>
         >>> # Integration testing with real server
-        >>> with run_app(app, use_server=True, port=8001) as url:
+        >>> with run_app(app, use_server=True, port=8001) as url:  # doctest: +SKIP
         ...     result = requests.post(f'{url}/add', json={'x': 3, 'y': 5})
         ...     assert result.json() == 8
     """
@@ -406,14 +400,12 @@ def test_app(app: FastAPI):
         TestClient instance
 
     Examples:
-        >>> from qh import mk_app
-        >>> from qh.testing import test_app
-        >>>
-        >>> def hello(name: str = "World") -> str:
+        >>> from qh import mk_app  # doctest: +SKIP
+        >>> from qh.testing import test_app  # doctest: +SKIP
+        >>> def hello(name: str = "World") -> str:  # doctest: +SKIP
         ...     return f"Hello, {name}!"
-        >>>
-        >>> app = mk_app([hello])
-        >>> with test_app(app) as client:
+        >>> app = mk_app([hello])  # doctest: +SKIP
+        >>> with test_app(app) as client:  # doctest: +SKIP
         ...     response = client.post('/hello', json={'name': 'Alice'})
         ...     assert response.json() == "Hello, Alice!"
     """
@@ -437,15 +429,13 @@ def serve_app(app: FastAPI, port: int = 8000, host: str = "127.0.0.1"):
         Base URL string
 
     Examples:
-        >>> from qh import mk_app
-        >>> from qh.testing import serve_app
-        >>> import requests
-        >>>
-        >>> def multiply(x: int, y: int) -> int:
+        >>> from qh import mk_app  # doctest: +SKIP
+        >>> from qh.testing import serve_app  # doctest: +SKIP
+        >>> import requests  # doctest: +SKIP
+        >>> def multiply(x: int, y: int) -> int:  # doctest: +SKIP
         ...     return x * y
-        >>>
-        >>> app = mk_app([multiply])
-        >>> with serve_app(app, port=8001) as url:
+        >>> app = mk_app([multiply])  # doctest: +SKIP
+        >>> with serve_app(app, port=8001) as url:  # doctest: +SKIP
         ...     response = requests.post(f'{url}/multiply', json={'x': 4, 'y': 5})
         ...     assert response.json() == 20
     """

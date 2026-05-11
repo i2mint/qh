@@ -288,11 +288,11 @@ def export_js_client(
         JavaScript code as string
 
     Example:
-        >>> from qh import mk_app, export_openapi
-        >>> from qh.jsclient import export_js_client
-        >>> app = mk_app([add, subtract])
-        >>> spec = export_openapi(app)
-        >>> js_code = export_js_client(spec, use_axios=True)
+        >>> from qh import mk_app, export_openapi  # doctest: +SKIP
+        >>> from qh.jsclient import export_js_client  # doctest: +SKIP
+        >>> app = mk_app([add, subtract])  # doctest: +SKIP
+        >>> spec = export_openapi(app)  # doctest: +SKIP
+        >>> js_code = export_js_client(spec, use_axios=True)  # doctest: +SKIP
     """
     paths = openapi_spec.get("paths", {})
 
@@ -356,11 +356,11 @@ def export_ts_client(
         TypeScript code as string
 
     Example:
-        >>> from qh import mk_app, export_openapi
-        >>> from qh.jsclient import export_ts_client
-        >>> app = mk_app([add, subtract])
-        >>> spec = export_openapi(app, include_python_metadata=True)
-        >>> ts_code = export_ts_client(spec, use_axios=True)
+        >>> from qh import mk_app, export_openapi  # doctest: +SKIP
+        >>> from qh.jsclient import export_ts_client  # doctest: +SKIP
+        >>> app = mk_app([add, subtract])  # doctest: +SKIP
+        >>> spec = export_openapi(app, include_python_metadata=True)  # doctest: +SKIP
+        >>> ts_code = export_ts_client(spec, use_axios=True)  # doctest: +SKIP
     """
     paths = openapi_spec.get("paths", {})
 

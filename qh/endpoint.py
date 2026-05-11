@@ -196,17 +196,22 @@ def make_endpoint(
 
     # Determine if we need egress transformation for output
     # For now, we'll use a simple JSON serializer
+    from qh.types import get_type_handler
+
     def default_egress(obj: Any) -> Any:
         """Default output transformation."""
         # Handle common types
         if isinstance(obj, (dict, list, str, int, float, bool, type(None))):
             return obj
+        # Consult the type registry (numpy arrays, pandas frames, user-registered types)
+        handler = get_type_handler(type(obj))
+        if handler is not None:
+            return handler.to_json(obj)
         # Try to convert to dict if it has __dict__
-        elif hasattr(obj, '__dict__'):
+        if hasattr(obj, '__dict__'):
             return obj.__dict__
         # Otherwise convert to string
-        else:
-            return str(obj)
+        return str(obj)
 
     async def endpoint(request: Request) -> Response:
         """FastAPI endpoint that wraps the original function."""

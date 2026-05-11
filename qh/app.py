@@ -100,8 +100,9 @@ def mk_app(
         ...     time.sleep(5)
         ...     return n * 2
         >>> app = mk_app([expensive_task], async_funcs=['expensive_task'])
+
         # Now: POST /expensive_task?async=true returns {"task_id": "..."}
-        #      GET /tasks/{task_id}/result returns the result when ready
+        # And: GET /tasks/{task_id}/result returns the result when ready
     """
     # Normalize input formats
     func_configs = normalize_funcs_input(funcs)

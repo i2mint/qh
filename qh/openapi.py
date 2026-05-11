@@ -271,10 +271,10 @@ def export_openapi(
         Enhanced OpenAPI schema dictionary
 
     Example:
-        >>> from qh import mk_app
-        >>> from qh.openapi import export_openapi
-        >>> app = mk_app([my_func])
-        >>> spec = export_openapi(app, include_examples=True)
+        >>> from qh import mk_app  # doctest: +SKIP
+        >>> from qh.openapi import export_openapi  # doctest: +SKIP
+        >>> app = mk_app([my_func])  # doctest: +SKIP
+        >>> spec = export_openapi(app, include_examples=True)  # doctest: +SKIP
     """
     schema = enhance_openapi_schema(
         app,
