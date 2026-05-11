@@ -490,6 +490,11 @@ def quick_test(func, **kwargs):
         return response.json()
 
 
+# Tell pytest not to collect these as tests (they start with `test_` but are
+# context managers / helpers, not test functions).
+test_app.__test__ = False
+quick_test.__test__ = False
+
 # Aliases for convenience
 app_runner = run_app  # Alias
 test_client = test_app  # Alias
