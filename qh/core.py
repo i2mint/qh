@@ -9,11 +9,11 @@ import inspect
 
 # Default configuration
 default_configs = {
-    'http_method': 'post',
-    'path': lambda func: f"/{func.__name__}",
-    'input_mapper': None,  # To be set below
-    'output_mapper': None,  # To be set below
-    'error_handler': lambda exc: Response(content=str(exc), status_code=500),
+    "http_method": "post",
+    "path": lambda func: f"/{func.__name__}",
+    "input_mapper": None,  # To be set below
+    "output_mapper": None,  # To be set below
+    "error_handler": lambda exc: Response(content=str(exc), status_code=500),
 }
 
 
@@ -31,8 +31,8 @@ def default_output_mapper(output: Any) -> Response:
 
 
 # Set defaults in config
-default_configs['input_mapper'] = default_input_mapper
-default_configs['output_mapper'] = default_output_mapper
+default_configs["input_mapper"] = default_input_mapper
+default_configs["output_mapper"] = default_output_mapper
 
 
 def get_config_for_func(
@@ -67,7 +67,7 @@ def mk_wrapped_func(
             return result
         except Exception as e:
             config = get_config_for_func(func, default_configs, {})
-            return config['error_handler'](e)
+            return config["error_handler"](e)
 
     return route_handler
 
@@ -84,16 +84,16 @@ def mk_fastapi_app(
     func_configs = func_configs or {}
 
     # Normalize funcs to a dict
-    if not hasattr(funcs, 'items'):
+    if not hasattr(funcs, "items"):
         funcs = {func: {} for func in funcs}
 
     for func, specific_config in funcs.items():
         config = get_config_for_func(func, default_configs, func_configs)
-        handler = mk_wrapped_func(func, config['input_mapper'], config['output_mapper'])
+        handler = mk_wrapped_func(func, config["input_mapper"], config["output_mapper"])
         app.add_api_route(
-            config['path'](func),
+            config["path"](func),
             handler,
-            methods=[config['http_method'].upper()],
+            methods=[config["http_method"].upper()],
             description=func.__doc__,
         )
 
@@ -103,9 +103,9 @@ def mk_fastapi_app(
 # Example usage
 if __name__ == "__main__":
 
-    def greeter(greeting: str, name: str = 'world', n: int = 1) -> str:
+    def greeter(greeting: str, name: str = "world", n: int = 1) -> str:
         """Return a greeting repeated n times."""
-        return '\n'.join(f"{greeting}, {name}!" for _ in range(n))
+        return "\n".join(f"{greeting}, {name}!" for _ in range(n))
 
     app = mk_fastapi_app([greeter])
     # Run with: uvicorn qh.base:app --reload

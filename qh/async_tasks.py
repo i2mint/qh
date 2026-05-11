@@ -30,6 +30,7 @@ from enum import Enum
 
 class TaskStatus(str, Enum):
     """Standard task status values."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -40,6 +41,7 @@ class TaskStatus(str, Enum):
 @dataclass
 class TaskInfo:
     """Information about a task's state."""
+
     task_id: str
     status: TaskStatus
     created_at: float
@@ -53,12 +55,10 @@ class TaskInfo:
         """Convert to dictionary for JSON serialization."""
         data = asdict(self)
         # Convert status enum to string
-        data['status'] = self.status.value
+        data["status"] = self.status.value
         # Add computed fields
         if self.started_at:
-            data['duration'] = (
-                (self.completed_at or time.time()) - self.started_at
-            )
+            data["duration"] = (self.completed_at or time.time()) - self.started_at
         return data
 
 
@@ -278,19 +278,19 @@ class TaskConfig:
 
     # How to determine if a request should be async
     # Options: 'query' (check ?async=true), 'header' (check X-Async: true), 'always'
-    async_mode: str = 'query'
+    async_mode: str = "query"
 
     # Query parameter name for async mode
-    async_param: str = 'async'
+    async_param: str = "async"
 
     # Header name for async mode
-    async_header: str = 'X-Async'
+    async_header: str = "X-Async"
 
     # Whether to create task management endpoints (GET /tasks/{id}, etc.)
     create_task_endpoints: bool = True
 
     # Default executor type if not specified: 'thread' or 'process'
-    default_executor: str = 'thread'
+    default_executor: str = "thread"
 
     def get_store(self) -> TaskStore:
         """Get or create the task store."""
@@ -301,7 +301,7 @@ class TaskConfig:
     def get_executor(self) -> TaskExecutor:
         """Get or create the task executor."""
         if self.executor is None:
-            if self.default_executor == 'process':
+            if self.default_executor == "process":
                 self.executor = ProcessPoolTaskExecutor()
             else:
                 self.executor = ThreadPoolTaskExecutor()
@@ -464,7 +464,9 @@ class TaskManager:
 _task_managers: Dict[str, TaskManager] = {}
 
 
-def get_task_manager(func_name: str, config: Optional[TaskConfig] = None) -> TaskManager:
+def get_task_manager(
+    func_name: str, config: Optional[TaskConfig] = None
+) -> TaskManager:
     """
     Get or create a task manager for a function.
 
@@ -494,17 +496,17 @@ def should_run_async(
     Returns:
         True if request should be async
     """
-    if config.async_mode == 'always':
+    if config.async_mode == "always":
         return True
 
-    if config.async_mode == 'query':
+    if config.async_mode == "query":
         # Check query parameter
-        value = request.query_params.get(config.async_param, '').lower()
-        return value in ('true', '1', 'yes')
+        value = request.query_params.get(config.async_param, "").lower()
+        return value in ("true", "1", "yes")
 
-    if config.async_mode == 'header':
+    if config.async_mode == "header":
         # Check header
-        value = request.headers.get(config.async_header, '').lower()
-        return value in ('true', '1', 'yes')
+        value = request.headers.get(config.async_header, "").lower()
+        return value in ("true", "1", "yes")
 
     return False

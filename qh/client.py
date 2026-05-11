@@ -28,7 +28,7 @@ class HttpClient:
             base_url: Base URL for the API (e.g., "http://localhost:8000")
             session: Optional requests Session for connection pooling
         """
-        self.base_url = base_url.rstrip('/')
+        self.base_url = base_url.rstrip("/")
         self.session = session or requests.Session()
         self._functions: Dict[str, Callable] = {}
 
@@ -64,11 +64,11 @@ class HttpClient:
         """Create a client function that makes HTTP requests."""
 
         # Extract path parameters
-        path_params = set(re.findall(r'\{(\w+)\}', path))
+        path_params = set(re.findall(r"\{(\w+)\}", path))
 
         # Build function signature if we have metadata
         if signature_info:
-            params = signature_info.get('parameters', [])
+            params = signature_info.get("parameters", [])
         else:
             params = []
 
@@ -81,7 +81,7 @@ class HttpClient:
             for key, value in kwargs.items():
                 if key in path_params:
                     # Replace in path
-                    actual_path = actual_path.replace(f'{{{key}}}', str(value))
+                    actual_path = actual_path.replace(f"{{{key}}}", str(value))
                 else:
                     # Add to request data
                     request_data[key] = value
@@ -91,15 +91,15 @@ class HttpClient:
             method_lower = method.lower()
 
             try:
-                if method_lower == 'get':
+                if method_lower == "get":
                     response = self.session.get(url, params=request_data)
-                elif method_lower == 'post':
+                elif method_lower == "post":
                     response = self.session.post(url, json=request_data)
-                elif method_lower == 'put':
+                elif method_lower == "put":
                     response = self.session.put(url, json=request_data)
-                elif method_lower == 'delete':
+                elif method_lower == "delete":
                     response = self.session.delete(url)
-                elif method_lower == 'patch':
+                elif method_lower == "patch":
                     response = self.session.patch(url, json=request_data)
                 else:
                     raise ValueError(f"Unsupported HTTP method: {method}")
@@ -118,7 +118,7 @@ class HttpClient:
         # Set function metadata
         client_function.__name__ = name
         if signature_info:
-            docstring = signature_info.get('docstring', '')
+            docstring = signature_info.get("docstring", "")
             client_function.__doc__ = docstring or f"Call {method} {path}"
         else:
             client_function.__doc__ = f"Call {method} {path}"
@@ -161,34 +161,39 @@ def mk_client_from_openapi(
     client = HttpClient(base_url, session)
 
     # Parse OpenAPI spec and create functions
-    paths = openapi_spec.get('paths', {})
+    paths = openapi_spec.get("paths", {})
 
     for path, path_item in paths.items():
         # Skip OpenAPI metadata endpoints
-        if path in ['/openapi.json', '/docs', '/redoc']:
+        if path in ["/openapi.json", "/docs", "/redoc"]:
             continue
 
         for method, operation in path_item.items():
             # Only process HTTP methods
-            if method.upper() not in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']:
+            if method.upper() not in ["GET", "POST", "PUT", "DELETE", "PATCH"]:
                 continue
 
             # Get Python signature metadata if available
-            signature_info = operation.get('x-python-signature')
+            signature_info = operation.get("x-python-signature")
 
             # Extract function name - prefer x-python-signature if available
-            if signature_info and 'name' in signature_info:
-                func_name = signature_info['name']
+            if signature_info and "name" in signature_info:
+                func_name = signature_info["name"]
             else:
                 # Fallback: try to extract from operationId or path
-                operation_id = operation.get('operationId', '')
+                operation_id = operation.get("operationId", "")
                 if operation_id:
                     # operationId is often like "add_add_post", extract the function name
                     # Try to find a reasonable name by removing method suffix
-                    func_name = operation_id.split('_')[0]
+                    func_name = operation_id.split("_")[0]
                 else:
                     # Last resort: use path
-                    func_name = path.strip('/').replace('/', '_').replace('{', '').replace('}', '')
+                    func_name = (
+                        path.strip("/")
+                        .replace("/", "_")
+                        .replace("{", "")
+                        .replace("}", "")
+                    )
 
             # Add function to client
             client.add_function(
@@ -231,6 +236,7 @@ def mk_client_from_url(
     # Infer base_url from openapi_url if not provided
     if base_url is None:
         from urllib.parse import urlparse
+
         parsed = urlparse(openapi_url)
         base_url = f"{parsed.scheme}://{parsed.netloc}"
 
@@ -262,6 +268,7 @@ def mk_client_from_app(app, base_url: str = "http://testserver") -> HttpClient:
 
     # Create client with TestClient session
     from fastapi.testclient import TestClient
+
     test_client = TestClient(app)
 
     # Wrap TestClient to look like requests.Session

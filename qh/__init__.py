@@ -24,7 +24,12 @@ from qh.types import register_type, register_json_type, TypeRegistry
 
 # OpenAPI and client generation (Phase 3)
 from qh.openapi import export_openapi, enhance_openapi_schema
-from qh.client import mk_client_from_openapi, mk_client_from_url, mk_client_from_app, HttpClient
+from qh.client import (
+    mk_client_from_openapi,
+    mk_client_from_url,
+    mk_client_from_app,
+    HttpClient,
+)
 from qh.jsclient import export_js_client, export_ts_client
 
 # Async task processing
@@ -61,13 +66,14 @@ try:
         AuTaskStore,
         AuTaskExecutor,
     )
+
     __all_au__ = [
-        'use_au_backend',
-        'use_au_thread_backend',
-        'use_au_process_backend',
-        'use_au_redis_backend',
-        'AuTaskStore',
-        'AuTaskExecutor',
+        "use_au_backend",
+        "use_au_thread_backend",
+        "use_au_process_backend",
+        "use_au_redis_backend",
+        "AuTaskStore",
+        "AuTaskExecutor",
     ]
 except ImportError:
     __all_au__ = []
@@ -86,53 +92,53 @@ except ImportError:
     # py2http not available, skip legacy imports
     pass
 
-__version__ = '0.5.0'  # Phase 4: Async Task Processing
+__version__ = "0.5.0"  # Phase 4: Async Task Processing
 __all__ = [
     # Primary API
-    'mk_app',
-    'inspect_routes',
-    'print_routes',
+    "mk_app",
+    "inspect_routes",
+    "print_routes",
     # Configuration
-    'AppConfig',
-    'RouteConfig',
-    'ConfigBuilder',
+    "AppConfig",
+    "RouteConfig",
+    "ConfigBuilder",
     # Rules
-    'RuleChain',
-    'TransformSpec',
-    'HttpLocation',
-    'TypeRule',
-    'NameRule',
-    'FuncRule',
-    'FuncNameRule',
+    "RuleChain",
+    "TransformSpec",
+    "HttpLocation",
+    "TypeRule",
+    "NameRule",
+    "FuncRule",
+    "FuncNameRule",
     # Type Registry
-    'register_type',
-    'register_json_type',
-    'TypeRegistry',
+    "register_type",
+    "register_json_type",
+    "TypeRegistry",
     # OpenAPI & Client (Phase 3)
-    'export_openapi',
-    'enhance_openapi_schema',
-    'mk_client_from_openapi',
-    'mk_client_from_url',
-    'mk_client_from_app',
-    'HttpClient',
-    'export_js_client',
-    'export_ts_client',
+    "export_openapi",
+    "enhance_openapi_schema",
+    "mk_client_from_openapi",
+    "mk_client_from_url",
+    "mk_client_from_app",
+    "HttpClient",
+    "export_js_client",
+    "export_ts_client",
     # Async Tasks (Phase 4)
-    'TaskConfig',
-    'TaskStatus',
-    'TaskInfo',
-    'TaskStore',
-    'InMemoryTaskStore',
-    'TaskExecutor',
-    'ThreadPoolTaskExecutor',
-    'ProcessPoolTaskExecutor',
-    'TaskManager',
+    "TaskConfig",
+    "TaskStatus",
+    "TaskInfo",
+    "TaskStore",
+    "InMemoryTaskStore",
+    "TaskExecutor",
+    "ThreadPoolTaskExecutor",
+    "ProcessPoolTaskExecutor",
+    "TaskManager",
     # Testing utilities
-    'AppRunner',
-    'run_app',
-    'test_app',
-    'serve_app',
-    'quick_test',
-    'service_running',
-    'ServiceInfo',
+    "AppRunner",
+    "run_app",
+    "test_app",
+    "serve_app",
+    "quick_test",
+    "service_running",
+    "ServiceInfo",
 ] + __all_au__

@@ -33,7 +33,7 @@ class RouteConfig:
     param_overrides: Dict[str, Any] = field(default_factory=dict)
 
     # Async task configuration (None = not async, TaskConfig = async enabled)
-    async_config: Optional['TaskConfig'] = None
+    async_config: Optional["TaskConfig"] = None
 
     # Additional metadata
     summary: Optional[str] = None
@@ -45,18 +45,26 @@ class RouteConfig:
     include_in_schema: bool = True
     deprecated: bool = False
 
-    def merge_with(self, other: 'RouteConfig') -> 'RouteConfig':
+    def merge_with(self, other: "RouteConfig") -> "RouteConfig":
         """Merge with another config, other takes precedence."""
         return RouteConfig(
             path=other.path if other.path is not None else self.path,
             methods=other.methods if other.methods is not None else self.methods,
-            rule_chain=other.rule_chain if other.rule_chain is not None else self.rule_chain,
+            rule_chain=other.rule_chain
+            if other.rule_chain is not None
+            else self.rule_chain,
             param_overrides={**self.param_overrides, **other.param_overrides},
-            async_config=other.async_config if other.async_config is not None else self.async_config,
+            async_config=other.async_config
+            if other.async_config is not None
+            else self.async_config,
             summary=other.summary if other.summary is not None else self.summary,
-            description=other.description if other.description is not None else self.description,
+            description=other.description
+            if other.description is not None
+            else self.description,
             tags=other.tags if other.tags is not None else self.tags,
-            response_model=other.response_model if other.response_model is not None else self.response_model,
+            response_model=other.response_model
+            if other.response_model is not None
+            else self.response_model,
             include_in_schema=other.include_in_schema,
             deprecated=other.deprecated or self.deprecated,
         )
@@ -67,14 +75,14 @@ class AppConfig:
     """Global configuration for the entire FastAPI app."""
 
     # Default HTTP methods for all routes
-    default_methods: List[str] = field(default_factory=lambda: ['POST'])
+    default_methods: List[str] = field(default_factory=lambda: ["POST"])
 
     # Path template for auto-generating routes
     # Available placeholders: {func_name}
-    path_template: str = '/{func_name}'
+    path_template: str = "/{func_name}"
 
     # Path prefix for all routes
-    path_prefix: str = ''
+    path_prefix: str = ""
 
     # Global rule chain
     rule_chain: RuleChain = field(default_factory=lambda: DEFAULT_RULE_CHAIN)
@@ -92,11 +100,11 @@ class AppConfig:
     def to_fastapi_kwargs(self) -> Dict[str, Any]:
         """Convert to FastAPI() constructor kwargs."""
         return {
-            'title': self.title,
-            'version': self.version,
-            'docs_url': self.docs_url,
-            'redoc_url': self.redoc_url,
-            'openapi_url': self.openapi_url,
+            "title": self.title,
+            "version": self.version,
+            "docs_url": self.docs_url,
+            "redoc_url": self.redoc_url,
+            "openapi_url": self.openapi_url,
             **self.fastapi_kwargs,
         }
 
@@ -133,17 +141,19 @@ def resolve_route_config(
     if route_config is not None:
         # Convert dict to RouteConfig if necessary
         if isinstance(route_config, dict):
-            route_config = RouteConfig(**{
-                k: v for k, v in route_config.items()
-                if k in RouteConfig.__dataclass_fields__
-            })
+            route_config = RouteConfig(
+                **{
+                    k: v
+                    for k, v in route_config.items()
+                    if k in RouteConfig.__dataclass_fields__
+                }
+            )
         config = config.merge_with(route_config)
 
     # Auto-generate path if not specified
     if config.path is None:
         config = replace(
-            config,
-            path=app_config.path_template.format(func_name=func.__name__)
+            config, path=app_config.path_template.format(func_name=func.__name__)
         )
 
     # Auto-generate description from docstring if not specified
@@ -152,7 +162,7 @@ def resolve_route_config(
 
     # Auto-generate summary from first line of docstring
     if config.summary is None and func.__doc__:
-        first_line = func.__doc__.strip().split('\n')[0]
+        first_line = func.__doc__.strip().split("\n")[0]
         config = replace(config, summary=first_line)
 
     return config
@@ -165,27 +175,27 @@ class ConfigBuilder:
         self.app_config = AppConfig()
         self.route_configs: Dict[Callable, RouteConfig] = {}
 
-    def with_path_prefix(self, prefix: str) -> 'ConfigBuilder':
+    def with_path_prefix(self, prefix: str) -> "ConfigBuilder":
         """Set path prefix for all routes."""
         self.app_config.path_prefix = prefix
         return self
 
-    def with_path_template(self, template: str) -> 'ConfigBuilder':
+    def with_path_template(self, template: str) -> "ConfigBuilder":
         """Set path template for auto-generation."""
         self.app_config.path_template = template
         return self
 
-    def with_default_methods(self, methods: List[str]) -> 'ConfigBuilder':
+    def with_default_methods(self, methods: List[str]) -> "ConfigBuilder":
         """Set default HTTP methods."""
         self.app_config.default_methods = methods
         return self
 
-    def with_rule_chain(self, chain: RuleChain) -> 'ConfigBuilder':
+    def with_rule_chain(self, chain: RuleChain) -> "ConfigBuilder":
         """Set global rule chain."""
         self.app_config.rule_chain = chain
         return self
 
-    def for_function(self, func: Callable) -> 'FunctionConfigBuilder':
+    def for_function(self, func: Callable) -> "FunctionConfigBuilder":
         """Start configuring a specific function."""
         return FunctionConfigBuilder(self, func)
 
@@ -202,22 +212,22 @@ class FunctionConfigBuilder:
         self.func = func
         self.config = RouteConfig()
 
-    def at_path(self, path: str) -> 'FunctionConfigBuilder':
+    def at_path(self, path: str) -> "FunctionConfigBuilder":
         """Set custom path for this function."""
         self.config.path = path
         return self
 
-    def with_methods(self, methods: List[str]) -> 'FunctionConfigBuilder':
+    def with_methods(self, methods: List[str]) -> "FunctionConfigBuilder":
         """Set HTTP methods for this function."""
         self.config.methods = methods
         return self
 
-    def with_summary(self, summary: str) -> 'FunctionConfigBuilder':
+    def with_summary(self, summary: str) -> "FunctionConfigBuilder":
         """Set OpenAPI summary."""
         self.config.summary = summary
         return self
 
-    def with_tags(self, tags: List[str]) -> 'FunctionConfigBuilder':
+    def with_tags(self, tags: List[str]) -> "FunctionConfigBuilder":
         """Set OpenAPI tags."""
         self.config.tags = tags
         return self
@@ -230,12 +240,12 @@ class FunctionConfigBuilder:
 
 # Convenience functions for common patterns
 
+
 def from_dict(config_dict: Dict[str, Any]) -> AppConfig:
     """Create AppConfig from dictionary."""
-    return AppConfig(**{
-        k: v for k, v in config_dict.items()
-        if k in AppConfig.__dataclass_fields__
-    })
+    return AppConfig(
+        **{k: v for k, v in config_dict.items() if k in AppConfig.__dataclass_fields__}
+    )
 
 
 def normalize_funcs_input(
@@ -268,10 +278,13 @@ def normalize_funcs_input(
                 result[func] = config
             elif isinstance(config, dict):
                 # Convert dict to RouteConfig
-                result[func] = RouteConfig(**{
-                    k: v for k, v in config.items()
-                    if k in RouteConfig.__dataclass_fields__
-                })
+                result[func] = RouteConfig(
+                    **{
+                        k: v
+                        for k, v in config.items()
+                        if k in RouteConfig.__dataclass_fields__
+                    }
+                )
             else:
                 raise ValueError(f"Invalid config type for {func}: {type(config)}")
         return result

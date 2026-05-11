@@ -12,7 +12,16 @@ Supports multi-dimensional matching:
 Rules are layered with first-match semantics, from specific to general.
 """
 
-from typing import Any, Callable, Dict, Optional, Protocol, Union, TypeVar, get_type_hints
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Optional,
+    Protocol,
+    Union,
+    TypeVar,
+    get_type_hints,
+)
 from dataclasses import dataclass, field
 from enum import Enum
 import inspect
@@ -20,6 +29,7 @@ import inspect
 
 class HttpLocation(Enum):
     """Where in HTTP request/response to map a parameter."""
+
     JSON_BODY = "json_body"  # Field in JSON payload
     PATH = "path"  # URL path parameter
     QUERY = "query"  # URL query parameter
@@ -29,7 +39,7 @@ class HttpLocation(Enum):
     FORM_DATA = "form_data"  # Multipart form data
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 @dataclass
@@ -94,7 +104,7 @@ class TypeRule:
             return self.type_map[param_type]
 
         # Check type hierarchy (MRO)
-        for cls in getattr(param_type, '__mro__', []):
+        for cls in getattr(param_type, "__mro__", []):
             if cls in self.type_map:
                 return self.type_map[cls]
 
@@ -280,7 +290,7 @@ class RuleChain:
         self.add_rule(rule)
         return self
 
-    def __add__(self, other: 'RuleChain') -> 'RuleChain':
+    def __add__(self, other: "RuleChain") -> "RuleChain":
         """Combine two rule chains."""
         new_chain = RuleChain()
         new_chain.rules = self.rules + other.rules
@@ -309,7 +319,9 @@ def _make_builtin_type_rules() -> TypeRule:
 
 # Default global rule chain
 DEFAULT_RULE_CHAIN = RuleChain()
-DEFAULT_RULE_CHAIN.add_rule(_make_builtin_type_rules(), priority=-1000)  # Lowest priority
+DEFAULT_RULE_CHAIN.add_rule(
+    _make_builtin_type_rules(), priority=-1000
+)  # Lowest priority
 
 
 def extract_param_context(func: Callable, param_name: str) -> Dict[str, Any]:
@@ -321,15 +333,15 @@ def extract_param_context(func: Callable, param_name: str) -> Dict[str, Any]:
         raise ValueError(f"Parameter {param_name} not found in {func.__name__}")
 
     # Get type hint
-    hints = get_type_hints(func) if hasattr(func, '__annotations__') else {}
+    hints = get_type_hints(func) if hasattr(func, "__annotations__") else {}
     param_type = hints.get(param_name, type(None))
 
     return {
-        'param_name': param_name,
-        'param_type': param_type,
-        'param_default': param.default,
-        'func': func,
-        'func_name': func.__name__,
+        "param_name": param_name,
+        "param_type": param_type,
+        "param_default": param.default,
+        "func": func,
+        "func_name": func.__name__,
     }
 
 
@@ -364,7 +376,8 @@ def resolve_transform(
     if spec is None:
         try:
             from qh.types import get_transform_spec_for_type
-            param_type = context['param_type']
+
+            param_type = context["param_type"]
             spec = get_transform_spec_for_type(param_type)
         except ImportError:
             # Type registry not available

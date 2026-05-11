@@ -18,7 +18,7 @@ import inspect
 from qh.rules import TransformSpec, HttpLocation
 
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 @dataclass
@@ -115,7 +115,9 @@ class TypeRegistry:
         # Check type hierarchy
         for registered_type, handler in self.handlers.items():
             try:
-                if isinstance(python_type, type) and issubclass(python_type, registered_type):
+                if isinstance(python_type, type) and issubclass(
+                    python_type, registered_type
+                ):
                     return handler
             except TypeError:
                 # Not a class
@@ -228,7 +230,7 @@ try:
 
     def dataframe_to_json(df: pd.DataFrame) -> Any:
         """Convert DataFrame to JSON-compatible format."""
-        return df.to_dict(orient='records')
+        return df.to_dict(orient="records")
 
     def dataframe_from_json(data: Any) -> pd.DataFrame:
         """Convert JSON data to DataFrame."""
@@ -308,21 +310,25 @@ def register_json_type(
 
         # Auto-detect serialization methods if not provided
         if _to_json is None:
-            if hasattr(cls_to_register, 'to_dict'):
+            if hasattr(cls_to_register, "to_dict"):
                 _to_json = lambda obj: obj.to_dict()
-            elif hasattr(cls_to_register, '__dict__'):
+            elif hasattr(cls_to_register, "__dict__"):
                 _to_json = lambda obj: obj.__dict__
             else:
-                raise ValueError(f"Cannot auto-detect serialization for {cls_to_register}")
+                raise ValueError(
+                    f"Cannot auto-detect serialization for {cls_to_register}"
+                )
 
         if _from_json is None:
-            if hasattr(cls_to_register, 'from_dict'):
+            if hasattr(cls_to_register, "from_dict"):
                 _from_json = cls_to_register.from_dict
-            elif hasattr(cls_to_register, '__init__'):
+            elif hasattr(cls_to_register, "__init__"):
                 # Try to call constructor with dict unpacking
                 _from_json = lambda data: cls_to_register(**data)
             else:
-                raise ValueError(f"Cannot auto-detect deserialization for {cls_to_register}")
+                raise ValueError(
+                    f"Cannot auto-detect deserialization for {cls_to_register}"
+                )
 
         # Register the type
         register_type(

@@ -23,13 +23,15 @@ from qh.conventions import (
 
 
 def mk_app(
-    funcs: Union[Callable, List[Callable], Dict[Callable, Union[Dict[str, Any], RouteConfig]]],
+    funcs: Union[
+        Callable, List[Callable], Dict[Callable, Union[Dict[str, Any], RouteConfig]]
+    ],
     *,
     app: Optional[FastAPI] = None,
     config: Optional[Union[Dict[str, Any], AppConfig]] = None,
     use_conventions: bool = False,
     async_funcs: Optional[List[Union[str, Callable]]] = None,
-    async_config: Optional[Union[Dict[str, Any], 'TaskConfig']] = None,
+    async_config: Optional[Union[Dict[str, Any], "TaskConfig"]] = None,
     **kwargs,
 ) -> FastAPI:
     """
@@ -144,7 +146,7 @@ def mk_app(
                 else:
                     # It's a dict, convert to RouteConfig
                     route_dict = route_config or {}
-                    route_dict['async_config'] = task_config
+                    route_dict["async_config"] = task_config
                     func_configs[func] = route_dict
 
     # Apply conventions if requested
@@ -163,7 +165,7 @@ def mk_app(
                 if isinstance(explicit_config, RouteConfig):
                     explicit_dict = {
                         k: getattr(explicit_config, k)
-                        for k in ['path', 'methods', 'summary', 'tags']
+                        for k in ["path", "methods", "summary", "tags"]
                         if getattr(explicit_config, k, None) is not None
                     }
                 else:
@@ -178,10 +180,9 @@ def mk_app(
     elif isinstance(config, AppConfig):
         app_config = config
     elif isinstance(config, dict):
-        app_config = AppConfig(**{
-            k: v for k, v in config.items()
-            if k in AppConfig.__dataclass_fields__
-        })
+        app_config = AppConfig(
+            **{k: v for k, v in config.items() if k in AppConfig.__dataclass_fields__}
+        )
     else:
         raise TypeError(f"Invalid config type: {type(config)}")
 
@@ -207,24 +208,24 @@ def mk_app(
 
         # Prepare route kwargs
         route_kwargs = {
-            'path': full_path,
-            'endpoint': endpoint,
-            'methods': resolved_config.methods,
-            'name': func.__name__,
+            "path": full_path,
+            "endpoint": endpoint,
+            "methods": resolved_config.methods,
+            "name": func.__name__,
         }
 
         # Add optional metadata
         if resolved_config.summary:
-            route_kwargs['summary'] = resolved_config.summary
+            route_kwargs["summary"] = resolved_config.summary
         if resolved_config.description:
-            route_kwargs['description'] = resolved_config.description
+            route_kwargs["description"] = resolved_config.description
         if resolved_config.tags:
-            route_kwargs['tags'] = resolved_config.tags
+            route_kwargs["tags"] = resolved_config.tags
         if resolved_config.response_model:
-            route_kwargs['response_model'] = resolved_config.response_model
+            route_kwargs["response_model"] = resolved_config.response_model
 
-        route_kwargs['include_in_schema'] = resolved_config.include_in_schema
-        route_kwargs['deprecated'] = resolved_config.deprecated
+        route_kwargs["include_in_schema"] = resolved_config.include_in_schema
+        route_kwargs["deprecated"] = resolved_config.deprecated
 
         # Add route to app
         app.add_api_route(**route_kwargs)
@@ -246,11 +247,11 @@ def mk_app(
                 if isinstance(route_config, RouteConfig):
                     task_config = route_config.async_config
                 elif isinstance(route_config, dict):
-                    task_config = route_config.get('async_config')
+                    task_config = route_config.get("async_config")
                 else:
                     task_config = None
 
-                if task_config and getattr(task_config, 'create_task_endpoints', True):
+                if task_config and getattr(task_config, "create_task_endpoints", True):
                     add_task_endpoints(app, func.__name__)
 
     return app
@@ -269,16 +270,16 @@ def inspect_routes(app: FastAPI) -> List[Dict[str, Any]]:
     routes = []
 
     for route in app.routes:
-        if hasattr(route, 'methods'):
+        if hasattr(route, "methods"):
             route_info = {
-                'path': route.path,
-                'methods': list(route.methods),
-                'name': route.name,
-                'endpoint': route.endpoint,
+                "path": route.path,
+                "methods": list(route.methods),
+                "name": route.name,
+                "endpoint": route.endpoint,
             }
             # Include original function if available (for OpenAPI/client generation)
-            if hasattr(route.endpoint, '_qh_original_func'):
-                route_info['function'] = route.endpoint._qh_original_func
+            if hasattr(route.endpoint, "_qh_original_func"):
+                route_info["function"] = route.endpoint._qh_original_func
             routes.append(route_info)
 
     return routes
@@ -298,8 +299,8 @@ def print_routes(app: FastAPI) -> None:
         return
 
     # Find max widths for formatting
-    max_methods = max(len(', '.join(r['methods'])) for r in routes)
-    max_path = max(len(r['path']) for r in routes)
+    max_methods = max(len(", ".join(r["methods"])) for r in routes)
+    max_path = max(len(r["path"]) for r in routes)
 
     # Print header
     print(f"{'METHODS':<{max_methods}}  {'PATH':<{max_path}}  ENDPOINT")
@@ -307,13 +308,13 @@ def print_routes(app: FastAPI) -> None:
 
     # Print routes
     for route in routes:
-        methods = ', '.join(sorted(route['methods']))
-        path = route['path']
-        name = route['name']
+        methods = ", ".join(sorted(route["methods"]))
+        path = route["path"]
+        name = route["name"]
 
         # Try to get endpoint signature
-        endpoint = route['endpoint']
-        if hasattr(endpoint, '__wrapped__'):
+        endpoint = route["endpoint"]
+        if hasattr(endpoint, "__wrapped__"):
             endpoint = endpoint.__wrapped__
 
         print(f"{methods:<{max_methods}}  {path:<{max_path}}  {name}")

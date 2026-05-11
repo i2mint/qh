@@ -72,7 +72,8 @@ async def extract_http_params(
 
     # Handle JSON body parameters
     json_params = {
-        name: spec for name, spec in param_specs.items()
+        name: spec
+        for name, spec in param_specs.items()
         if spec.http_location == HttpLocation.JSON_BODY
     }
 
@@ -90,7 +91,7 @@ async def extract_http_params(
 
         except json.JSONDecodeError:
             # If no valid JSON, that's okay for GET requests
-            if request.method not in ['GET', 'DELETE', 'HEAD']:
+            if request.method not in ["GET", "DELETE", "HEAD"]:
                 # For other methods, might be an error
                 pass
 
@@ -145,22 +146,23 @@ def make_endpoint(
     # Detect path parameters from route path
     import re
     from typing import get_type_hints
+
     path_param_names = set()
     if route_config.path:
-        path_param_names = set(re.findall(r'\{(\w+)\}', route_config.path))
+        path_param_names = set(re.findall(r"\{(\w+)\}", route_config.path))
 
     # Check if this uses query params (GET-only routes without POST/PUT/PATCH)
     # Routes with POST/PUT/PATCH should use JSON body even if GET is also supported
     methods = route_config.methods or []
-    has_body_methods = any(m in methods for m in ['POST', 'PUT', 'PATCH'])
-    use_query_params = 'GET' in methods and not has_body_methods
+    has_body_methods = any(m in methods for m in ["POST", "PUT", "PATCH"])
+    use_query_params = "GET" in methods and not has_body_methods
 
     # Resolve transformation specs for each parameter
     rule_chain = route_config.rule_chain
     param_specs: Dict[str, TransformSpec] = {}
 
     # Get type hints for type conversion
-    type_hints = get_type_hints(func) if hasattr(func, '__annotations__') else {}
+    type_hints = get_type_hints(func) if hasattr(func, "__annotations__") else {}
 
     for param_name in sig.parameters:
         # Check for parameter-specific override
@@ -182,17 +184,16 @@ def make_endpoint(
                     if isinstance(value, target_type):
                         return value
                     return target_type(value)
+
                 return convert
 
             param_specs[param_name] = TransformSpec(
                 http_location=HttpLocation.QUERY,
-                ingress=make_query_converter(param_type) if param_type != str else None
+                ingress=make_query_converter(param_type) if param_type != str else None,
             )
         else:
             # Resolve from rule chain
-            param_specs[param_name] = resolve_transform(
-                func, param_name, rule_chain
-            )
+            param_specs[param_name] = resolve_transform(func, param_name, rule_chain)
 
     # Determine if we need egress transformation for output
     # For now, we'll use a simple JSON serializer
@@ -208,7 +209,7 @@ def make_endpoint(
         if handler is not None:
             return handler.to_json(obj)
         # Try to convert to dict if it has __dict__
-        if hasattr(obj, '__dict__'):
+        if hasattr(obj, "__dict__"):
             return obj.__dict__
         # Otherwise convert to string
         return str(obj)
@@ -251,6 +252,7 @@ def make_endpoint(
                         if is_async:
                             # For async functions, we need to run them in an event loop
                             import asyncio
+
                             loop = asyncio.new_event_loop()
                             try:
                                 return loop.run_until_complete(func(**kwargs))
@@ -322,7 +324,8 @@ def validate_route_config(func: Callable, config: RouteConfig) -> None:
     if config.path:
         # Extract {param} from path
         import re
-        path_params = re.findall(r'\{(\w+)\}', config.path)
+
+        path_params = re.findall(r"\{(\w+)\}", config.path)
         for param in path_params:
             if param not in param_names:
                 raise ValueError(

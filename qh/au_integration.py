@@ -34,6 +34,7 @@ try:
         get_global_config,
     )
     from au.base import ComputationStore, ComputationBackend
+
     HAS_AU = True
 except ImportError:
     HAS_AU = False
@@ -48,12 +49,12 @@ class AuTaskStore(TaskStore):
     Maps between qh's TaskInfo and au's computation results.
     """
 
-    def __init__(self, au_store: 'ComputationStore'):
+    def __init__(self, au_store: "ComputationStore"):
         if not HAS_AU:
             raise ImportError("au is required. Install with: pip install au")
         self.au_store = au_store
 
-    def _au_status_to_qh_status(self, au_status: 'ComputationStatus') -> TaskStatus:
+    def _au_status_to_qh_status(self, au_status: "ComputationStatus") -> TaskStatus:
         """Convert au status to qh status."""
         mapping = {
             ComputationStatus.PENDING: TaskStatus.PENDING,
@@ -66,6 +67,7 @@ class AuTaskStore(TaskStore):
     def create_task(self, task_id: str, func_name: str) -> TaskInfo:
         """Create a new task record."""
         import time
+
         task_info = TaskInfo(
             task_id=task_id,
             status=TaskStatus.PENDING,
@@ -85,6 +87,7 @@ class AuTaskStore(TaskStore):
 
             # Convert to qh TaskInfo
             import time
+
             task_info = TaskInfo(
                 task_id=task_id,
                 status=self._au_status_to_qh_status(au_status),
@@ -144,8 +147,8 @@ class AuTaskExecutor(TaskExecutor):
 
     def __init__(
         self,
-        au_backend: 'ComputationBackend',
-        au_store: 'ComputationStore',
+        au_backend: "ComputationBackend",
+        au_store: "ComputationStore",
     ):
         if not HAS_AU:
             raise ImportError("au is required. Install with: pip install au")
@@ -172,14 +175,14 @@ class AuTaskExecutor(TaskExecutor):
     def shutdown(self, wait: bool = True) -> None:
         """Shutdown the executor."""
         # au backends handle their own lifecycle
-        if hasattr(self.au_backend, 'shutdown'):
+        if hasattr(self.au_backend, "shutdown"):
             self.au_backend.shutdown(wait=wait)
 
 
 def use_au_backend(
-    backend: Optional['ComputationBackend'] = None,
-    store: Optional['ComputationStore'] = None,
-    **au_config_kwargs
+    backend: Optional["ComputationBackend"] = None,
+    store: Optional["ComputationStore"] = None,
+    **au_config_kwargs,
 ) -> TaskConfig:
     """
     Create a qh TaskConfig that uses au backend and storage.
@@ -235,10 +238,12 @@ def use_au_backend(
     # Get backend and store (use au's defaults if not provided)
     if backend is None:
         from au.api import _get_default_backend
+
         backend = _get_default_backend()
 
     if store is None:
         from au.api import _get_default_store
+
         store = _get_default_store()
 
     # Create adapters
@@ -246,17 +251,14 @@ def use_au_backend(
     task_executor = AuTaskExecutor(backend, store)
 
     # Return qh TaskConfig using au backend
-    return TaskConfig(
-        store=task_store,
-        executor=task_executor,
-        **au_config_kwargs
-    )
+    return TaskConfig(store=task_store, executor=task_executor, **au_config_kwargs)
 
 
 # Convenience functions for common au backends
 
+
 def use_au_thread_backend(
-    storage_path: str = '/tmp/qh_au_tasks',
+    storage_path: str = "/tmp/qh_au_tasks",
     ttl_seconds: int = 3600,
 ) -> TaskConfig:
     """Use au's ThreadBackend with filesystem storage."""
@@ -269,7 +271,7 @@ def use_au_thread_backend(
 
 
 def use_au_process_backend(
-    storage_path: str = '/tmp/qh_au_tasks',
+    storage_path: str = "/tmp/qh_au_tasks",
     ttl_seconds: int = 3600,
 ) -> TaskConfig:
     """Use au's ProcessBackend for CPU-bound tasks."""
@@ -282,8 +284,8 @@ def use_au_process_backend(
 
 
 def use_au_redis_backend(
-    redis_url: str = 'redis://localhost:6379',
-    storage_path: str = '/tmp/qh_au_tasks',
+    redis_url: str = "redis://localhost:6379",
+    storage_path: str = "/tmp/qh_au_tasks",
     ttl_seconds: int = 3600,
 ) -> TaskConfig:
     """Use au's Redis/RQ backend for distributed tasks."""
@@ -293,9 +295,7 @@ def use_au_redis_backend(
     try:
         from au.backends.rq_backend import RQBackend
     except ImportError:
-        raise ImportError(
-            "Redis backend requires: pip install au[redis]"
-        )
+        raise ImportError("Redis backend requires: pip install au[redis]")
 
     backend = RQBackend(redis_url=redis_url)
     store = FileSystemStore(storage_path, ttl_seconds=ttl_seconds)

@@ -68,11 +68,11 @@ def service_running(
     app: Optional[FastAPI] = None,
     launcher: Optional[Callable[[], None]] = None,
     port: int = 8000,
-    host: str = '127.0.0.1',
+    host: str = "127.0.0.1",
     startup_wait: float = 2.0,
     readiness_check_interval: float = 0.2,
     readiness_timeout: float = 10.0,
-    log_level: str = 'error',
+    log_level: str = "error",
 ) -> Generator[ServiceInfo, None, None]:
     """Ensure an HTTP service is running for testing purposes.
 
@@ -140,7 +140,7 @@ def service_running(
         raise ValueError("Cannot provide multiple service specifications")
 
     if url is None:
-        service_url = f'http://{host}:{port}'
+        service_url = f"http://{host}:{port}"
     else:
         service_url = url
 
@@ -347,12 +347,7 @@ class AppRunner:
 
 
 @contextmanager
-def run_app(
-    app: FastAPI,
-    *,
-    use_server: bool = False,
-    **kwargs
-):
+def run_app(app: FastAPI, *, use_server: bool = False, **kwargs):
     """
     Context manager for running a FastAPI app.
 
@@ -475,7 +470,7 @@ def quick_test(func, **kwargs):
 
     app = mk_app([func])
     with test_app(app) as client:
-        response = client.post(f'/{func.__name__}', json=kwargs)
+        response = client.post(f"/{func.__name__}", json=kwargs)
         response.raise_for_status()
         return response.json()
 

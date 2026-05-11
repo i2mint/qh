@@ -49,10 +49,7 @@ def python_type_to_ts_type(python_type: str) -> str:
     return type_map.get(python_type, "any")
 
 
-def generate_ts_interface(
-    name: str,
-    signature_info: Dict[str, Any]
-) -> str:
+def generate_ts_interface(name: str, signature_info: Dict[str, Any]) -> str:
     """
     Generate TypeScript interface for function parameters.
 
@@ -106,7 +103,8 @@ def generate_js_function(
 
     # Extract path parameters
     import re
-    path_params = re.findall(r'\{(\w+)\}', path)
+
+    path_params = re.findall(r"\{(\w+)\}", path)
 
     # Generate function signature
     if signature_info:
@@ -141,22 +139,24 @@ def generate_js_function(
 
     if use_axios:
         # Axios implementation
-        if method_lower == 'get' and body_params:
+        if method_lower == "get" and body_params:
             func += f"    const params = {{ {', '.join(body_params)} }};\n"
             func += f"    const response = await this.axios.get(url, {{ params }});\n"
-        elif method_lower in ['post', 'put', 'patch'] and body_params:
+        elif method_lower in ["post", "put", "patch"] and body_params:
             func += f"    const data = {{ {', '.join(body_params)} }};\n"
-            func += f"    const response = await this.axios.{method_lower}(url, data);\n"
+            func += (
+                f"    const response = await this.axios.{method_lower}(url, data);\n"
+            )
         else:
             func += f"    const response = await this.axios.{method_lower}(url);\n"
         func += "    return response.data;\n"
     else:
         # Fetch implementation
-        if method_lower == 'get' and body_params:
+        if method_lower == "get" and body_params:
             func += f"    const params = new URLSearchParams({{ {', '.join(body_params)} }});\n"
             func += "    url += '?' + params.toString();\n"
             func += "    const response = await fetch(url);\n"
-        elif method_lower in ['post', 'put', 'patch'] and body_params:
+        elif method_lower in ["post", "put", "patch"] and body_params:
             func += f"    const data = {{ {', '.join(body_params)} }};\n"
             func += "    const response = await fetch(url, {\n"
             func += f"      method: '{method.upper()}',\n"
@@ -203,7 +203,8 @@ def generate_ts_function(
     # Generate function with types
     method_lower = method.lower()
     import re
-    path_params = re.findall(r'\{(\w+)\}', path)
+
+    path_params = re.findall(r"\{(\w+)\}", path)
 
     params = signature_info.get("parameters", [])
 
@@ -234,11 +235,11 @@ def generate_ts_function(
 
     if use_axios:
         # Axios implementation
-        if method_lower == 'get' and body_params:
+        if method_lower == "get" and body_params:
             func += f"    const params = {{ {', '.join(body_params)} }};\n"
             func += f"    const response = await this.axios.get<{return_type}>(url, {{ params }});\n"
             func += "    return response.data;\n"
-        elif method_lower in ['post', 'put', 'patch'] and body_params:
+        elif method_lower in ["post", "put", "patch"] and body_params:
             func += f"    const data = {{ {', '.join(body_params)} }};\n"
             func += f"    const response = await this.axios.{method_lower}<{return_type}>(url, data);\n"
             func += "    return response.data;\n"
@@ -247,11 +248,11 @@ def generate_ts_function(
             func += "    return response.data;\n"
     else:
         # Fetch implementation
-        if method_lower == 'get' and body_params:
+        if method_lower == "get" and body_params:
             func += f"    const params = new URLSearchParams({{ {', '.join(body_params)} }});\n"
             func += "    url += '?' + params.toString();\n"
             func += "    const response = await fetch(url);\n"
-        elif method_lower in ['post', 'put', 'patch'] and body_params:
+        elif method_lower in ["post", "put", "patch"] and body_params:
             func += f"    const data = {{ {', '.join(body_params)} }};\n"
             func += "    const response = await fetch(url, {\n"
             func += f"      method: '{method.upper()}',\n"
@@ -310,20 +311,24 @@ def export_js_client(
 
     # Generate methods
     for path, path_item in paths.items():
-        if path in ['/openapi.json', '/docs', '/redoc']:
+        if path in ["/openapi.json", "/docs", "/redoc"]:
             continue
 
         for method, operation in path_item.items():
-            if method.upper() not in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']:
+            if method.upper() not in ["GET", "POST", "PUT", "DELETE", "PATCH"]:
                 continue
 
             # Get function name from x-python-signature or operation_id
-            signature_info = operation.get('x-python-signature')
+            signature_info = operation.get("x-python-signature")
             if signature_info:
-                func_name = signature_info['name']
+                func_name = signature_info["name"]
             else:
-                operation_id = operation.get('operationId', '')
-                func_name = operation_id.split('_')[0] if operation_id else path.strip('/').replace('/', '_')
+                operation_id = operation.get("operationId", "")
+                func_name = (
+                    operation_id.split("_")[0]
+                    if operation_id
+                    else path.strip("/").replace("/", "_")
+                )
 
             # Generate function
             func_code = generate_js_function(
@@ -372,17 +377,17 @@ def export_ts_client(
     # Generate interfaces first
     interfaces = []
     for path, path_item in paths.items():
-        if path in ['/openapi.json', '/docs', '/redoc']:
+        if path in ["/openapi.json", "/docs", "/redoc"]:
             continue
 
         for method, operation in path_item.items():
-            if method.upper() not in ['GET', 'POST', 'PUT', 'DELETE', 'PATCH']:
+            if method.upper() not in ["GET", "POST", "PUT", "DELETE", "PATCH"]:
                 continue
 
-            signature_info = operation.get('x-python-signature')
+            signature_info = operation.get("x-python-signature")
             if signature_info:
                 interface, _, _ = generate_ts_interface(
-                    signature_info['name'], signature_info
+                    signature_info["name"], signature_info
                 )
                 interfaces.append(interface)
 
@@ -404,26 +409,30 @@ def export_ts_client(
 
     # Generate methods
     for path, path_item in paths.items():
-        if path in ['/openapi.json', '/docs', '/redoc']:
+        if path in ["/openapi.json", "/docs", "/redoc"]:
             continue
 
         for method, operation in path_item.items():
-            if method.upper() not in ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']:
+            if method.upper() not in ["GET", "POST", "PUT", "PATCH", "DELETE"]:
                 continue
 
-            signature_info = operation.get('x-python-signature')
+            signature_info = operation.get("x-python-signature")
             if signature_info:
-                func_name = signature_info['name']
+                func_name = signature_info["name"]
             else:
-                operation_id = operation.get('operationId', '')
-                func_name = operation_id.split('_')[0] if operation_id else path.strip('/').replace('/', '_')
+                operation_id = operation.get("operationId", "")
+                func_name = (
+                    operation_id.split("_")[0]
+                    if operation_id
+                    else path.strip("/").replace("/", "_")
+                )
 
             func_code = generate_ts_function(
                 func_name, path, method.upper(), signature_info, use_axios
             )
             # Extract just the function part (skip interface)
-            if '\n\n' in func_code:
-                func_code = func_code.split('\n\n', 1)[1]
+            if "\n\n" in func_code:
+                func_code = func_code.split("\n\n", 1)[1]
             code += func_code + "\n"
 
     code += "}\n"

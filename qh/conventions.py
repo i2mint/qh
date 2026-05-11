@@ -19,33 +19,34 @@ from dataclasses import dataclass
 
 # Common CRUD verb patterns
 CRUD_VERBS = {
-    'get': 'GET',
-    'fetch': 'GET',
-    'retrieve': 'GET',
-    'read': 'GET',
-    'list': 'GET',
-    'find': 'GET',
-    'search': 'GET',
-    'query': 'GET',
-    'create': 'POST',
-    'add': 'POST',
-    'insert': 'POST',
-    'new': 'POST',
-    'update': 'PUT',
-    'modify': 'PUT',
-    'edit': 'PUT',
-    'change': 'PUT',
-    'set': 'PUT',
-    'patch': 'PATCH',
-    'delete': 'DELETE',
-    'remove': 'DELETE',
-    'destroy': 'DELETE',
+    "get": "GET",
+    "fetch": "GET",
+    "retrieve": "GET",
+    "read": "GET",
+    "list": "GET",
+    "find": "GET",
+    "search": "GET",
+    "query": "GET",
+    "create": "POST",
+    "add": "POST",
+    "insert": "POST",
+    "new": "POST",
+    "update": "PUT",
+    "modify": "PUT",
+    "edit": "PUT",
+    "change": "PUT",
+    "set": "PUT",
+    "patch": "PATCH",
+    "delete": "DELETE",
+    "remove": "DELETE",
+    "destroy": "DELETE",
 }
 
 
 @dataclass
 class ParsedFunctionName:
     """Result of parsing a function name."""
+
     verb: str  # e.g., 'get', 'list', 'create'
     resource: str  # e.g., 'user', 'users', 'order'
     is_plural: bool  # Whether resource is plural
@@ -67,7 +68,7 @@ def parse_function_name(func_name: str) -> ParsedFunctionName:
         ParsedFunctionName(verb='create', resource='order_item', is_plural=True, is_collection_operation=True)
     """
     # Try to match verb_resource pattern
-    parts = func_name.split('_', 1)
+    parts = func_name.split("_", 1)
 
     if len(parts) == 2:
         verb, resource = parts
@@ -76,10 +77,10 @@ def parse_function_name(func_name: str) -> ParsedFunctionName:
         # Check if verb is in our known list
         if verb in CRUD_VERBS:
             # Check if this is a collection operation
-            is_collection = verb in ('list', 'create', 'search', 'query')
+            is_collection = verb in ("list", "create", "search", "query")
 
             # Check if resource is plural (simple heuristic)
-            is_plural = resource.endswith('s') or is_collection
+            is_plural = resource.endswith("s") or is_collection
 
             return ParsedFunctionName(
                 verb=verb,
@@ -90,14 +91,16 @@ def parse_function_name(func_name: str) -> ParsedFunctionName:
 
     # Fallback: treat whole name as resource
     return ParsedFunctionName(
-        verb='',
+        verb="",
         resource=func_name,
         is_plural=False,
         is_collection_operation=False,
     )
 
 
-def infer_http_method(func_name: str, parsed: Optional[ParsedFunctionName] = None) -> str:
+def infer_http_method(
+    func_name: str, parsed: Optional[ParsedFunctionName] = None
+) -> str:
     """
     Infer HTTP method from function name.
 
@@ -125,7 +128,7 @@ def infer_http_method(func_name: str, parsed: Optional[ParsedFunctionName] = Non
         return CRUD_VERBS[parsed.verb]
 
     # Default to POST for unknown verbs
-    return 'POST'
+    return "POST"
 
 
 def singularize(word: str) -> str:
@@ -134,11 +137,11 @@ def singularize(word: str) -> str:
 
     More sophisticated rules can be added later.
     """
-    if word.endswith('ies'):
-        return word[:-3] + 'y'
-    elif word.endswith('ses'):
+    if word.endswith("ies"):
+        return word[:-3] + "y"
+    elif word.endswith("ses"):
         return word[:-2]
-    elif word.endswith('s') and not word.endswith('ss'):
+    elif word.endswith("s") and not word.endswith("ss"):
         return word[:-1]
     return word
 
@@ -149,12 +152,12 @@ def pluralize(word: str) -> str:
 
     More sophisticated rules can be added later.
     """
-    if word.endswith('y') and word[-2] not in 'aeiou':
-        return word[:-1] + 'ies'
-    elif word.endswith('s') or word.endswith('x') or word.endswith('z'):
-        return word + 'es'
+    if word.endswith("y") and word[-2] not in "aeiou":
+        return word[:-1] + "ies"
+    elif word.endswith("s") or word.endswith("x") or word.endswith("z"):
+        return word + "es"
     else:
-        return word + 's'
+        return word + "s"
 
 
 def get_id_params(func: Callable) -> List[str]:
@@ -177,10 +180,10 @@ def get_id_params(func: Callable) -> List[str]:
 
     for param_name, param in sig.parameters.items():
         # Check if it's an ID parameter
-        if param_name == 'id' or param_name.endswith('_id'):
+        if param_name == "id" or param_name.endswith("_id"):
             id_params.append(param_name)
         # Check if it's a key parameter (for stores)
-        elif param_name == 'key':
+        elif param_name == "key":
             id_params.append(param_name)
 
     return id_params
@@ -190,7 +193,7 @@ def infer_path_from_function(
     func: Callable,
     *,
     use_plurals: bool = True,
-    base_path: str = '',
+    base_path: str = "",
 ) -> str:
     """
     Infer RESTful path from function name and signature.
@@ -251,9 +254,9 @@ def infer_path_from_function(
 
     # Add ID parameters to path
     for id_param in id_params:
-        path_parts.append(f'{{{id_param}}}')
+        path_parts.append(f"{{{id_param}}}")
 
-    path = '/' + '/'.join(p.strip('/') for p in path_parts if p)
+    path = "/" + "/".join(p.strip("/") for p in path_parts if p)
 
     return path
 
@@ -262,7 +265,7 @@ def infer_route_config(
     func: Callable,
     *,
     use_conventions: bool = True,
-    base_path: str = '',
+    base_path: str = "",
     use_plurals: bool = True,
 ) -> Dict[str, Any]:
     """
@@ -286,7 +289,7 @@ def infer_route_config(
     config = {}
 
     # Infer path
-    config['path'] = infer_path_from_function(
+    config["path"] = infer_path_from_function(
         func,
         use_plurals=use_plurals,
         base_path=base_path,
@@ -294,21 +297,21 @@ def infer_route_config(
 
     # Infer HTTP method
     http_method = infer_http_method(func_name, parsed)
-    config['methods'] = [http_method]
+    config["methods"] = [http_method]
 
     # For GET requests, non-path parameters should come from query string
-    if http_method == 'GET':
+    if http_method == "GET":
         from qh.rules import TransformSpec, HttpLocation
         import inspect
         import re
         from typing import get_type_hints
 
         # Get path parameters
-        path_params = set(re.findall(r'\{(\w+)\}', config['path']))
+        path_params = set(re.findall(r"\{(\w+)\}", config["path"]))
 
         # Get function parameters and their types
         sig = inspect.signature(func)
-        type_hints = get_type_hints(func) if hasattr(func, '__annotations__') else {}
+        type_hints = get_type_hints(func) if hasattr(func, "__annotations__") else {}
         param_overrides = {}
 
         for param_name, param in sig.parameters.items():
@@ -326,25 +329,26 @@ def infer_route_config(
                             return value
                         # Convert from string
                         return target_type(value)
+
                     return convert
 
                 # Non-path parameters for GET should be query parameters
                 param_overrides[param_name] = TransformSpec(
                     http_location=HttpLocation.QUERY,
-                    ingress=make_converter(param_type) if param_type != str else None
+                    ingress=make_converter(param_type) if param_type != str else None,
                 )
 
         if param_overrides:
-            config['param_overrides'] = param_overrides
+            config["param_overrides"] = param_overrides
 
     # Auto-generate summary if docstring exists
     if func.__doc__:
-        first_line = func.__doc__.strip().split('\n')[0]
-        config['summary'] = first_line
+        first_line = func.__doc__.strip().split("\n")[0]
+        config["summary"] = first_line
 
     # Add tags based on resource
     if parsed.resource:
-        config['tags'] = [parsed.resource]
+        config["tags"] = [parsed.resource]
 
     return config
 
@@ -353,7 +357,7 @@ def apply_conventions_to_funcs(
     funcs: List[Callable],
     *,
     use_conventions: bool = True,
-    base_path: str = '',
+    base_path: str = "",
     use_plurals: bool = True,
 ) -> Dict[Callable, Dict[str, Any]]:
     """
