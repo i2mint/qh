@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qh.endpoint &mdash; qh 0.0.9 documentation</title>
+  <title>qh.endpoint &mdash; qh 0.0.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=f7cdbf68"></script>
+      <script src="../../_static/documentation_options.js?v=a83ce22a"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -173,7 +173,8 @@
 
     <span class="c1"># Handle JSON body parameters</span>
     <span class="n">json_params</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">name</span><span class="p">:</span> <span class="n">spec</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">param_specs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">spec</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">param_specs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">http_location</span> <span class="o">==</span> <span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span>
     <span class="p">}</span>
 
@@ -191,7 +192,7 @@
 
         <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
             <span class="c1"># If no valid JSON, that&#39;s okay for GET requests</span>
-            <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;DELETE&#39;</span><span class="p">,</span> <span class="s1">&#39;HEAD&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;GET&quot;</span><span class="p">,</span> <span class="s2">&quot;DELETE&quot;</span><span class="p">,</span> <span class="s2">&quot;HEAD&quot;</span><span class="p">]:</span>
                 <span class="c1"># For other methods, might be an error</span>
                 <span class="k">pass</span>
 
@@ -255,22 +256,23 @@
     <span class="c1"># Detect path parameters from route path</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_type_hints</span>
+
     <span class="n">path_param_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">route_config</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
-        <span class="n">path_param_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\{(\w+)\}&#39;</span><span class="p">,</span> <span class="n">route_config</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+        <span class="n">path_param_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\{(\w+)\}&quot;</span><span class="p">,</span> <span class="n">route_config</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
 
     <span class="c1"># Check if this uses query params (GET-only routes without POST/PUT/PATCH)</span>
     <span class="c1"># Routes with POST/PUT/PATCH should use JSON body even if GET is also supported</span>
     <span class="n">methods</span> <span class="o">=</span> <span class="n">route_config</span><span class="o">.</span><span class="n">methods</span> <span class="ow">or</span> <span class="p">[]</span>
-    <span class="n">has_body_methods</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">m</span> <span class="ow">in</span> <span class="n">methods</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">,</span> <span class="s1">&#39;PUT&#39;</span><span class="p">,</span> <span class="s1">&#39;PATCH&#39;</span><span class="p">])</span>
-    <span class="n">use_query_params</span> <span class="o">=</span> <span class="s1">&#39;GET&#39;</span> <span class="ow">in</span> <span class="n">methods</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_body_methods</span>
+    <span class="n">has_body_methods</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">m</span> <span class="ow">in</span> <span class="n">methods</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="s2">&quot;PUT&quot;</span><span class="p">,</span> <span class="s2">&quot;PATCH&quot;</span><span class="p">])</span>
+    <span class="n">use_query_params</span> <span class="o">=</span> <span class="s2">&quot;GET&quot;</span> <span class="ow">in</span> <span class="n">methods</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_body_methods</span>
 
     <span class="c1"># Resolve transformation specs for each parameter</span>
     <span class="n">rule_chain</span> <span class="o">=</span> <span class="n">route_config</span><span class="o">.</span><span class="n">rule_chain</span>
     <span class="n">param_specs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TransformSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># Get type hints for type conversion</span>
-    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;__annotations__&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
 
     <span class="k">for</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
         <span class="c1"># Check for parameter-specific override</span>
@@ -292,17 +294,16 @@
                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">target_type</span><span class="p">):</span>
                         <span class="k">return</span> <span class="n">value</span>
                     <span class="k">return</span> <span class="n">target_type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
                 <span class="k">return</span> <span class="n">convert</span>
 
             <span class="n">param_specs</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">TransformSpec</span><span class="p">(</span>
                 <span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">QUERY</span><span class="p">,</span>
-                <span class="n">ingress</span><span class="o">=</span><span class="n">make_query_converter</span><span class="p">(</span><span class="n">param_type</span><span class="p">)</span> <span class="k">if</span> <span class="n">param_type</span> <span class="o">!=</span> <span class="nb">str</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">ingress</span><span class="o">=</span><span class="n">make_query_converter</span><span class="p">(</span><span class="n">param_type</span><span class="p">)</span> <span class="k">if</span> <span class="n">param_type</span> <span class="o">!=</span> <span class="nb">str</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Resolve from rule chain</span>
-            <span class="n">param_specs</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">resolve_transform</span><span class="p">(</span>
-                <span class="n">func</span><span class="p">,</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">rule_chain</span>
-            <span class="p">)</span>
+            <span class="n">param_specs</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">resolve_transform</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">rule_chain</span><span class="p">)</span>
 
     <span class="c1"># Determine if we need egress transformation for output</span>
     <span class="c1"># For now, we&#39;ll use a simple JSON serializer</span>
@@ -318,7 +319,7 @@
         <span class="k">if</span> <span class="n">handler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">handler</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
         <span class="c1"># Try to convert to dict if it has __dict__</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s1">&#39;__dict__&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__dict__&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span>
         <span class="c1"># Otherwise convert to string</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
@@ -361,6 +362,7 @@
                         <span class="k">if</span> <span class="n">is_async</span><span class="p">:</span>
                             <span class="c1"># For async functions, we need to run them in an event loop</span>
                             <span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+
                             <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">new_event_loop</span><span class="p">()</span>
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="k">return</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
@@ -383,6 +385,14 @@
                 <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">func</span><span class="p">(</span><span class="o">**</span><span class="n">transformed_params</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">**</span><span class="n">transformed_params</span><span class="p">)</span>
+
+            <span class="c1"># If the function returns a Response (or any subclass —</span>
+            <span class="c1"># StreamingResponse, FileResponse, PlainTextResponse, …),</span>
+            <span class="c1"># pass it through unchanged. This lets endpoints emit non-</span>
+            <span class="c1"># JSON payloads (PDFs, file downloads, streams) without</span>
+            <span class="c1"># having to bypass qh.</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">Response</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">result</span>
 
             <span class="c1"># Apply egress transformation</span>
             <span class="n">output</span> <span class="o">=</span> <span class="n">apply_egress_transform</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">default_egress</span><span class="p">)</span>
@@ -435,7 +445,8 @@
     <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
         <span class="c1"># Extract {param} from path</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-        <span class="n">path_params</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\{(\w+)\}&#39;</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="n">path_params</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\{(\w+)\}&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">path_params</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">param</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">param_names</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>

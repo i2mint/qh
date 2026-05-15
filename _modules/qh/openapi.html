@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qh.openapi &mdash; qh 0.0.9 documentation</title>
+  <title>qh.openapi &mdash; qh 0.0.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=f7cdbf68"></script>
+      <script src="../../_static/documentation_options.js?v=a83ce22a"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -109,7 +109,16 @@
 <span class="sd">- x-python-examples: Generated examples for testing</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">get_type_hints</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">get_args</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Any</span><span class="p">,</span>
+    <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">get_type_hints</span><span class="p">,</span>
+    <span class="n">get_origin</span><span class="p">,</span>
+    <span class="n">get_args</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.openapi.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_openapi</span>
@@ -131,7 +140,7 @@
         <span class="k">return</span> <span class="s2">&quot;Any&quot;</span>
 
     <span class="c1"># Handle basic types</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="s1">&#39;__name__&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">type_hint</span><span class="o">.</span><span class="vm">__name__</span>
 
     <span class="c1"># Handle typing generics</span>
@@ -139,9 +148,9 @@
     <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">origin_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s1">&#39;__name__&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">origin</span><span class="p">))</span>
+        <span class="n">origin_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">origin</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
-            <span class="n">args_str</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_python_type_name</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
+            <span class="n">args_str</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_python_type_name</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">origin_name</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">args_str</span><span class="si">}</span><span class="s2">]&quot;</span>
         <span class="k">return</span> <span class="n">origin_name</span>
 
@@ -164,36 +173,36 @@
 <span class="sd">        - docstring: function docstring</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;__annotations__&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
 
     <span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">param_type</span> <span class="o">=</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">annotation</span><span class="p">)</span>
 
         <span class="n">param_info</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">param_name</span><span class="p">,</span>
-            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">get_python_type_name</span><span class="p">(</span><span class="n">param_type</span><span class="p">),</span>
-            <span class="s1">&#39;required&#39;</span><span class="p">:</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">param_name</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">get_python_type_name</span><span class="p">(</span><span class="n">param_type</span><span class="p">),</span>
+            <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">,</span>
         <span class="p">}</span>
 
         <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
             <span class="c1"># Try to serialize default value</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
-                <span class="n">param_info</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">default</span>
+                <span class="n">param_info</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">default</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">param_info</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+                <span class="n">param_info</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
 
         <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_info</span><span class="p">)</span>
 
-    <span class="n">return_type</span> <span class="o">=</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;return&#39;</span><span class="p">,</span> <span class="n">sig</span><span class="o">.</span><span class="n">return_annotation</span><span class="p">)</span>
+    <span class="n">return_type</span> <span class="o">=</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;return&quot;</span><span class="p">,</span> <span class="n">sig</span><span class="o">.</span><span class="n">return_annotation</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-        <span class="s1">&#39;module&#39;</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span>
-        <span class="s1">&#39;parameters&#39;</span><span class="p">:</span> <span class="n">parameters</span><span class="p">,</span>
-        <span class="s1">&#39;return_type&#39;</span><span class="p">:</span> <span class="n">get_python_type_name</span><span class="p">(</span><span class="n">return_type</span><span class="p">),</span>
-        <span class="s1">&#39;docstring&#39;</span><span class="p">:</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">func</span><span class="p">),</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+        <span class="s2">&quot;module&quot;</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span>
+        <span class="s2">&quot;parameters&quot;</span><span class="p">:</span> <span class="n">parameters</span><span class="p">,</span>
+        <span class="s2">&quot;return_type&quot;</span><span class="p">:</span> <span class="n">get_python_type_name</span><span class="p">(</span><span class="n">return_type</span><span class="p">),</span>
+        <span class="s2">&quot;docstring&quot;</span><span class="p">:</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">func</span><span class="p">),</span>
     <span class="p">}</span></div>
 
 
@@ -207,7 +216,7 @@
 <span class="sd">    Uses type hints to generate sensible example values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s1">&#39;__annotations__&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
 
     <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -227,10 +236,7 @@
             <span class="n">example_request</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">example_value</span>
 
     <span class="k">if</span> <span class="n">example_request</span><span class="p">:</span>
-        <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">({</span>
-            <span class="s1">&#39;summary&#39;</span><span class="p">:</span> <span class="s1">&#39;Basic example&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">example_request</span>
-        <span class="p">})</span>
+        <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;summary&quot;</span><span class="p">:</span> <span class="s2">&quot;Basic example&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">example_request</span><span class="p">})</span>
 
     <span class="k">return</span> <span class="n">examples</span></div>
 
@@ -242,27 +248,27 @@
         <span class="k">return</span> <span class="s2">&quot;example_value&quot;</span>
 
     <span class="c1"># Handle basic types</span>
-    <span class="k">if</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s2">&quot;int&quot;</span><span class="p">:</span>
         <span class="c1"># Use param name hints</span>
-        <span class="k">if</span> <span class="s1">&#39;id&#39;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="k">if</span> <span class="s2">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
             <span class="k">return</span> <span class="mi">123</span>
-        <span class="k">elif</span> <span class="s1">&#39;count&#39;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;num&#39;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="k">elif</span> <span class="s2">&quot;count&quot;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">&quot;num&quot;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
             <span class="k">return</span> <span class="mi">10</span>
         <span class="k">return</span> <span class="mi">42</span>
-    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
-        <span class="k">if</span> <span class="s1">&#39;name&#39;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s2">&quot;str&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
             <span class="k">return</span> <span class="s2">&quot;example_name&quot;</span>
-        <span class="k">elif</span> <span class="s1">&#39;id&#39;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+        <span class="k">elif</span> <span class="s2">&quot;id&quot;</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
             <span class="k">return</span> <span class="s2">&quot;abc123&quot;</span>
         <span class="k">return</span> <span class="s2">&quot;example&quot;</span>
-    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">float</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s1">&#39;float&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">float</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s2">&quot;float&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="mf">3.14</span>
-    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s1">&#39;bool&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s2">&quot;bool&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">list</span> <span class="ow">or</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
-            <span class="n">item_example</span> <span class="o">=</span> <span class="n">_generate_example_value</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;item&#39;</span><span class="p">)</span>
+            <span class="n">item_example</span> <span class="o">=</span> <span class="n">_generate_example_value</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;item&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">item_example</span><span class="p">]</span> <span class="k">if</span> <span class="n">item_example</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
         <span class="k">return</span> <span class="p">[]</span>
     <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">or</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
@@ -304,23 +310,24 @@
 
     <span class="c1"># Store function metadata by operation_id</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">qh.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">inspect_routes</span>
+
     <span class="n">routes</span> <span class="o">=</span> <span class="n">inspect_routes</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
 
     <span class="c1"># Enhance each endpoint with Python metadata</span>
     <span class="k">for</span> <span class="n">route_info</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">:</span>
-        <span class="n">func</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;function&#39;</span><span class="p">)</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;function&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">func</span><span class="p">:</span>
             <span class="k">continue</span>
 
-        <span class="n">path</span> <span class="o">=</span> <span class="n">route_info</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">]</span>
-        <span class="n">methods</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;methods&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">route_info</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span>
+        <span class="n">methods</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;methods&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span>
 
         <span class="c1"># Skip OpenAPI/docs routes</span>
-        <span class="k">if</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;/openapi.json&#39;</span><span class="p">,</span> <span class="s1">&#39;/docs&#39;</span><span class="p">,</span> <span class="s1">&#39;/redoc&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;/openapi.json&quot;</span><span class="p">,</span> <span class="s2">&quot;/docs&quot;</span><span class="p">,</span> <span class="s2">&quot;/redoc&quot;</span><span class="p">]:</span>
             <span class="k">continue</span>
 
         <span class="c1"># Find the operation in the schema</span>
-        <span class="n">path_item</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;paths&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">path_item</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;paths&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">{})</span>
 
         <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
             <span class="n">method_lower</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -332,15 +339,15 @@
             <span class="c1"># Add Python metadata</span>
             <span class="k">if</span> <span class="n">include_python_metadata</span><span class="p">:</span>
                 <span class="n">sig_info</span> <span class="o">=</span> <span class="n">extract_function_signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-                <span class="n">operation</span><span class="p">[</span><span class="s1">&#39;x-python-signature&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_info</span>
+                <span class="n">operation</span><span class="p">[</span><span class="s2">&quot;x-python-signature&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_info</span>
 
             <span class="c1"># Add examples</span>
             <span class="k">if</span> <span class="n">include_examples</span><span class="p">:</span>
                 <span class="n">examples</span> <span class="o">=</span> <span class="n">generate_examples_for_function</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">examples</span> <span class="ow">and</span> <span class="s1">&#39;requestBody&#39;</span> <span class="ow">in</span> <span class="n">operation</span><span class="p">:</span>
-                    <span class="n">content</span> <span class="o">=</span> <span class="n">operation</span><span class="p">[</span><span class="s1">&#39;requestBody&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;content&#39;</span><span class="p">,</span> <span class="p">{})</span>
-                    <span class="n">json_content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;application/json&#39;</span><span class="p">,</span> <span class="p">{})</span>
-                    <span class="n">json_content</span><span class="p">[</span><span class="s1">&#39;examples&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="k">if</span> <span class="n">examples</span> <span class="ow">and</span> <span class="s2">&quot;requestBody&quot;</span> <span class="ow">in</span> <span class="n">operation</span><span class="p">:</span>
+                    <span class="n">content</span> <span class="o">=</span> <span class="n">operation</span><span class="p">[</span><span class="s2">&quot;requestBody&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                    <span class="n">json_content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                    <span class="n">json_content</span><span class="p">[</span><span class="s2">&quot;examples&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
                         <span class="sa">f</span><span class="s2">&quot;example_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">ex</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ex</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
                     <span class="p">}</span>
 
@@ -348,13 +355,13 @@
             <span class="k">if</span> <span class="n">include_transformers</span><span class="p">:</span>
                 <span class="c1"># This would include information about how types are transformed</span>
                 <span class="c1"># For now, we&#39;ll add a placeholder</span>
-                <span class="n">operation</span><span class="p">[</span><span class="s1">&#39;x-python-transformers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-                    <span class="s1">&#39;note&#39;</span><span class="p">:</span> <span class="s1">&#39;Type transformation metadata would go here&#39;</span>
+                <span class="n">operation</span><span class="p">[</span><span class="s2">&quot;x-python-transformers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;note&quot;</span><span class="p">:</span> <span class="s2">&quot;Type transformation metadata would go here&quot;</span>
                 <span class="p">}</span>
 
             <span class="n">path_item</span><span class="p">[</span><span class="n">method_lower</span><span class="p">]</span> <span class="o">=</span> <span class="n">operation</span>
 
-        <span class="n">schema</span><span class="p">[</span><span class="s1">&#39;paths&#39;</span><span class="p">][</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="n">path_item</span>
+        <span class="n">schema</span><span class="p">[</span><span class="s2">&quot;paths&quot;</span><span class="p">][</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="n">path_item</span>
 
     <span class="k">return</span> <span class="n">schema</span></div>
 
@@ -398,7 +405,8 @@
 
     <span class="k">if</span> <span class="n">output_file</span><span class="p">:</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">schema</span></div>

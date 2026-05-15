@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qh.config &mdash; qh 0.0.9 documentation</title>
+  <title>qh.config &mdash; qh 0.0.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=f7cdbf68"></script>
+      <script src="../../_static/documentation_options.js?v=a83ce22a"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -134,7 +134,7 @@
     <span class="n">param_overrides</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
 
     <span class="c1"># Async task configuration (None = not async, TaskConfig = async enabled)</span>
-    <span class="n">async_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;TaskConfig&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">async_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="s2">&quot;TaskConfig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># Additional metadata</span>
     <span class="n">summary</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -148,18 +148,26 @@
 
 <div class="viewcode-block" id="RouteConfig.merge_with">
 <a class="viewcode-back" href="../../module_docs/qh/config.html#qh.config.RouteConfig.merge_with">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">merge_with</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">&#39;RouteConfig&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RouteConfig&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">merge_with</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;RouteConfig&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;RouteConfig&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Merge with another config, other takes precedence.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">RouteConfig</span><span class="p">(</span>
             <span class="n">path</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">path</span> <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
             <span class="n">methods</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">methods</span> <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">methods</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">methods</span><span class="p">,</span>
-            <span class="n">rule_chain</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">rule_chain</span> <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">rule_chain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule_chain</span><span class="p">,</span>
+            <span class="n">rule_chain</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">rule_chain</span>
+            <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">rule_chain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">rule_chain</span><span class="p">,</span>
             <span class="n">param_overrides</span><span class="o">=</span><span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">param_overrides</span><span class="p">,</span> <span class="o">**</span><span class="n">other</span><span class="o">.</span><span class="n">param_overrides</span><span class="p">},</span>
-            <span class="n">async_config</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">async_config</span> <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">async_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_config</span><span class="p">,</span>
+            <span class="n">async_config</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">async_config</span>
+            <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">async_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">async_config</span><span class="p">,</span>
             <span class="n">summary</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">summary</span> <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">summary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">summary</span><span class="p">,</span>
-            <span class="n">description</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">description</span> <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">description</span>
+            <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
             <span class="n">tags</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">tags</span> <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">tags</span><span class="p">,</span>
-            <span class="n">response_model</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">response_model</span> <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">response_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">response_model</span><span class="p">,</span>
+            <span class="n">response_model</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">response_model</span>
+            <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">response_model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">response_model</span><span class="p">,</span>
             <span class="n">include_in_schema</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">include_in_schema</span><span class="p">,</span>
             <span class="n">deprecated</span><span class="o">=</span><span class="n">other</span><span class="o">.</span><span class="n">deprecated</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">deprecated</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -174,14 +182,14 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Global configuration for the entire FastAPI app.&quot;&quot;&quot;</span>
 
     <span class="c1"># Default HTTP methods for all routes</span>
-    <span class="n">default_methods</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+    <span class="n">default_methods</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span>
 
     <span class="c1"># Path template for auto-generating routes</span>
     <span class="c1"># Available placeholders: {func_name}</span>
-    <span class="n">path_template</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;/</span><span class="si">{func_name}</span><span class="s1">&#39;</span>
+    <span class="n">path_template</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;/</span><span class="si">{func_name}</span><span class="s2">&quot;</span>
 
     <span class="c1"># Path prefix for all routes</span>
-    <span class="n">path_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">path_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
     <span class="c1"># Global rule chain</span>
     <span class="n">rule_chain</span><span class="p">:</span> <span class="n">RuleChain</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">DEFAULT_RULE_CHAIN</span><span class="p">)</span>
@@ -201,11 +209,11 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">to_fastapi_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert to FastAPI() constructor kwargs.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span>
-            <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
-            <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
-            <span class="s1">&#39;docs_url&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">docs_url</span><span class="p">,</span>
-            <span class="s1">&#39;redoc_url&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">redoc_url</span><span class="p">,</span>
-            <span class="s1">&#39;openapi_url&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">openapi_url</span><span class="p">,</span>
+            <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+            <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+            <span class="s2">&quot;docs_url&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">docs_url</span><span class="p">,</span>
+            <span class="s2">&quot;redoc_url&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">redoc_url</span><span class="p">,</span>
+            <span class="s2">&quot;openapi_url&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">openapi_url</span><span class="p">,</span>
             <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">fastapi_kwargs</span><span class="p">,</span>
         <span class="p">}</span></div>
 </div>
@@ -246,17 +254,19 @@
     <span class="k">if</span> <span class="n">route_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># Convert dict to RouteConfig if necessary</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">route_config</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-            <span class="n">route_config</span> <span class="o">=</span> <span class="n">RouteConfig</span><span class="p">(</span><span class="o">**</span><span class="p">{</span>
-                <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">route_config</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">RouteConfig</span><span class="o">.</span><span class="n">__dataclass_fields__</span>
-            <span class="p">})</span>
+            <span class="n">route_config</span> <span class="o">=</span> <span class="n">RouteConfig</span><span class="p">(</span>
+                <span class="o">**</span><span class="p">{</span>
+                    <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">route_config</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">RouteConfig</span><span class="o">.</span><span class="n">__dataclass_fields__</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
         <span class="n">config</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">merge_with</span><span class="p">(</span><span class="n">route_config</span><span class="p">)</span>
 
     <span class="c1"># Auto-generate path if not specified</span>
     <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">config</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span>
-            <span class="n">config</span><span class="p">,</span>
-            <span class="n">path</span><span class="o">=</span><span class="n">app_config</span><span class="o">.</span><span class="n">path_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func_name</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+            <span class="n">config</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">app_config</span><span class="o">.</span><span class="n">path_template</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">func_name</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="p">)</span>
 
     <span class="c1"># Auto-generate description from docstring if not specified</span>
@@ -265,7 +275,7 @@
 
     <span class="c1"># Auto-generate summary from first line of docstring</span>
     <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">summary</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">:</span>
-        <span class="n">first_line</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">first_line</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">config</span> <span class="o">=</span> <span class="n">replace</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">summary</span><span class="o">=</span><span class="n">first_line</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">config</span></div>
@@ -283,7 +293,7 @@
 
 <div class="viewcode-block" id="ConfigBuilder.with_path_prefix">
 <a class="viewcode-back" href="../../module_docs/qh/config.html#qh.config.ConfigBuilder.with_path_prefix">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">with_path_prefix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ConfigBuilder&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_path_prefix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ConfigBuilder&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set path prefix for all routes.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app_config</span><span class="o">.</span><span class="n">path_prefix</span> <span class="o">=</span> <span class="n">prefix</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -291,7 +301,7 @@
 
 <div class="viewcode-block" id="ConfigBuilder.with_path_template">
 <a class="viewcode-back" href="../../module_docs/qh/config.html#qh.config.ConfigBuilder.with_path_template">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">with_path_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ConfigBuilder&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_path_template</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ConfigBuilder&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set path template for auto-generation.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app_config</span><span class="o">.</span><span class="n">path_template</span> <span class="o">=</span> <span class="n">template</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -299,7 +309,7 @@
 
 <div class="viewcode-block" id="ConfigBuilder.with_default_methods">
 <a class="viewcode-back" href="../../module_docs/qh/config.html#qh.config.ConfigBuilder.with_default_methods">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">with_default_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">methods</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s1">&#39;ConfigBuilder&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_default_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">methods</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;ConfigBuilder&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set default HTTP methods.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app_config</span><span class="o">.</span><span class="n">default_methods</span> <span class="o">=</span> <span class="n">methods</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -307,7 +317,7 @@
 
 <div class="viewcode-block" id="ConfigBuilder.with_rule_chain">
 <a class="viewcode-back" href="../../module_docs/qh/config.html#qh.config.ConfigBuilder.with_rule_chain">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">with_rule_chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chain</span><span class="p">:</span> <span class="n">RuleChain</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;ConfigBuilder&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_rule_chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chain</span><span class="p">:</span> <span class="n">RuleChain</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ConfigBuilder&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set global rule chain.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app_config</span><span class="o">.</span><span class="n">rule_chain</span> <span class="o">=</span> <span class="n">chain</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -315,7 +325,7 @@
 
 <div class="viewcode-block" id="ConfigBuilder.for_function">
 <a class="viewcode-back" href="../../module_docs/qh/config.html#qh.config.ConfigBuilder.for_function">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">for_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;FunctionConfigBuilder&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">for_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;FunctionConfigBuilder&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Start configuring a specific function.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">FunctionConfigBuilder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span></div>
 
@@ -341,7 +351,7 @@
 
 <div class="viewcode-block" id="FunctionConfigBuilder.at_path">
 <a class="viewcode-back" href="../../module_docs/qh/config.html#qh.config.FunctionConfigBuilder.at_path">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">at_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;FunctionConfigBuilder&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">at_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;FunctionConfigBuilder&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set custom path for this function.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -349,7 +359,7 @@
 
 <div class="viewcode-block" id="FunctionConfigBuilder.with_methods">
 <a class="viewcode-back" href="../../module_docs/qh/config.html#qh.config.FunctionConfigBuilder.with_methods">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">with_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">methods</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s1">&#39;FunctionConfigBuilder&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_methods</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">methods</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;FunctionConfigBuilder&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set HTTP methods for this function.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">methods</span> <span class="o">=</span> <span class="n">methods</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -357,7 +367,7 @@
 
 <div class="viewcode-block" id="FunctionConfigBuilder.with_summary">
 <a class="viewcode-back" href="../../module_docs/qh/config.html#qh.config.FunctionConfigBuilder.with_summary">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">with_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">summary</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;FunctionConfigBuilder&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">summary</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;FunctionConfigBuilder&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set OpenAPI summary.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">summary</span> <span class="o">=</span> <span class="n">summary</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -365,7 +375,7 @@
 
 <div class="viewcode-block" id="FunctionConfigBuilder.with_tags">
 <a class="viewcode-back" href="../../module_docs/qh/config.html#qh.config.FunctionConfigBuilder.with_tags">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">with_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tags</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s1">&#39;FunctionConfigBuilder&#39;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_tags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tags</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;FunctionConfigBuilder&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Set OpenAPI tags.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tags</span> <span class="o">=</span> <span class="n">tags</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -383,14 +393,14 @@
 
 <span class="c1"># Convenience functions for common patterns</span>
 
+
 <div class="viewcode-block" id="from_dict">
 <a class="viewcode-back" href="../../module_docs/qh/config.html#qh.config.from_dict">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="n">config_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">AppConfig</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create AppConfig from dictionary.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">AppConfig</span><span class="p">(</span><span class="o">**</span><span class="p">{</span>
-        <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">AppConfig</span><span class="o">.</span><span class="n">__dataclass_fields__</span>
-    <span class="p">})</span></div>
+    <span class="k">return</span> <span class="n">AppConfig</span><span class="p">(</span>
+        <span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">AppConfig</span><span class="o">.</span><span class="n">__dataclass_fields__</span><span class="p">}</span>
+    <span class="p">)</span></div>
 
 
 
@@ -426,10 +436,13 @@
                 <span class="n">result</span><span class="p">[</span><span class="n">func</span><span class="p">]</span> <span class="o">=</span> <span class="n">config</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
                 <span class="c1"># Convert dict to RouteConfig</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">func</span><span class="p">]</span> <span class="o">=</span> <span class="n">RouteConfig</span><span class="p">(</span><span class="o">**</span><span class="p">{</span>
-                    <span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                    <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">RouteConfig</span><span class="o">.</span><span class="n">__dataclass_fields__</span>
-                <span class="p">})</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">func</span><span class="p">]</span> <span class="o">=</span> <span class="n">RouteConfig</span><span class="p">(</span>
+                    <span class="o">**</span><span class="p">{</span>
+                        <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+                        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">RouteConfig</span><span class="o">.</span><span class="n">__dataclass_fields__</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid config type for </span><span class="si">{</span><span class="n">func</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">config</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">result</span>
