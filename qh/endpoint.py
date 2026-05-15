@@ -276,6 +276,14 @@ def make_endpoint(
             else:
                 result = func(**transformed_params)
 
+            # If the function returns a Response (or any subclass —
+            # StreamingResponse, FileResponse, PlainTextResponse, …),
+            # pass it through unchanged. This lets endpoints emit non-
+            # JSON payloads (PDFs, file downloads, streams) without
+            # having to bypass qh.
+            if isinstance(result, Response):
+                return result
+
             # Apply egress transformation
             output = apply_egress_transform(result, default_egress)
 

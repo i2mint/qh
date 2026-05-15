@@ -233,5 +233,56 @@ def test_none_config():
     assert response.json() == 8
 
 
+def test_response_passthrough_returns_unchanged():
+    """A function that returns a fastapi.Response bypasses JSON encoding.
+
+    This is the seam reelee uses for PDF export (chunk 9): the endpoint
+    returns a Response with raw bytes and a content-type header, qh
+    passes it through verbatim.
+    """
+    from fastapi import Response
+
+    PDF_BYTES = b"%PDF-1.4 fake but valid header"
+
+    def export_pdf() -> Response:
+        return Response(
+            content=PDF_BYTES,
+            media_type="application/pdf",
+            headers={
+                "content-disposition": 'attachment; filename="picture-book.pdf"'
+            },
+        )
+
+    app = mk_app([export_pdf])
+    client = TestClient(app)
+    response = client.post("/export_pdf")
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert (
+        response.headers["content-disposition"]
+        == 'attachment; filename="picture-book.pdf"'
+    )
+    assert response.content == PDF_BYTES
+
+
+def test_response_passthrough_supports_streaming():
+    """StreamingResponse subclasses also pass through."""
+    from fastapi.responses import StreamingResponse
+
+    def stream_text() -> StreamingResponse:
+        def gen():
+            for chunk in ("hello ", "from ", "qh"):
+                yield chunk.encode()
+
+        return StreamingResponse(gen(), media_type="text/plain")
+
+    app = mk_app([stream_text])
+    client = TestClient(app)
+    response = client.post("/stream_text")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/plain")
+    assert response.text == "hello from qh"
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
