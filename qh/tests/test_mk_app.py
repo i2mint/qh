@@ -284,5 +284,72 @@ def test_response_passthrough_supports_streaming():
     assert response.text == "hello from qh"
 
 
+def test_dataclass_return_serializes():
+    """A function returning a dataclass serializes (via jsonable_encoder).
+
+    Regression for i2mint/qh#6: JSONResponse uses the stdlib json encoder,
+    which only handles dict/list/scalar — a dataclass instance raised
+    ``Object of type ... is not JSON serializable`` and 500'd.
+    """
+    from dataclasses import dataclass
+
+    @dataclass(frozen=True)
+    class Point:
+        x: int
+        y: int
+
+    def make_point(x: int, y: int) -> Point:
+        return Point(x=x, y=y)
+
+    app = mk_app([make_point])
+    client = TestClient(app)
+
+    response = client.post('/make_point', json={'x': 3, 'y': 5})
+    assert response.status_code == 200
+    assert response.json() == {'x': 3, 'y': 5}
+
+
+def test_list_of_dataclasses_serializes():
+    """A list of dataclasses serializes — the ef.EfService.search() shape."""
+    from dataclasses import dataclass
+
+    @dataclass(frozen=True)
+    class Hit:
+        label: str
+        score: float
+
+    def top_hits() -> list[Hit]:
+        return [Hit(label='a', score=0.9), Hit(label='b', score=0.5)]
+
+    app = mk_app([top_hits])
+    client = TestClient(app)
+
+    response = client.post('/top_hits', json={})
+    assert response.status_code == 200
+    assert response.json() == [
+        {'label': 'a', 'score': 0.9},
+        {'label': 'b', 'score': 0.5},
+    ]
+
+
+def test_rich_types_serialize():
+    """datetime and Enum returns also serialize through jsonable_encoder."""
+    from datetime import datetime
+    from enum import Enum
+
+    class Color(Enum):
+        RED = 'red'
+
+    def info() -> dict:
+        return {'when': datetime(2026, 5, 21, 12, 0, 0), 'color': Color.RED}
+
+    app = mk_app([info])
+    client = TestClient(app)
+
+    response = client.post('/info', json={})
+    assert response.status_code == 200
+    assert response.json() == {'when': '2026-05-21T12:00:00', 'color': 'red'}
+
+
 if __name__ == '__main__':
     pytest.main([__file__, '-v'])
