@@ -41,6 +41,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    ForwardRef,
     List,
     Literal,
     Optional,
@@ -181,11 +182,23 @@ def python_type_to_json_schema(
     """
     stack = _stack if _stack is not None else frozenset()
 
-    # Unknowns and unresolved string annotations → permissive empty schema.
+    # Unknowns → permissive empty schema.
     if type_hint is inspect.Parameter.empty or type_hint is Any:
         return {}
-    if isinstance(type_hint, str):
-        return {}
+
+    # Forward references — a bare string or a typing.ForwardRef. These appear
+    # for self-referential types: ``get_type_hints`` leaves the inner type of
+    # ``list["TreeNode"]`` unresolved (a bare ``str`` on Python 3.10, a
+    # ``ForwardRef`` elsewhere). Resolve only against names already known to
+    # the schema registry or currently on the recursion stack; an otherwise
+    # unresolvable reference degrades to the permissive empty schema.
+    if isinstance(type_hint, (str, ForwardRef)):
+        name = (
+            type_hint
+            if isinstance(type_hint, str)
+            else type_hint.__forward_arg__
+        )
+        return _ref(name) if (name in schemas or name in stack) else {}
 
     # Exact primitive match (covers ``NoneType`` too).
     if type_hint in _PRIMITIVE_SCHEMAS:
