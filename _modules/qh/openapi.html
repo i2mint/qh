@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qh.openapi &mdash; qh 0.0.12 documentation</title>
+  <title>qh.openapi &mdash; qh 0.0.13 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=3bbcec59"></script>
+      <script src="../../_static/documentation_options.js?v=9fc46840"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -98,30 +98,479 @@
              
   <h1>Source code for qh.openapi</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Enhanced OpenAPI generation for qh.</span>
+<span class="sd">OpenAPI generation for qh — including JSON Schema derived from Python type hints.</span>
 
-<span class="sd">Extends FastAPI&#39;s OpenAPI generation with metadata needed for bidirectional</span>
-<span class="sd">Python ↔ HTTP transformation:</span>
+<span class="sd">``qh`` builds every route with a generic ``endpoint(request: Request)`` signature</span>
+<span class="sd">(see :mod:`qh.endpoint`): the wrapped function&#39;s real parameters and return type</span>
+<span class="sd">are parsed *manually* from the request body, which makes them invisible to</span>
+<span class="sd">FastAPI&#39;s own OpenAPI machinery. Out of the box, therefore, ``/openapi.json``</span>
+<span class="sd">lists routes and docstrings but emits empty ``{}`` request/response schemas and</span>
+<span class="sd">no ``components.schemas``.</span>
 
-<span class="sd">- x-python-signature: Full function signature with defaults</span>
-<span class="sd">- x-python-module: Module path for imports</span>
-<span class="sd">- x-python-transformers: Type transformation metadata</span>
-<span class="sd">- x-python-examples: Generated examples for testing</span>
+<span class="sd">This module closes that gap. It introspects each wrapped function&#39;s Python type</span>
+<span class="sd">hints and derives a complete OpenAPI document:</span>
+
+<span class="sd">- ``requestBody`` — a JSON Schema object built from the JSON-body parameters,</span>
+<span class="sd">- ``parameters`` — path/query parameters,</span>
+<span class="sd">- ``responses`` — a JSON Schema for the return type,</span>
+<span class="sd">- ``components.schemas`` — one named schema per dataclass / ``TypedDict`` /</span>
+<span class="sd">  Pydantic model / ``NamedTuple`` / ``Enum`` encountered, referenced via ``$ref``,</span>
+<span class="sd">- ``x-python-*`` extensions — Python signature metadata for bidirectional</span>
+<span class="sd">  Python ↔ HTTP transformation.</span>
+
+<span class="sd">The whole thing is **additive**: the request-handling path is untouched, and</span>
+<span class="sd">:func:`install_enhanced_openapi` falls back to FastAPI&#39;s plain schema if</span>
+<span class="sd">enhancement ever raises — so a converter bug can never break ``/openapi.json``.</span>
+
+<span class="sd">Public surface:</span>
+
+<span class="sd">- :func:`python_type_to_json_schema` — the Python-type-hint → JSON Schema converter.</span>
+<span class="sd">- :func:`enhance_openapi_schema` — full enhanced OpenAPI document for an app.</span>
+<span class="sd">- :func:`export_openapi` — :func:`enhance_openapi_schema` plus optional file output.</span>
+<span class="sd">- :func:`install_enhanced_openapi` — make an app serve the enhanced doc at</span>
+<span class="sd">  ``/openapi.json`` (and render it in ``/docs``).</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Any</span><span class="p">,</span>
-    <span class="n">Dict</span><span class="p">,</span>
-    <span class="n">List</span><span class="p">,</span>
-    <span class="n">Optional</span><span class="p">,</span>
     <span class="n">Callable</span><span class="p">,</span>
-    <span class="n">get_type_hints</span><span class="p">,</span>
-    <span class="n">get_origin</span><span class="p">,</span>
+    <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">ForwardRef</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">,</span>
+    <span class="n">Literal</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">Union</span><span class="p">,</span>
     <span class="n">get_args</span><span class="p">,</span>
+    <span class="n">get_origin</span><span class="p">,</span>
+    <span class="n">get_type_hints</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.openapi.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_openapi</span>
+
+<span class="k">try</span><span class="p">:</span>  <span class="c1"># PEP 604 unions (``int | None``) — Python 3.10+</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnionType</span>  <span class="c1"># type: ignore</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma: no cover - Python &lt; 3.10</span>
+    <span class="n">UnionType</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+
+<span class="n">NoneType</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="c1">#: Exact-match JSON Schema for Python primitives. ``bool`` is listed before</span>
+<span class="c1">#: ``int`` only for readability — lookup is by exact type, so order is moot.</span>
+<span class="n">_PRIMITIVE_SCHEMAS</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="nb">bool</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;boolean&quot;</span><span class="p">},</span>
+    <span class="nb">int</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">},</span>
+    <span class="nb">float</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">},</span>
+    <span class="nb">str</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">},</span>
+    <span class="nb">bytes</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span> <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;byte&quot;</span><span class="p">},</span>
+    <span class="n">NoneType</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;null&quot;</span><span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1">#: Generic origins treated as JSON arrays.</span>
+<span class="n">_ARRAY_ORIGINS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="nb">list</span><span class="p">,</span>
+    <span class="nb">tuple</span><span class="p">,</span>
+    <span class="nb">set</span><span class="p">,</span>
+    <span class="nb">frozenset</span><span class="p">,</span>
+    <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
+    <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableSequence</span><span class="p">,</span>
+    <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Set</span><span class="p">,</span>
+    <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableSet</span><span class="p">,</span>
+    <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Collection</span><span class="p">,</span>
+    <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterable</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1">#: Generic origins treated as JSON objects (free-form maps).</span>
+<span class="n">_MAPPING_ORIGINS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">,</span>
+    <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">MutableMapping</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Python type → JSON Schema</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_ref</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A JSON Schema ``$ref`` into ``components.schemas``.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;$ref&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;#/components/schemas/</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_safe_type_hints</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve type hints, degrading gracefully when annotations don&#39;t resolve.</span>
+
+<span class="sd">    ``get_type_hints`` raises ``NameError`` for string annotations referring to</span>
+<span class="sd">    names not in the object&#39;s module globals (e.g. types defined inside a</span>
+<span class="sd">    function). In that case fall back to the raw ``__annotations__`` mapping —</span>
+<span class="sd">    the converter treats any leftover string as an unknown (empty) schema.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{})</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_typed_dict</span><span class="p">(</span><span class="n">tp</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether ``tp`` is a ``typing.TypedDict`` subclass.&quot;&quot;&quot;</span>
+    <span class="c1"># ``__required_keys__`` / ``__optional_keys__`` are the stable markers.</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;__required_keys__&quot;</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_namedtuple</span><span class="p">(</span><span class="n">tp</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether ``tp`` is a ``typing.NamedTuple`` / ``collections.namedtuple``.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;_fields&quot;</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_is_pydantic_model</span><span class="p">(</span><span class="n">tp</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether ``tp`` is a Pydantic model (v2 ``model_json_schema`` or v1 ``schema``).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+        <span class="nb">hasattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;model_json_schema&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;schema&quot;</span><span class="p">)</span>
+    <span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;__fields__&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="python_type_to_json_schema">
+<a class="viewcode-back" href="../../module_docs/qh/openapi.html#qh.openapi.python_type_to_json_schema">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">python_type_to_json_schema</span><span class="p">(</span>
+    <span class="n">type_hint</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">schemas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">_stack</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">frozenset</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a Python type hint to a JSON Schema fragment.</span>
+
+<span class="sd">    Primitives, containers and unions are inlined. Named composite types —</span>
+<span class="sd">    dataclasses, ``TypedDict``\\ s, Pydantic models, ``NamedTuple``\\ s and</span>
+<span class="sd">    ``Enum``\\ s — are registered in ``schemas`` (the OpenAPI</span>
+<span class="sd">    ``components.schemas`` table) and returned as a ``$ref``, so the same type</span>
+<span class="sd">    used in several places is described once.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        type_hint: the Python type / annotation to convert. ``Any`` and</span>
+<span class="sd">            :data:`inspect.Parameter.empty` map to the empty schema ``{}``</span>
+<span class="sd">            (matches anything); ``None`` / ``NoneType`` map to ``{&quot;type&quot;: &quot;null&quot;}``.</span>
+<span class="sd">        schemas: the mutable ``components.schemas`` accumulator — composite</span>
+<span class="sd">            types encountered are added here, keyed by their class name.</span>
+<span class="sd">        _stack: internal — the set of composite type names currently being</span>
+<span class="sd">            built, used to break recursion on self-referential types.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        a JSON Schema dict — an inline fragment, or ``{&quot;$ref&quot;: ...}`` for a</span>
+<span class="sd">        named composite type.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &gt;&gt;&gt; python_type_to_json_schema(int, {})</span>
+<span class="sd">        {&#39;type&#39;: &#39;integer&#39;}</span>
+<span class="sd">        &gt;&gt;&gt; python_type_to_json_schema(list[str], {})</span>
+<span class="sd">        {&#39;type&#39;: &#39;array&#39;, &#39;items&#39;: {&#39;type&#39;: &#39;string&#39;}}</span>
+<span class="sd">        &gt;&gt;&gt; python_type_to_json_schema(Optional[int], {})</span>
+<span class="sd">        {&#39;anyOf&#39;: [{&#39;type&#39;: &#39;integer&#39;}, {&#39;type&#39;: &#39;null&#39;}]}</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">stack</span> <span class="o">=</span> <span class="n">_stack</span> <span class="k">if</span> <span class="n">_stack</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">frozenset</span><span class="p">()</span>
+
+    <span class="c1"># Unknowns → permissive empty schema.</span>
+    <span class="k">if</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+    <span class="c1"># Forward references — a bare string or a typing.ForwardRef. These appear</span>
+    <span class="c1"># for self-referential types: ``get_type_hints`` leaves the inner type of</span>
+    <span class="c1"># ``list[&quot;TreeNode&quot;]`` unresolved (a bare ``str`` on Python 3.10, a</span>
+    <span class="c1"># ``ForwardRef`` elsewhere). Resolve only against names already known to</span>
+    <span class="c1"># the schema registry or currently on the recursion stack; an otherwise</span>
+    <span class="c1"># unresolvable reference degrades to the permissive empty schema.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">ForwardRef</span><span class="p">)):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">type_hint</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">type_hint</span><span class="o">.</span><span class="n">__forward_arg__</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">_ref</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="n">schemas</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">stack</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+
+    <span class="c1"># Exact primitive match (covers ``NoneType`` too).</span>
+    <span class="k">if</span> <span class="n">type_hint</span> <span class="ow">in</span> <span class="n">_PRIMITIVE_SCHEMAS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">_PRIMITIVE_SCHEMAS</span><span class="p">[</span><span class="n">type_hint</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># a bare ``None`` annotation means ``NoneType``</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;null&quot;</span><span class="p">}</span>
+
+    <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span>
+
+    <span class="c1"># Unions (``typing.Union`` and PEP 604 ``X | Y``), incl. ``Optional``.</span>
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">Union</span> <span class="ow">or</span> <span class="p">(</span><span class="n">UnionType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">UnionType</span><span class="p">):</span>
+        <span class="n">non_none</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span> <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NoneType</span><span class="p">]</span>
+        <span class="n">sub</span> <span class="o">=</span> <span class="p">[</span><span class="n">python_type_to_json_schema</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">schemas</span><span class="p">,</span> <span class="n">_stack</span><span class="o">=</span><span class="n">stack</span><span class="p">)</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">non_none</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_none</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>  <span class="c1"># had ``None`` → nullable</span>
+            <span class="n">sub</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;null&quot;</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">sub</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="p">{</span><span class="s2">&quot;anyOf&quot;</span><span class="p">:</span> <span class="n">sub</span><span class="p">}</span>
+
+    <span class="c1"># ``Literal[...]`` → enum of the literal values.</span>
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">Literal</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;enum&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)}</span>
+
+    <span class="c1"># Arrays.</span>
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">in</span> <span class="n">_ARRAY_ORIGINS</span><span class="p">:</span>
+        <span class="n">item_args</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">args</span> <span class="k">if</span> <span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">Ellipsis</span><span class="p">]</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">python_type_to_json_schema</span><span class="p">(</span><span class="n">item_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">schemas</span><span class="p">,</span> <span class="n">_stack</span><span class="o">=</span><span class="n">stack</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">item_args</span>
+            <span class="k">else</span> <span class="p">{}</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span> <span class="s2">&quot;items&quot;</span><span class="p">:</span> <span class="n">item</span><span class="p">}</span>
+
+    <span class="c1"># Free-form objects (maps). JSON object keys are always strings, so the key</span>
+    <span class="c1"># type is ignored; only the value type informs ``additionalProperties``.</span>
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">in</span> <span class="n">_MAPPING_ORIGINS</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">python_type_to_json_schema</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">schemas</span><span class="p">,</span> <span class="n">_stack</span><span class="o">=</span><span class="n">stack</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+            <span class="k">else</span> <span class="p">{}</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;additionalProperties&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+
+    <span class="c1"># Bare ``list`` / ``dict`` (no parameters).</span>
+    <span class="k">if</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span> <span class="s2">&quot;items&quot;</span><span class="p">:</span> <span class="p">{}}</span>
+    <span class="k">if</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;additionalProperties&quot;</span><span class="p">:</span> <span class="p">{}}</span>
+
+    <span class="c1"># Named composite types → registered in ``schemas``, returned as ``$ref``.</span>
+    <span class="k">if</span> <span class="n">_is_typed_dict</span><span class="p">(</span><span class="n">type_hint</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_register_object</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="n">schemas</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">_typed_dict_fields</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_register_object</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="n">schemas</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">_dataclass_fields</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_is_pydantic_model</span><span class="p">(</span><span class="n">type_hint</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_register_pydantic</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="n">schemas</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_is_namedtuple</span><span class="p">(</span><span class="n">type_hint</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_register_object</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="n">schemas</span><span class="p">,</span> <span class="n">stack</span><span class="p">,</span> <span class="n">_namedtuple_fields</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;enum&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">member</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">type_hint</span><span class="p">]}</span>
+
+    <span class="c1"># Primitive subclasses (e.g. ``class UserId(str)``).</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">prim</span><span class="p">,</span> <span class="n">prim_schema</span> <span class="ow">in</span> <span class="n">_PRIMITIVE_SCHEMAS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">prim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NoneType</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="n">prim</span><span class="p">):</span>
+                <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">prim_schema</span><span class="p">)</span>
+
+    <span class="c1"># Unknown — permissive empty schema.</span>
+    <span class="k">return</span> <span class="p">{}</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_register_object</span><span class="p">(</span>
+    <span class="n">tp</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span>
+    <span class="n">schemas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">stack</span><span class="p">:</span> <span class="nb">frozenset</span><span class="p">,</span>
+    <span class="n">fields_fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">type</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register an object-shaped composite type and return a ``$ref`` to it.</span>
+
+<span class="sd">    ``fields_fn`` yields ``(name, type_hint, required)`` triples. The type name</span>
+<span class="sd">    is added to the recursion ``stack`` *before* its fields are converted, so a</span>
+<span class="sd">    self-referential field resolves to a ``$ref`` instead of recursing forever.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">tp</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">schemas</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">stack</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_ref</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">child_stack</span> <span class="o">=</span> <span class="n">stack</span> <span class="o">|</span> <span class="p">{</span><span class="n">name</span><span class="p">}</span>
+    <span class="n">properties</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">required</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">field_type</span><span class="p">,</span> <span class="n">is_required</span> <span class="ow">in</span> <span class="n">fields_fn</span><span class="p">(</span><span class="n">tp</span><span class="p">):</span>
+        <span class="n">properties</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">python_type_to_json_schema</span><span class="p">(</span>
+            <span class="n">field_type</span><span class="p">,</span> <span class="n">schemas</span><span class="p">,</span> <span class="n">_stack</span><span class="o">=</span><span class="n">child_stack</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_required</span><span class="p">:</span>
+            <span class="n">required</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field_name</span><span class="p">)</span>
+
+    <span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="n">properties</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">required</span><span class="p">:</span>
+        <span class="n">obj</span><span class="p">[</span><span class="s2">&quot;required&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">required</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">tp</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">doc</span><span class="p">:</span>
+        <span class="n">obj</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">doc</span>
+    <span class="n">schemas</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+    <span class="k">return</span> <span class="n">_ref</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_typed_dict_fields</span><span class="p">(</span><span class="n">tp</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;``(name, type, required)`` triples for a ``TypedDict``.</span>
+
+<span class="sd">    Honours ``total=False`` and per-key ``Required`` / ``NotRequired`` via the</span>
+<span class="sd">    ``__required_keys__`` / ``__optional_keys__`` markers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">hints</span> <span class="o">=</span> <span class="n">_safe_type_hints</span><span class="p">(</span><span class="n">tp</span><span class="p">)</span>
+    <span class="n">required_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;__required_keys__&quot;</span><span class="p">,</span> <span class="nb">set</span><span class="p">()))</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Any</span><span class="p">),</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">required_keys</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">hints</span>
+    <span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dataclass_fields</span><span class="p">(</span><span class="n">tp</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;``(name, type, required)`` triples for a dataclass — required = no default.&quot;&quot;&quot;</span>
+    <span class="n">hints</span> <span class="o">=</span> <span class="n">_safe_type_hints</span><span class="p">(</span><span class="n">tp</span><span class="p">)</span>
+    <span class="n">triples</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">tp</span><span class="p">):</span>
+        <span class="n">has_default</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span>
+            <span class="ow">or</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span>  <span class="c1"># type: ignore[misc]</span>
+        <span class="p">)</span>
+        <span class="n">triples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">),</span> <span class="ow">not</span> <span class="n">has_default</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">triples</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_namedtuple_fields</span><span class="p">(</span><span class="n">tp</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;``(name, type, required)`` triples for a ``NamedTuple`` — required = no default.&quot;&quot;&quot;</span>
+    <span class="n">hints</span> <span class="o">=</span> <span class="n">_safe_type_hints</span><span class="p">(</span><span class="n">tp</span><span class="p">)</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;_field_defaults&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">return</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">Any</span><span class="p">),</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">defaults</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;_fields&quot;</span><span class="p">,</span> <span class="p">())</span>
+    <span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_register_pydantic</span><span class="p">(</span><span class="n">tp</span><span class="p">:</span> <span class="nb">type</span><span class="p">,</span> <span class="n">schemas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Register a Pydantic model via its own JSON Schema export, return a ``$ref``.</span>
+
+<span class="sd">    Pydantic emits a self-contained schema; its nested-model definitions</span>
+<span class="sd">    (``$defs`` in v2, ``definitions`` in v1) are lifted into ``components.schemas``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">tp</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">schemas</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_ref</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;model_json_schema&quot;</span><span class="p">):</span>  <span class="c1"># Pydantic v2</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">tp</span><span class="o">.</span><span class="n">model_json_schema</span><span class="p">(</span><span class="n">ref_template</span><span class="o">=</span><span class="s2">&quot;#/components/schemas/</span><span class="si">{model}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># Pydantic v1</span>
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">tp</span><span class="o">.</span><span class="n">schema</span><span class="p">(</span><span class="n">ref_template</span><span class="o">=</span><span class="s2">&quot;#/components/schemas/</span><span class="si">{model}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">defs</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;$defs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">doc</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;definitions&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="n">schemas</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">doc</span>  <span class="c1"># reserve the name before recursing into nested defs</span>
+    <span class="k">for</span> <span class="n">def_name</span><span class="p">,</span> <span class="n">def_schema</span> <span class="ow">in</span> <span class="n">defs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">schemas</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">def_name</span><span class="p">,</span> <span class="n">def_schema</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_ref</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Operation-level schema construction</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_param_location</span><span class="p">(</span><span class="n">param_specs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The HTTP location (``json_body`` / ``path`` / ``query`` / …) of a parameter.</span>
+
+<span class="sd">    Reads :class:`qh.rules.TransformSpec.http_location` from the resolved</span>
+<span class="sd">    ``param_specs`` map attached to the endpoint (the single source of truth).</span>
+<span class="sd">    Defaults to ``json_body`` when unknown.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">param_specs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span> <span class="k">if</span> <span class="n">param_specs</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">location</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="s2">&quot;http_location&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">,</span> <span class="s2">&quot;json_body&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="build_request_body_schema">
+<a class="viewcode-back" href="../../module_docs/qh/openapi.html#qh.openapi.build_request_body_schema">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_request_body_schema</span><span class="p">(</span>
+    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">param_specs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">schemas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build the JSON Schema object for a function&#39;s JSON-body parameters.</span>
+
+<span class="sd">    Only parameters whose resolved HTTP location is the JSON body are included;</span>
+<span class="sd">    path/query/header parameters are emitted separately by</span>
+<span class="sd">    :func:`build_parameters`. A parameter with no default is ``required``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        an object JSON Schema, or ``None`` when the function has no body</span>
+<span class="sd">        parameters (e.g. a GET route whose arguments are all query parameters).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="n">hints</span> <span class="o">=</span> <span class="n">_safe_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+    <span class="n">properties</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">required</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">_param_location</span><span class="p">(</span><span class="n">param_specs</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;json_body&quot;</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">properties</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">python_type_to_json_schema</span><span class="p">(</span><span class="n">hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">Any</span><span class="p">),</span> <span class="n">schemas</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">required</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">properties</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="n">properties</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">required</span><span class="p">:</span>
+        <span class="n">obj</span><span class="p">[</span><span class="s2">&quot;required&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">required</span>
+    <span class="k">return</span> <span class="n">obj</span></div>
+
+
+
+<div class="viewcode-block" id="build_parameters">
+<a class="viewcode-back" href="../../module_docs/qh/openapi.html#qh.openapi.build_parameters">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_parameters</span><span class="p">(</span>
+    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">param_specs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">schemas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build OpenAPI ``parameters`` entries for a function&#39;s path/query arguments.</span>
+
+<span class="sd">    Path parameters are always required; query parameters are required only</span>
+<span class="sd">    when the Python parameter has no default.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="n">hints</span> <span class="o">=</span> <span class="n">_safe_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+    <span class="n">parameters</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">location</span> <span class="o">=</span> <span class="n">_param_location</span><span class="p">(</span><span class="n">param_specs</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">location</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;query&quot;</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">param_specs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="s2">&quot;http_name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">name</span><span class="p">,</span>
+                <span class="s2">&quot;in&quot;</span><span class="p">:</span> <span class="n">location</span><span class="p">,</span>
+                <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="n">location</span> <span class="o">==</span> <span class="s2">&quot;path&quot;</span>
+                <span class="ow">or</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">,</span>
+                <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">python_type_to_json_schema</span><span class="p">(</span><span class="n">hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">Any</span><span class="p">),</span> <span class="n">schemas</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">parameters</span></div>
+
+
+
+<div class="viewcode-block" id="build_response_schema">
+<a class="viewcode-back" href="../../module_docs/qh/openapi.html#qh.openapi.build_response_schema">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_response_schema</span><span class="p">(</span>
+    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">schemas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build the JSON Schema for a function&#39;s return type.</span>
+
+<span class="sd">    A missing return annotation yields the permissive empty schema; a ``None``</span>
+<span class="sd">    return yields ``{&quot;type&quot;: &quot;null&quot;}`` (``qh`` still replies with a JSON body).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">hints</span> <span class="o">=</span> <span class="n">_safe_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">python_type_to_json_schema</span><span class="p">(</span><span class="n">hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;return&quot;</span><span class="p">,</span> <span class="n">Any</span><span class="p">),</span> <span class="n">schemas</span><span class="p">)</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Python signature metadata (x-python-* extensions)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
 
 
 <div class="viewcode-block" id="get_python_type_name">
@@ -173,7 +622,7 @@
 <span class="sd">        - docstring: function docstring</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">_safe_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
 
     <span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -216,7 +665,7 @@
 <span class="sd">    Uses type hints to generate sensible example values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">_safe_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
 
     <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -278,6 +727,11 @@
     <span class="k">return</span> <span class="kc">None</span>
 
 
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Whole-document enhancement</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
 <div class="viewcode-block" id="enhance_openapi_schema">
 <a class="viewcode-back" href="../../module_docs/qh/openapi.html#qh.openapi.enhance_openapi_schema">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">enhance_openapi_schema</span><span class="p">(</span>
@@ -285,21 +739,33 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">include_examples</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">include_python_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">include_schemas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">include_transformers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Generate enhanced OpenAPI schema with Python-specific extensions.</span>
+<span class="sd">    Generate an enhanced OpenAPI schema for a ``qh`` app.</span>
+
+<span class="sd">    On top of FastAPI&#39;s base document this fills in what ``qh``&#39;s</span>
+<span class="sd">    ``Request``-based endpoints hide from FastAPI:</span>
+
+<span class="sd">    - ``requestBody`` / ``parameters`` / ``responses`` JSON Schema derived from</span>
+<span class="sd">      each wrapped function&#39;s Python type hints (``include_schemas``),</span>
+<span class="sd">    - ``components.schemas`` for every dataclass / ``TypedDict`` / Pydantic</span>
+<span class="sd">      model / ``NamedTuple`` / ``Enum`` referenced,</span>
+<span class="sd">    - ``x-python-signature`` metadata (``include_python_metadata``),</span>
+<span class="sd">    - request examples (``include_examples``).</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        app: FastAPI application</span>
-<span class="sd">        include_examples: Add example requests/responses</span>
-<span class="sd">        include_python_metadata: Add x-python-* extensions</span>
-<span class="sd">        include_transformers: Add transformation metadata</span>
+<span class="sd">        app: the FastAPI application.</span>
+<span class="sd">        include_examples: add example requests.</span>
+<span class="sd">        include_python_metadata: add ``x-python-*`` extensions.</span>
+<span class="sd">        include_schemas: derive ``requestBody`` / ``responses`` /</span>
+<span class="sd">            ``components.schemas`` from the Python type hints.</span>
+<span class="sd">        include_transformers: add (placeholder) transformation metadata.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Enhanced OpenAPI schema dictionary</span>
+<span class="sd">        the enhanced OpenAPI schema dictionary.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># Get base OpenAPI schema from FastAPI</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">get_openapi</span><span class="p">(</span>
         <span class="n">title</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
         <span class="n">version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
@@ -308,12 +774,11 @@
         <span class="n">routes</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">routes</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="c1"># Store function metadata by operation_id</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">qh.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">inspect_routes</span>
 
     <span class="n">routes</span> <span class="o">=</span> <span class="n">inspect_routes</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="n">component_schemas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="c1"># Enhance each endpoint with Python metadata</span>
     <span class="k">for</span> <span class="n">route_info</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">:</span>
         <span class="n">func</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;function&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">func</span><span class="p">:</span>
@@ -321,40 +786,37 @@
 
         <span class="n">path</span> <span class="o">=</span> <span class="n">route_info</span><span class="p">[</span><span class="s2">&quot;path&quot;</span><span class="p">]</span>
         <span class="n">methods</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;methods&quot;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">])</span>
+        <span class="n">param_specs</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;param_specs&quot;</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{}</span>
 
-        <span class="c1"># Skip OpenAPI/docs routes</span>
         <span class="k">if</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;/openapi.json&quot;</span><span class="p">,</span> <span class="s2">&quot;/docs&quot;</span><span class="p">,</span> <span class="s2">&quot;/redoc&quot;</span><span class="p">]:</span>
             <span class="k">continue</span>
 
-        <span class="c1"># Find the operation in the schema</span>
         <span class="n">path_item</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;paths&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">{})</span>
 
         <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
             <span class="n">method_lower</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
             <span class="n">operation</span> <span class="o">=</span> <span class="n">path_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">method_lower</span><span class="p">,</span> <span class="p">{})</span>
-
             <span class="k">if</span> <span class="ow">not</span> <span class="n">operation</span><span class="p">:</span>
                 <span class="k">continue</span>
 
-            <span class="c1"># Add Python metadata</span>
             <span class="k">if</span> <span class="n">include_python_metadata</span><span class="p">:</span>
-                <span class="n">sig_info</span> <span class="o">=</span> <span class="n">extract_function_signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-                <span class="n">operation</span><span class="p">[</span><span class="s2">&quot;x-python-signature&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sig_info</span>
+                <span class="n">operation</span><span class="p">[</span><span class="s2">&quot;x-python-signature&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">extract_function_signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
 
-            <span class="c1"># Add examples</span>
+            <span class="k">if</span> <span class="n">include_schemas</span><span class="p">:</span>
+                <span class="n">_apply_operation_schemas</span><span class="p">(</span>
+                    <span class="n">operation</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">param_specs</span><span class="p">,</span> <span class="n">method_lower</span><span class="p">,</span> <span class="n">component_schemas</span>
+                <span class="p">)</span>
+
             <span class="k">if</span> <span class="n">include_examples</span><span class="p">:</span>
                 <span class="n">examples</span> <span class="o">=</span> <span class="n">generate_examples_for_function</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">examples</span> <span class="ow">and</span> <span class="s2">&quot;requestBody&quot;</span> <span class="ow">in</span> <span class="n">operation</span><span class="p">:</span>
-                    <span class="n">content</span> <span class="o">=</span> <span class="n">operation</span><span class="p">[</span><span class="s2">&quot;requestBody&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="p">{})</span>
-                    <span class="n">json_content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                    <span class="n">content</span> <span class="o">=</span> <span class="n">operation</span><span class="p">[</span><span class="s2">&quot;requestBody&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="p">{})</span>
+                    <span class="n">json_content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;application/json&quot;</span><span class="p">,</span> <span class="p">{})</span>
                     <span class="n">json_content</span><span class="p">[</span><span class="s2">&quot;examples&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
                         <span class="sa">f</span><span class="s2">&quot;example_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="n">ex</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ex</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
                     <span class="p">}</span>
 
-            <span class="c1"># Add transformer metadata (if requested)</span>
             <span class="k">if</span> <span class="n">include_transformers</span><span class="p">:</span>
-                <span class="c1"># This would include information about how types are transformed</span>
-                <span class="c1"># For now, we&#39;ll add a placeholder</span>
                 <span class="n">operation</span><span class="p">[</span><span class="s2">&quot;x-python-transformers&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
                     <span class="s2">&quot;note&quot;</span><span class="p">:</span> <span class="s2">&quot;Type transformation metadata would go here&quot;</span>
                 <span class="p">}</span>
@@ -363,8 +825,39 @@
 
         <span class="n">schema</span><span class="p">[</span><span class="s2">&quot;paths&quot;</span><span class="p">][</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="n">path_item</span>
 
+    <span class="k">if</span> <span class="n">include_schemas</span> <span class="ow">and</span> <span class="n">component_schemas</span><span class="p">:</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;components&quot;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">components</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;schemas&quot;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">component_schemas</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">schema</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_apply_operation_schemas</span><span class="p">(</span>
+    <span class="n">operation</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">param_specs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">method_lower</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">component_schemas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fill an operation&#39;s ``requestBody`` / ``parameters`` / ``responses`` in place.&quot;&quot;&quot;</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">build_parameters</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">param_specs</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">parameters</span><span class="p">:</span>
+        <span class="n">existing</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parameters&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">operation</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">existing</span> <span class="o">+</span> <span class="n">parameters</span>
+
+    <span class="k">if</span> <span class="n">method_lower</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="s2">&quot;put&quot;</span><span class="p">,</span> <span class="s2">&quot;patch&quot;</span><span class="p">):</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="n">build_request_body_schema</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">param_specs</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">request_body</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;requestBody&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">request_body</span><span class="p">[</span><span class="s2">&quot;required&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;required&quot;</span><span class="p">))</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">request_body</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="n">content</span><span class="p">[</span><span class="s2">&quot;application/json&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">body</span><span class="p">}</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">build_response_schema</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
+    <span class="n">responses</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;responses&quot;</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="n">responses</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;200&quot;</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Successful Response&quot;</span><span class="p">})</span>
+    <span class="n">ok</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">&quot;application/json&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="n">response</span><span class="p">}</span>
 
 
 <div class="viewcode-block" id="export_openapi">
@@ -374,21 +867,24 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">include_examples</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">include_python_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">include_schemas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">include_transformers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">output_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Export enhanced OpenAPI schema.</span>
+<span class="sd">    Export the enhanced OpenAPI schema, optionally writing it to a file.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        app: FastAPI application</span>
-<span class="sd">        include_examples: Include example requests/responses</span>
-<span class="sd">        include_python_metadata: Include x-python-* extensions</span>
-<span class="sd">        include_transformers: Include transformation metadata</span>
-<span class="sd">        output_file: Optional file path to write JSON output</span>
+<span class="sd">        app: the FastAPI application.</span>
+<span class="sd">        include_examples: include example requests.</span>
+<span class="sd">        include_python_metadata: include ``x-python-*`` extensions.</span>
+<span class="sd">        include_schemas: derive ``requestBody`` / ``responses`` /</span>
+<span class="sd">            ``components.schemas`` from the Python type hints.</span>
+<span class="sd">        include_transformers: include transformation metadata.</span>
+<span class="sd">        output_file: optional path to write the JSON document to.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Enhanced OpenAPI schema dictionary</span>
+<span class="sd">        the enhanced OpenAPI schema dictionary.</span>
 
 <span class="sd">    Example:</span>
 <span class="sd">        &gt;&gt;&gt; from qh import mk_app  # doctest: +SKIP</span>
@@ -400,16 +896,56 @@
         <span class="n">app</span><span class="p">,</span>
         <span class="n">include_examples</span><span class="o">=</span><span class="n">include_examples</span><span class="p">,</span>
         <span class="n">include_python_metadata</span><span class="o">=</span><span class="n">include_python_metadata</span><span class="p">,</span>
+        <span class="n">include_schemas</span><span class="o">=</span><span class="n">include_schemas</span><span class="p">,</span>
         <span class="n">include_transformers</span><span class="o">=</span><span class="n">include_transformers</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">output_file</span><span class="p">:</span>
-        <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">schema</span></div>
+
+
+
+<div class="viewcode-block" id="install_enhanced_openapi">
+<a class="viewcode-back" href="../../module_docs/qh/openapi.html#qh.openapi.install_enhanced_openapi">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">install_enhanced_openapi</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="o">**</span><span class="n">enhance_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make ``app`` serve the enhanced OpenAPI schema at its ``/openapi.json``.</span>
+
+<span class="sd">    Overrides ``app.openapi`` so the document returned by FastAPI — and rendered</span>
+<span class="sd">    by ``/docs`` and ``/redoc`` — carries the request/response JSON Schema and</span>
+<span class="sd">    ``components.schemas`` derived from the wrapped functions&#39; Python type hints.</span>
+
+<span class="sd">    The override is **defensive**: if enhancement raises for any reason, it</span>
+<span class="sd">    falls back to FastAPI&#39;s plain schema, so a converter bug can never turn</span>
+<span class="sd">    ``/openapi.json`` into a 500.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        app: the FastAPI application (typically the result of :func:`qh.mk_app`).</span>
+<span class="sd">        **enhance_kwargs: forwarded to :func:`enhance_openapi_schema`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        the same ``app``, for chaining.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">custom_openapi</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span> <span class="o">=</span> <span class="n">enhance_openapi_schema</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="o">**</span><span class="n">enhance_kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span> <span class="o">=</span> <span class="n">get_openapi</span><span class="p">(</span>
+                <span class="n">title</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+                <span class="n">version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+                <span class="n">openapi_version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">openapi_version</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">routes</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">routes</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span>
+
+    <span class="n">app</span><span class="o">.</span><span class="n">openapi</span> <span class="o">=</span> <span class="n">custom_openapi</span>  <span class="c1"># type: ignore[method-assign]</span>
+    <span class="k">return</span> <span class="n">app</span></div>
 
 </pre></div>
 

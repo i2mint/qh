@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qh.endpoint &mdash; qh 0.0.12 documentation</title>
+  <title>qh.endpoint &mdash; qh 0.0.13 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=3bbcec59"></script>
+      <script src="../../_static/documentation_options.js?v=9fc46840"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -422,6 +422,12 @@
     <span class="n">endpoint</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span>
     <span class="c1"># Store original function for OpenAPI/client generation</span>
     <span class="n">endpoint</span><span class="o">.</span><span class="n">_qh_original_func</span> <span class="o">=</span> <span class="n">func</span>  <span class="c1"># type: ignore</span>
+    <span class="c1"># Store the resolved param -&gt; TransformSpec map (the single source of truth</span>
+    <span class="c1"># for which HTTP location each parameter is read from). OpenAPI generation</span>
+    <span class="c1"># (qh.openapi) consumes this to classify body/path/query parameters without</span>
+    <span class="c1"># re-deriving the logic.</span>
+    <span class="n">endpoint</span><span class="o">.</span><span class="n">_qh_param_specs</span> <span class="o">=</span> <span class="n">param_specs</span>  <span class="c1"># type: ignore</span>
+    <span class="n">endpoint</span><span class="o">.</span><span class="n">_qh_route_config</span> <span class="o">=</span> <span class="n">route_config</span>  <span class="c1"># type: ignore</span>
 
     <span class="k">return</span> <span class="n">endpoint</span></div>
 

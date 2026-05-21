@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qh.openapi &mdash; qh 0.0.12 documentation</title>
+  <title>qh.openapi &mdash; qh 0.0.13 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=3bbcec59"></script>
+      <script src="../../_static/documentation_options.js?v=9fc46840"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -64,11 +64,16 @@
 <li class="toctree-l1"><a class="reference internal" href="examples/simple.html">qh.examples.simple</a></li>
 <li class="toctree-l1"><a class="reference internal" href="jsclient.html">qh.jsclient</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">qh.openapi</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qh.openapi.build_parameters"><code class="docutils literal notranslate"><span class="pre">build_parameters()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.openapi.build_request_body_schema"><code class="docutils literal notranslate"><span class="pre">build_request_body_schema()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.openapi.build_response_schema"><code class="docutils literal notranslate"><span class="pre">build_response_schema()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#qh.openapi.enhance_openapi_schema"><code class="docutils literal notranslate"><span class="pre">enhance_openapi_schema()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#qh.openapi.export_openapi"><code class="docutils literal notranslate"><span class="pre">export_openapi()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#qh.openapi.extract_function_signature"><code class="docutils literal notranslate"><span class="pre">extract_function_signature()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#qh.openapi.generate_examples_for_function"><code class="docutils literal notranslate"><span class="pre">generate_examples_for_function()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#qh.openapi.get_python_type_name"><code class="docutils literal notranslate"><span class="pre">get_python_type_name()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.openapi.install_enhanced_openapi"><code class="docutils literal notranslate"><span class="pre">install_enhanced_openapi()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#qh.openapi.python_type_to_json_schema"><code class="docutils literal notranslate"><span class="pre">python_type_to_json_schema()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="rules.html">qh.rules</a></li>
@@ -108,50 +113,115 @@
              
   <section id="module-qh.openapi">
 <span id="qh-openapi"></span><h1>qh.openapi<a class="headerlink" href="#module-qh.openapi" title="Link to this heading"></a></h1>
-<p>Enhanced OpenAPI generation for qh.</p>
-<p>Extends FastAPI’s OpenAPI generation with metadata needed for bidirectional
-Python ↔ HTTP transformation:</p>
+<p>OpenAPI generation for qh — including JSON Schema derived from Python type hints.</p>
+<p><code class="docutils literal notranslate"><span class="pre">qh</span></code> builds every route with a generic <code class="docutils literal notranslate"><span class="pre">endpoint(request:</span> <span class="pre">Request)</span></code> signature
+(see <a class="reference internal" href="endpoint.html#module-qh.endpoint" title="qh.endpoint"><code class="xref py py-mod docutils literal notranslate"><span class="pre">qh.endpoint</span></code></a>): the wrapped function’s real parameters and return type
+are parsed <em>manually</em> from the request body, which makes them invisible to
+FastAPI’s own OpenAPI machinery. Out of the box, therefore, <code class="docutils literal notranslate"><span class="pre">/openapi.json</span></code>
+lists routes and docstrings but emits empty <code class="docutils literal notranslate"><span class="pre">{}</span></code> request/response schemas and
+no <code class="docutils literal notranslate"><span class="pre">components.schemas</span></code>.</p>
+<p>This module closes that gap. It introspects each wrapped function’s Python type
+hints and derives a complete OpenAPI document:</p>
 <ul class="simple">
-<li><p>x-python-signature: Full function signature with defaults</p></li>
-<li><p>x-python-module: Module path for imports</p></li>
-<li><p>x-python-transformers: Type transformation metadata</p></li>
-<li><p>x-python-examples: Generated examples for testing</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">requestBody</span></code> — a JSON Schema object built from the JSON-body parameters,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">parameters</span></code> — path/query parameters,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">responses</span></code> — a JSON Schema for the return type,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">components.schemas</span></code> — one named schema per dataclass / <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code> /
+Pydantic model / <code class="docutils literal notranslate"><span class="pre">NamedTuple</span></code> / <code class="docutils literal notranslate"><span class="pre">Enum</span></code> encountered, referenced via <code class="docutils literal notranslate"><span class="pre">$ref</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x-python-*</span></code> extensions — Python signature metadata for bidirectional
+Python ↔ HTTP transformation.</p></li>
+</ul>
+<p>The whole thing is <strong>additive</strong>: the request-handling path is untouched, and
+<a class="reference internal" href="#qh.openapi.install_enhanced_openapi" title="qh.openapi.install_enhanced_openapi"><code class="xref py py-func docutils literal notranslate"><span class="pre">install_enhanced_openapi()</span></code></a> falls back to FastAPI’s plain schema if
+enhancement ever raises — so a converter bug can never break <code class="docutils literal notranslate"><span class="pre">/openapi.json</span></code>.</p>
+<p>Public surface:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#qh.openapi.python_type_to_json_schema" title="qh.openapi.python_type_to_json_schema"><code class="xref py py-func docutils literal notranslate"><span class="pre">python_type_to_json_schema()</span></code></a> — the Python-type-hint → JSON Schema converter.</p></li>
+<li><p><a class="reference internal" href="#qh.openapi.enhance_openapi_schema" title="qh.openapi.enhance_openapi_schema"><code class="xref py py-func docutils literal notranslate"><span class="pre">enhance_openapi_schema()</span></code></a> — full enhanced OpenAPI document for an app.</p></li>
+<li><p><a class="reference internal" href="#qh.openapi.export_openapi" title="qh.openapi.export_openapi"><code class="xref py py-func docutils literal notranslate"><span class="pre">export_openapi()</span></code></a> — <a class="reference internal" href="#qh.openapi.enhance_openapi_schema" title="qh.openapi.enhance_openapi_schema"><code class="xref py py-func docutils literal notranslate"><span class="pre">enhance_openapi_schema()</span></code></a> plus optional file output.</p></li>
+<li><p><a class="reference internal" href="#qh.openapi.install_enhanced_openapi" title="qh.openapi.install_enhanced_openapi"><code class="xref py py-func docutils literal notranslate"><span class="pre">install_enhanced_openapi()</span></code></a> — make an app serve the enhanced doc at
+<code class="docutils literal notranslate"><span class="pre">/openapi.json</span></code> (and render it in <code class="docutils literal notranslate"><span class="pre">/docs</span></code>).</p></li>
 </ul>
 <dl class="py function">
+<dt class="sig sig-object py" id="qh.openapi.build_parameters">
+<span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">build_parameters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_specs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schemas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/openapi.html#build_parameters"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.openapi.build_parameters" title="Link to this definition"></a></dt>
+<dd><p>Build OpenAPI <code class="docutils literal notranslate"><span class="pre">parameters</span></code> entries for a function’s path/query arguments.</p>
+<p>Path parameters are always required; query parameters are required only
+when the Python parameter has no default.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.openapi.build_request_body_schema">
+<span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">build_request_body_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">param_specs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schemas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/qh/openapi.html#build_request_body_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.openapi.build_request_body_schema" title="Link to this definition"></a></dt>
+<dd><p>Build the JSON Schema object for a function’s JSON-body parameters.</p>
+<p>Only parameters whose resolved HTTP location is the JSON body are included;
+path/query/header parameters are emitted separately by
+<a class="reference internal" href="#qh.openapi.build_parameters" title="qh.openapi.build_parameters"><code class="xref py py-func docutils literal notranslate"><span class="pre">build_parameters()</span></code></a>. A parameter with no default is <code class="docutils literal notranslate"><span class="pre">required</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>an object JSON Schema, or <code class="docutils literal notranslate"><span class="pre">None</span></code> when the function has no body
+parameters (e.g. a GET route whose arguments are all query parameters).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.openapi.build_response_schema">
+<span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">build_response_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schemas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/openapi.html#build_response_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.openapi.build_response_schema" title="Link to this definition"></a></dt>
+<dd><p>Build the JSON Schema for a function’s return type.</p>
+<p>A missing return annotation yields the permissive empty schema; a <code class="docutils literal notranslate"><span class="pre">None</span></code>
+return yields <code class="docutils literal notranslate"><span class="pre">{&quot;type&quot;:</span> <span class="pre">&quot;null&quot;}</span></code> (<code class="docutils literal notranslate"><span class="pre">qh</span></code> still replies with a JSON body).</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="qh.openapi.enhance_openapi_schema">
-<span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">enhance_openapi_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FastAPI</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_examples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_python_metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_transformers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/openapi.html#enhance_openapi_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.openapi.enhance_openapi_schema" title="Link to this definition"></a></dt>
-<dd><p>Generate enhanced OpenAPI schema with Python-specific extensions.</p>
+<span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">enhance_openapi_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FastAPI</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_examples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_python_metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_schemas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_transformers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/openapi.html#enhance_openapi_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.openapi.enhance_openapi_schema" title="Link to this definition"></a></dt>
+<dd><p>Generate an enhanced OpenAPI schema for a <code class="docutils literal notranslate"><span class="pre">qh</span></code> app.</p>
+<p>On top of FastAPI’s base document this fills in what <code class="docutils literal notranslate"><span class="pre">qh</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">Request</span></code>-based endpoints hide from FastAPI:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">requestBody</span></code> / <code class="docutils literal notranslate"><span class="pre">parameters</span></code> / <code class="docutils literal notranslate"><span class="pre">responses</span></code> JSON Schema derived from
+each wrapped function’s Python type hints (<code class="docutils literal notranslate"><span class="pre">include_schemas</span></code>),</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">components.schemas</span></code> for every dataclass / <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code> / Pydantic
+model / <code class="docutils literal notranslate"><span class="pre">NamedTuple</span></code> / <code class="docutils literal notranslate"><span class="pre">Enum</span></code> referenced,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">x-python-signature</span></code> metadata (<code class="docutils literal notranslate"><span class="pre">include_python_metadata</span></code>),</p></li>
+<li><p>request examples (<code class="docutils literal notranslate"><span class="pre">include_examples</span></code>).</p></li>
+</ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>app</strong> – FastAPI application</p></li>
-<li><p><strong>include_examples</strong> – Add example requests/responses</p></li>
-<li><p><strong>include_python_metadata</strong> – Add x-python-* extensions</p></li>
-<li><p><strong>include_transformers</strong> – Add transformation metadata</p></li>
+<li><p><strong>app</strong> – the FastAPI application.</p></li>
+<li><p><strong>include_examples</strong> – add example requests.</p></li>
+<li><p><strong>include_python_metadata</strong> – add <code class="docutils literal notranslate"><span class="pre">x-python-*</span></code> extensions.</p></li>
+<li><p><strong>include_schemas</strong> – derive <code class="docutils literal notranslate"><span class="pre">requestBody</span></code> / <code class="docutils literal notranslate"><span class="pre">responses</span></code> /
+<code class="docutils literal notranslate"><span class="pre">components.schemas</span></code> from the Python type hints.</p></li>
+<li><p><strong>include_transformers</strong> – add (placeholder) transformation metadata.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Enhanced OpenAPI schema dictionary</p>
+<dd class="field-even"><p>the enhanced OpenAPI schema dictionary.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="qh.openapi.export_openapi">
-<span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">export_openapi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FastAPI</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_examples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_python_metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_transformers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/openapi.html#export_openapi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.openapi.export_openapi" title="Link to this definition"></a></dt>
-<dd><p>Export enhanced OpenAPI schema.</p>
+<span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">export_openapi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FastAPI</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_examples</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_python_metadata</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_schemas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_transformers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/openapi.html#export_openapi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.openapi.export_openapi" title="Link to this definition"></a></dt>
+<dd><p>Export the enhanced OpenAPI schema, optionally writing it to a file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>app</strong> – FastAPI application</p></li>
-<li><p><strong>include_examples</strong> – Include example requests/responses</p></li>
-<li><p><strong>include_python_metadata</strong> – Include x-python-* extensions</p></li>
-<li><p><strong>include_transformers</strong> – Include transformation metadata</p></li>
-<li><p><strong>output_file</strong> – Optional file path to write JSON output</p></li>
+<li><p><strong>app</strong> – the FastAPI application.</p></li>
+<li><p><strong>include_examples</strong> – include example requests.</p></li>
+<li><p><strong>include_python_metadata</strong> – include <code class="docutils literal notranslate"><span class="pre">x-python-*</span></code> extensions.</p></li>
+<li><p><strong>include_schemas</strong> – derive <code class="docutils literal notranslate"><span class="pre">requestBody</span></code> / <code class="docutils literal notranslate"><span class="pre">responses</span></code> /
+<code class="docutils literal notranslate"><span class="pre">components.schemas</span></code> from the Python type hints.</p></li>
+<li><p><strong>include_transformers</strong> – include transformation metadata.</p></li>
+<li><p><strong>output_file</strong> – optional path to write the JSON document to.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Enhanced OpenAPI schema dictionary</p>
+<dd class="field-even"><p>the enhanced OpenAPI schema dictionary.</p>
 </dd>
 </dl>
 <p class="rubric">Example</p>
@@ -200,6 +270,66 @@ Python ↔ HTTP transformation:</p>
 str → “str”
 list[int] → “list[int]”
 Optional[str] → “Optional[str]”</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.openapi.install_enhanced_openapi">
+<span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">install_enhanced_openapi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">app</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FastAPI</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">enhance_kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">FastAPI</span></span></span><a class="reference internal" href="../../_modules/qh/openapi.html#install_enhanced_openapi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.openapi.install_enhanced_openapi" title="Link to this definition"></a></dt>
+<dd><p>Make <code class="docutils literal notranslate"><span class="pre">app</span></code> serve the enhanced OpenAPI schema at its <code class="docutils literal notranslate"><span class="pre">/openapi.json</span></code>.</p>
+<p>Overrides <code class="docutils literal notranslate"><span class="pre">app.openapi</span></code> so the document returned by FastAPI — and rendered
+by <code class="docutils literal notranslate"><span class="pre">/docs</span></code> and <code class="docutils literal notranslate"><span class="pre">/redoc</span></code> — carries the request/response JSON Schema and
+<code class="docutils literal notranslate"><span class="pre">components.schemas</span></code> derived from the wrapped functions’ Python type hints.</p>
+<p>The override is <strong>defensive</strong>: if enhancement raises for any reason, it
+falls back to FastAPI’s plain schema, so a converter bug can never turn
+<code class="docutils literal notranslate"><span class="pre">/openapi.json</span></code> into a 500.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>app</strong> – the FastAPI application (typically the result of <code class="xref py py-func docutils literal notranslate"><span class="pre">qh.mk_app()</span></code>).</p></li>
+<li><p><strong>**enhance_kwargs</strong> – forwarded to <a class="reference internal" href="#qh.openapi.enhance_openapi_schema" title="qh.openapi.enhance_openapi_schema"><code class="xref py py-func docutils literal notranslate"><span class="pre">enhance_openapi_schema()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the same <code class="docutils literal notranslate"><span class="pre">app</span></code>, for chaining.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.openapi.python_type_to_json_schema">
+<span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">python_type_to_json_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_hint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schemas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">_stack</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">frozenset</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/qh/openapi.html#python_type_to_json_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#qh.openapi.python_type_to_json_schema" title="Link to this definition"></a></dt>
+<dd><p>Convert a Python type hint to a JSON Schema fragment.</p>
+<p>Primitives, containers and unions are inlined. Named composite types —
+dataclasses, <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code>s, Pydantic models, <code class="docutils literal notranslate"><span class="pre">NamedTuple</span></code>s and
+<code class="docutils literal notranslate"><span class="pre">Enum</span></code>s — are registered in <code class="docutils literal notranslate"><span class="pre">schemas</span></code> (the OpenAPI
+<code class="docutils literal notranslate"><span class="pre">components.schemas</span></code> table) and returned as a <code class="docutils literal notranslate"><span class="pre">$ref</span></code>, so the same type
+used in several places is described once.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type_hint</strong> – the Python type / annotation to convert. <code class="docutils literal notranslate"><span class="pre">Any</span></code> and
+<code class="xref py py-data docutils literal notranslate"><span class="pre">inspect.Parameter.empty</span></code> map to the empty schema <code class="docutils literal notranslate"><span class="pre">{}</span></code>
+(matches anything); <code class="docutils literal notranslate"><span class="pre">None</span></code> / <code class="docutils literal notranslate"><span class="pre">NoneType</span></code> map to <code class="docutils literal notranslate"><span class="pre">{&quot;type&quot;:</span> <span class="pre">&quot;null&quot;}</span></code>.</p></li>
+<li><p><strong>schemas</strong> – the mutable <code class="docutils literal notranslate"><span class="pre">components.schemas</span></code> accumulator — composite
+types encountered are added here, keyed by their class name.</p></li>
+<li><p><strong>_stack</strong> – internal — the set of composite type names currently being
+built, used to break recursion on self-referential types.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>a JSON Schema dict — an inline fragment, or <code class="docutils literal notranslate"><span class="pre">{&quot;$ref&quot;:</span> <span class="pre">...}</span></code> for a
+named composite type.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">python_type_to_json_schema</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="p">{})</span>
+<span class="go">{&#39;type&#39;: &#39;integer&#39;}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">python_type_to_json_schema</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="p">{})</span>
+<span class="go">{&#39;type&#39;: &#39;array&#39;, &#39;items&#39;: {&#39;type&#39;: &#39;string&#39;}}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">python_type_to_json_schema</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="p">{})</span>
+<span class="go">{&#39;anyOf&#39;: [{&#39;type&#39;: &#39;integer&#39;}, {&#39;type&#39;: &#39;null&#39;}]}</span>
+</pre></div>
+</div>
 </dd></dl>
 
 </section>
