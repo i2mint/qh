@@ -140,9 +140,11 @@ def _is_namedtuple(tp: Any) -> bool:
 
 def _is_pydantic_model(tp: Any) -> bool:
     """Whether ``tp`` is a Pydantic model (v2 ``model_json_schema`` or v1 ``schema``)."""
-    return isinstance(tp, type) and (
-        hasattr(tp, "model_json_schema") or hasattr(tp, "schema")
-    ) and hasattr(tp, "__fields__")
+    return (
+        isinstance(tp, type)
+        and (hasattr(tp, "model_json_schema") or hasattr(tp, "schema"))
+        and hasattr(tp, "__fields__")
+    )
 
 
 def python_type_to_json_schema(
@@ -193,11 +195,7 @@ def python_type_to_json_schema(
     # the schema registry or currently on the recursion stack; an otherwise
     # unresolvable reference degrades to the permissive empty schema.
     if isinstance(type_hint, (str, ForwardRef)):
-        name = (
-            type_hint
-            if isinstance(type_hint, str)
-            else type_hint.__forward_arg__
-        )
+        name = type_hint if isinstance(type_hint, str) else type_hint.__forward_arg__
         return _ref(name) if (name in schemas or name in stack) else {}
 
     # Exact primitive match (covers ``NoneType`` too).
@@ -313,9 +311,7 @@ def _typed_dict_fields(tp: type) -> List[tuple]:
     """
     hints = _safe_type_hints(tp)
     required_keys = set(getattr(tp, "__required_keys__", set()))
-    return [
-        (key, hints.get(key, Any), key in required_keys) for key in hints
-    ]
+    return [(key, hints.get(key, Any), key in required_keys) for key in hints]
 
 
 def _dataclass_fields(tp: type) -> List[tuple]:
