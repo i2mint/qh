@@ -7,6 +7,7 @@ This module bridges Python functions and HTTP endpoints via transformation rules
 from typing import Any, Callable, Dict, Optional, get_type_hints
 from fastapi import Request, Response, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
 import inspect
 import json
 
@@ -287,8 +288,13 @@ def make_endpoint(
             # Apply egress transformation
             output = apply_egress_transform(result, default_egress)
 
-            # Return JSON response
-            return JSONResponse(content=output)
+            # Return JSON response. Run the output through FastAPI's
+            # jsonable_encoder first: JSONResponse serializes with the stdlib
+            # json encoder, which only handles dict/list/scalar. jsonable_encoder
+            # recursively converts dataclasses, pydantic models, datetime, Enum,
+            # set, UUID, Decimal, … into JSON-compatible primitives. Plain
+            # dict/list/scalar outputs pass through unchanged.
+            return JSONResponse(content=jsonable_encoder(output))
 
         except HTTPException:
             # Re-raise HTTP exceptions
