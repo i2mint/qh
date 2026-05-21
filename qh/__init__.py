@@ -23,7 +23,12 @@ from qh.rules import (
 from qh.types import register_type, register_json_type, TypeRegistry
 
 # OpenAPI and client generation (Phase 3)
-from qh.openapi import export_openapi, enhance_openapi_schema
+from qh.openapi import (
+    export_openapi,
+    enhance_openapi_schema,
+    install_enhanced_openapi,
+    python_type_to_json_schema,
+)
 from qh.client import (
     mk_client_from_openapi,
     mk_client_from_url,
@@ -117,6 +122,8 @@ __all__ = [
     # OpenAPI & Client (Phase 3)
     "export_openapi",
     "enhance_openapi_schema",
+    "install_enhanced_openapi",
+    "python_type_to_json_schema",
     "mk_client_from_openapi",
     "mk_client_from_url",
     "mk_client_from_app",
