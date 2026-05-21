@@ -32,6 +32,7 @@ def mk_app(
     use_conventions: bool = False,
     async_funcs: Optional[List[Union[str, Callable]]] = None,
     async_config: Optional[Union[Dict[str, Any], "TaskConfig"]] = None,
+    enhanced_openapi: bool = True,
     **kwargs,
 ) -> FastAPI:
     """
@@ -68,6 +69,12 @@ def mk_app(
             - None (uses default TaskConfig for functions in async_funcs)
             - TaskConfig object (applies to all async_funcs)
             - Dict mapping function names to TaskConfig objects
+
+        enhanced_openapi: Whether to serve an enhanced OpenAPI document at
+            ``/openapi.json`` — one with ``requestBody`` / ``responses`` /
+            ``components.schemas`` derived from each function's Python type
+            hints (see :mod:`qh.openapi`). Defaults to True; the enhancement is
+            additive and falls back to FastAPI's plain schema if it ever fails.
 
         **kwargs: Additional FastAPI() constructor kwargs (if creating new app)
 
@@ -254,6 +261,13 @@ def mk_app(
                 if task_config and getattr(task_config, "create_task_endpoints", True):
                     add_task_endpoints(app, func.__name__)
 
+    # Serve an OpenAPI document with full request/response JSON Schema derived
+    # from the wrapped functions' Python type hints.
+    if enhanced_openapi:
+        from qh.openapi import install_enhanced_openapi
+
+        install_enhanced_openapi(app)
+
     return app
 
 
@@ -280,6 +294,10 @@ def inspect_routes(app: FastAPI) -> List[Dict[str, Any]]:
             # Include original function if available (for OpenAPI/client generation)
             if hasattr(route.endpoint, "_qh_original_func"):
                 route_info["function"] = route.endpoint._qh_original_func
+            # Include the resolved param -> TransformSpec map (HTTP-location
+            # classification) for OpenAPI request/response schema generation.
+            if hasattr(route.endpoint, "_qh_param_specs"):
+                route_info["param_specs"] = route.endpoint._qh_param_specs
             routes.append(route_info)
 
     return routes
