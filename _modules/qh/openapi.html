@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>qh.openapi &mdash; qh 0.0.13 documentation</title>
+  <title>qh.openapi &mdash; qh 0.0.14 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=9fc46840"></script>
+      <script src="../../_static/documentation_options.js?v=544df88d"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -239,9 +239,11 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_is_pydantic_model</span><span class="p">(</span><span class="n">tp</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Whether ``tp`` is a Pydantic model (v2 ``model_json_schema`` or v1 ``schema``).&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
-        <span class="nb">hasattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;model_json_schema&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;schema&quot;</span><span class="p">)</span>
-    <span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;__fields__&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;model_json_schema&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;schema&quot;</span><span class="p">))</span>
+        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;__fields__&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
 
 
 <div class="viewcode-block" id="python_type_to_json_schema">
@@ -294,11 +296,7 @@
     <span class="c1"># the schema registry or currently on the recursion stack; an otherwise</span>
     <span class="c1"># unresolvable reference degrades to the permissive empty schema.</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">ForwardRef</span><span class="p">)):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">type_hint</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-            <span class="k">else</span> <span class="n">type_hint</span><span class="o">.</span><span class="n">__forward_arg__</span>
-        <span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">type_hint</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">type_hint</span><span class="o">.</span><span class="n">__forward_arg__</span>
         <span class="k">return</span> <span class="n">_ref</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="n">schemas</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">stack</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
 
     <span class="c1"># Exact primitive match (covers ``NoneType`` too).</span>
@@ -415,9 +413,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">hints</span> <span class="o">=</span> <span class="n">_safe_type_hints</span><span class="p">(</span><span class="n">tp</span><span class="p">)</span>
     <span class="n">required_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">tp</span><span class="p">,</span> <span class="s2">&quot;__required_keys__&quot;</span><span class="p">,</span> <span class="nb">set</span><span class="p">()))</span>
-    <span class="k">return</span> <span class="p">[</span>
-        <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Any</span><span class="p">),</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">required_keys</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">hints</span>
-    <span class="p">]</span>
+    <span class="k">return</span> <span class="p">[(</span><span class="n">key</span><span class="p">,</span> <span class="n">hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Any</span><span class="p">),</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">required_keys</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">hints</span><span class="p">]</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_dataclass_fields</span><span class="p">(</span><span class="n">tp</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]:</span>
