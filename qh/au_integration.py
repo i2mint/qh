@@ -202,6 +202,9 @@ def use_au_backend(
     Returns:
         TaskConfig configured to use au
 
+    Raises:
+        ImportError: If the ``au`` package is not installed.
+
     Example:
 
         >>> from au import ThreadBackend, FileSystemStore  # doctest: +SKIP

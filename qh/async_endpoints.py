@@ -70,6 +70,9 @@ def add_task_endpoints(
             task_id: Task identifier
             wait: Whether to block until task completes
             timeout: Maximum time to wait in seconds
+
+        Raises:
+            HTTPException: 404 if ``task_id`` is unknown to this function's task manager.
         """
         task_manager = get_task_manager(func_name)
 

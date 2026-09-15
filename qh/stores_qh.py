@@ -151,6 +151,10 @@ def create_method_endpoint(
 
     Returns:
         An async endpoint function compatible with FastAPI
+
+    Raises:
+        ValueError: If ``path_params`` has a length this method's branch does
+            not implement (currently 1 or 2 are supported).
     """
     http_method = config.get("method", "get")
     path_params = path_params or ["user_id"]

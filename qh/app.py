@@ -108,6 +108,9 @@ def mk_app(
         The FastAPI application (the one passed as ``app``, or a new one) with
         one route per function, in the order the functions were given.
 
+    Raises:
+        TypeError: If ``config`` is neither ``None``, an ``AppConfig``, nor a dict.
+
     See Also:
         ``qh.testing.test_app``: call the resulting app in-process without a server.
         ``qh.client.mk_client_from_app``: a Python client whose methods mirror the functions.
