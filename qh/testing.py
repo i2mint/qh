@@ -25,7 +25,7 @@ Main entry points:
 8
 """
 
-from typing import Optional, Any, Callable, Generator
+from typing import Optional, Any, Callable, Generator, Union
 from dataclasses import dataclass
 import threading
 import time
@@ -386,7 +386,9 @@ class AppRunner:
 
 
 @contextmanager
-def run_app(app: FastAPI, *, use_server: bool = False, **kwargs):
+def run_app(
+    app: FastAPI, *, use_server: bool = False, **kwargs
+) -> Generator[Union[TestClient, str], None, None]:
     """
     Context manager for running a FastAPI app.
 
@@ -422,7 +424,7 @@ def run_app(app: FastAPI, *, use_server: bool = False, **kwargs):
 
 
 @contextmanager
-def test_app(app: FastAPI):
+def test_app(app: FastAPI) -> Generator[TestClient, None, None]:
     """
     Call an app in-process through a ``TestClient``, no server, no port.
 
@@ -460,7 +462,9 @@ def test_app(app: FastAPI):
 
 
 @contextmanager
-def serve_app(app: FastAPI, port: int = 8000, host: str = "127.0.0.1"):
+def serve_app(
+    app: FastAPI, port: int = 8000, host: str = "127.0.0.1"
+) -> Generator[str, None, None]:
     """
     Context manager for running app with real server.
 
