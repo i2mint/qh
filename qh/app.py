@@ -1,12 +1,31 @@
-"""
-Core API for creating FastAPI applications from Python functions.
+"""Build a FastAPI application from plain Python functions.
 
-This is the primary entry point for qh: mk_app()
+``mk_app`` is the primary entry point of qh: it normalizes whatever you pass
+(a callable, a list, or a dict of callables to route configs), resolves the
+layered configuration from ``qh.config``, applies the naming conventions from
+``qh.conventions`` when asked, wraps each function into a FastAPI endpoint via
+``qh.endpoint``, and installs the type-hint-derived OpenAPI document from
+``qh.openapi``. Functions named in ``async_funcs`` also get the task endpoints
+of ``qh.async_endpoints``.
+
+Main entry points:
+
+- ``mk_app``: functions in, FastAPI app out
+- ``inspect_routes``: the registered routes as plain dicts
+- ``print_routes``: the same as a text table
+
+>>> from qh.app import mk_app, inspect_routes
+>>> def add(x: int, y: int) -> int:
+...     return x + y
+>>> app = mk_app([add])
+>>> [r['path'] for r in inspect_routes(app) if r['name'] == 'add']
+['/add']
 """
 
 from typing import Any, Callable, Dict, List, Optional, Union
 from fastapi import FastAPI
 
+from qh.async_tasks import TaskConfig
 from qh.config import (
     AppConfig,
     RouteConfig,
@@ -31,15 +50,18 @@ def mk_app(
     config: Optional[Union[Dict[str, Any], AppConfig]] = None,
     use_conventions: bool = False,
     async_funcs: Optional[List[Union[str, Callable]]] = None,
-    async_config: Optional[Union[Dict[str, Any], "TaskConfig"]] = None,
+    async_config: Optional[Union[Dict[str, Any], TaskConfig]] = None,
     enhanced_openapi: bool = True,
     **kwargs,
 ) -> FastAPI:
     """
-    Create a FastAPI application from Python functions.
+    Create a FastAPI application whose routes call the given Python functions.
 
     This is the primary API for qh. It supports multiple input formats for maximum
-    flexibility while maintaining simplicity for common cases.
+    flexibility while maintaining simplicity for common cases. Each function gets
+    one route; by default a ``POST`` at ``/<function name>`` taking its arguments
+    as a JSON object (see ``RouteConfig`` and ``AppConfig`` in ``qh.config`` for
+    what can be changed, and ``qh.rules`` for how parameters are mapped to HTTP).
 
     Args:
         funcs: Functions to expose as HTTP endpoints. Can be:
@@ -83,7 +105,13 @@ def mk_app(
         **kwargs: Additional FastAPI() constructor kwargs (if creating new app)
 
     Returns:
-        FastAPI application with routes added
+        The FastAPI application (the one passed as ``app``, or a new one) with
+        one route per function, in the order the functions were given.
+
+    See Also:
+        ``qh.testing.test_app``: call the resulting app in-process without a server.
+        ``qh.client.mk_client_from_app``: a Python client whose methods mirror the functions.
+        ``qh.base.mk_fastapi_app``: the older, config-free variant kept for its tests.
 
     Examples:
         Simple case - just functions:
@@ -119,16 +147,14 @@ def mk_app(
         ...     return n * 2
         >>> app = mk_app([expensive_task], async_funcs=['expensive_task'])
 
-        # Now: POST /expensive_task?async=true returns {"task_id": "..."}
-        # And: GET /tasks/{task_id}/result returns the result when ready
+        Now ``POST /expensive_task?async=true`` returns ``{"task_id": ...}`` and
+        ``GET /tasks/{task_id}/result`` returns the result when ready.
     """
     # Normalize input formats
     func_configs = normalize_funcs_input(funcs)
 
     # Process async configuration
     if async_funcs:
-        from qh.async_tasks import TaskConfig
-
         # Normalize async_config
         if async_config is None:
             # Use default config for all async functions
@@ -282,13 +308,27 @@ def mk_app(
 
 def inspect_routes(app: FastAPI) -> List[Dict[str, Any]]:
     """
-    Inspect routes in a FastAPI app.
+    List the routes of a FastAPI app as plain dicts.
 
     Args:
         app: FastAPI application
 
     Returns:
-        List of route information dicts
+        One dict per route that has HTTP methods (FastAPI's own ``/docs``,
+        ``/redoc`` and ``/openapi.json`` routes included), in registration
+        order, with keys ``path``, ``methods``, ``name`` and ``endpoint``.
+        Routes made by ``mk_app`` also carry ``function`` (the original
+        Python callable) and ``param_specs`` (the parameter-to-``TransformSpec``
+        map used to build the OpenAPI document).
+
+    Examples:
+        >>> from qh import mk_app, inspect_routes
+        >>> def add(x: int, y: int) -> int:
+        ...     return x + y
+        >>> app = mk_app([add])
+        >>> route = [r for r in inspect_routes(app) if r['name'] == 'add'][0]
+        >>> route['path'], route['methods'], route['function'] is add
+        ('/add', ['POST'], True)
     """
     routes = []
 
@@ -314,10 +354,19 @@ def inspect_routes(app: FastAPI) -> List[Dict[str, Any]]:
 
 def print_routes(app: FastAPI) -> None:
     """
-    Print formatted route table for a FastAPI app.
+    Print a text table of a FastAPI app's routes (methods, path, endpoint name).
 
     Args:
         app: FastAPI application
+
+    Examples:
+        >>> from qh import mk_app, print_routes
+        >>> def add(x: int, y: int) -> int:
+        ...     return x + y
+        >>> print_routes(mk_app([add], config={'docs_url': None, 'redoc_url': None, 'openapi_url': None}))
+        METHODS  PATH  ENDPOINT
+        ----------------------------------------------------------
+        POST  /add  add
     """
     routes = inspect_routes(app)
 

@@ -1,18 +1,28 @@
-"""
-Testing utilities for qh applications.
+"""Run a qh (or any FastAPI) app for a test: in-process, or on a real port.
 
-Provides context managers and helpers for testing HTTP services created with qh.
+Two ways to exercise an app. ``test_app`` (and ``run_app``, ``AppRunner``) wrap
+FastAPI's ``TestClient`` so requests go straight to the app with no socket.
+``serve_app`` and ``service_running`` start uvicorn in a daemon thread and
+give you a base URL to hit with ``requests``; ``service_running`` can also
+notice a service that is already up and leave it alone. ``quick_test`` is the
+one-liner: build an app around one function, POST to it, return the JSON.
 
-Related Tools in Other Packages
--------------------------------
-This module provides testing utilities similar to those found in:
+Similar tools elsewhere: ``meshed.tools.launch_webservice``,
+``strand.taskrunning.utils.run_process``, and the service helpers in
+``py2http``.
 
-- `meshed.tools.launch_webservice`: Context manager for launching function-based web services
-- `strand.taskrunning.utils.run_process`: Generic process runner with health checks
-- `py2http`: Various service management utilities
+Main entry points:
 
-The tools here are specifically optimized for qh/FastAPI applications but can work
-with any HTTP service.
+- ``test_app``: ``with test_app(app) as client:`` for in-process requests
+- ``quick_test``: call one function through HTTP and get its JSON back
+- ``serve_app`` / ``service_running``: a live server on a port, for integration tests
+
+>>> from qh import mk_app
+>>> from qh.testing import quick_test
+>>> def add(x: int, y: int) -> int:
+...     return x + y
+>>> quick_test(add, x=3, y=5)
+8
 """
 
 from typing import Optional, Any, Callable, Generator
@@ -23,6 +33,18 @@ import requests
 from contextlib import contextmanager
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+
+__all__ = [
+    "ServiceInfo",
+    "service_running",
+    "AppRunner",
+    "run_app",
+    "test_app",
+    "serve_app",
+    "quick_test",
+    "app_runner",
+    "test_client",
+]
 
 
 @dataclass
@@ -82,11 +104,13 @@ def service_running(
     launcher) and tears it down on exit. If the service was already running, it leaves
     it running on exit.
 
-    Exactly one of `url`, `app`, or `launcher` must be provided.
+    Exactly one of ``url``, ``app``, or ``launcher`` must be provided.
 
     Note:
-        Services are launched in background threads (not processes) to avoid
-        serialization issues with FastAPI apps on macOS.
+        Services are launched in daemon threads (not processes) to avoid
+        serialization issues with FastAPI apps on macOS. A service this
+        context manager launched is not stopped on exit: the thread ends
+        with the process.
 
     Args:
         url: URL of an existing service to check (e.g., 'http://localhost:8000').
@@ -104,11 +128,12 @@ def service_running(
         ServiceInfo: Information about the running service including URL and status
 
     Raises:
-        ValueError: If invalid combination of arguments provided
-        RuntimeError: If service fails to start within timeout
+        ValueError: If none, or more than one, of ``url``, ``app`` and ``launcher`` is given.
+        RuntimeError: If ``url`` alone was given and nothing answers there, or if a
+            launched service does not answer within ``readiness_timeout`` seconds.
 
     Examples:
-        Test a qh app (will launch and tear down):
+        Test a qh app (launches a server in a daemon thread):
 
         >>> from qh import mk_app
         >>> def add(x: int, y: int) -> int:
@@ -211,7 +236,11 @@ class AppRunner:
     Context manager for running a FastAPI app in test mode or with a real server.
 
     Supports both synchronous testing (using TestClient) and integration testing
-    (using a real uvicorn server).
+    (using a real uvicorn server). With ``use_server=False`` (the default) the
+    ``with`` block receives a ``TestClient``; with ``use_server=True`` it
+    receives the base URL of a uvicorn server started in a daemon thread. On
+    exit the TestClient reference is dropped; a real server is not stopped, its
+    daemon thread ends with the process. ``run_app`` is the function form.
 
     Examples:
         Basic usage with TestClient:
@@ -231,10 +260,9 @@ class AppRunner:
         ...     response = requests.post(f'{base_url}/add', json={'x': 3, 'y': 5})
         ...     assert response.json() == 8
 
-        Automatic cleanup on error:
+        An exception inside the block propagates; ``__exit__`` still runs:
 
         >>> with AppRunner(app) as client:  # doctest: +SKIP
-        ...     # Server automatically stops if exception occurs
         ...     raise ValueError("Test error")
     """
 
@@ -280,9 +308,10 @@ class AppRunner:
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
-        Stop the app and clean up resources.
+        Drop the TestClient, or mark the server as no longer tracked.
 
-        Automatically called even if an exception occurs.
+        Runs even if the block raised; never suppresses the exception. A real
+        server (``use_server=True``) keeps running in its daemon thread.
         """
         if self.use_server:
             self._stop_server()
@@ -309,6 +338,9 @@ class AppRunner:
 
         Returns:
             Base URL string (e.g., "http://127.0.0.1:8000")
+
+        Raises:
+            RuntimeError: If ``/docs`` does not answer within ``server_timeout`` seconds.
         """
         import uvicorn
 
@@ -345,7 +377,7 @@ class AppRunner:
         )
 
     def _stop_server(self):
-        """Stop the uvicorn server."""
+        """Forget the server thread; the daemon thread itself keeps running until the process exits."""
         if self._server_running:
             # Server will stop when thread is terminated
             # (daemon thread will automatically stop when main thread exits)
@@ -392,9 +424,11 @@ def run_app(app: FastAPI, *, use_server: bool = False, **kwargs):
 @contextmanager
 def test_app(app: FastAPI):
     """
-    Simple context manager for testing with TestClient.
+    Call an app in-process through a ``TestClient``, no server, no port.
 
-    Convenience wrapper for the most common case: testing with TestClient.
+    The most common case, and the fastest: requests are dispatched straight
+    to the ASGI app. Use ``serve_app`` when a real socket matters (another
+    process, a browser, a generated client pointed at a URL).
 
     Args:
         app: FastAPI application
@@ -404,14 +438,22 @@ def test_app(app: FastAPI):
 
     Examples:
 
-        >>> from qh import mk_app  # doctest: +SKIP
-        >>> from qh.testing import test_app  # doctest: +SKIP
-        >>> def hello(name: str = "World") -> str:  # doctest: +SKIP
+        >>> from qh import mk_app
+        >>> from qh.testing import test_app
+        >>> def hello(name: str = "World") -> str:
         ...     return f"Hello, {name}!"
-        >>> app = mk_app([hello])  # doctest: +SKIP
-        >>> with test_app(app) as client:  # doctest: +SKIP
-        ...     response = client.post('/hello', json={'name': 'Alice'})
-        ...     assert response.json() == "Hello, Alice!"
+        >>> app = mk_app([hello])
+        >>> with test_app(app) as client:
+        ...     client.post('/hello', json={'name': 'Alice'}).json()
+        'Hello, Alice!'
+
+        A missing required argument is a ``422``, as in FastAPI:
+
+        >>> def add(x: int, y: int) -> int:
+        ...     return x + y
+        >>> with test_app(mk_app([add])) as client:
+        ...     client.post('/add', json={'x': 3}).status_code
+        422
     """
     with run_app(app, use_server=False) as client:
         yield client
@@ -450,16 +492,23 @@ def serve_app(app: FastAPI, port: int = 8000, host: str = "127.0.0.1"):
 
 def quick_test(func, **kwargs):
     """
-    Quick test helper for a single function.
+    Call one function through HTTP and return the decoded JSON response.
 
-    Creates an app, runs it with TestClient, and tests a single function call.
+    Builds ``mk_app([func])``, POSTs ``kwargs`` as the JSON body to
+    ``/<func name>``, and returns ``response.json()``. Meant for a one-line
+    smoke check of what a function looks like over HTTP.
 
     Args:
         func: Function to test
-        **kwargs: Arguments to pass to the function
+        **kwargs: Arguments to pass to the function (sent as the JSON body)
 
     Returns:
-        Response from calling the function
+        The JSON-decoded response body, i.e. the function's return value after
+        JSON round-tripping.
+
+    Raises:
+        requests.HTTPError: If the response status is 4xx or 5xx (for example
+            a missing required argument, or an exception in ``func``).
 
     Examples:
 

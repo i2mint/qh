@@ -1,5 +1,18 @@
-"""
-qh.base - Core functionality for dispatching Python functions as HTTP endpoints using FastAPI
+"""Config-free dispatch of Python callables as FastAPI routes, plus a store dispatcher.
+
+A lighter predecessor of ``qh.app.mk_app`` with a dict-based route config
+(``path``, ``methods``, ``input_trans``, ``output_trans``, ``defaults``,
+``summary``, ``tags``). Every endpoint reads its arguments from the JSON body
+merged with path parameters, and answers ``422`` for a missing required
+argument and ``500`` for an exception raised by the function. Importing this
+module also patches ``fastapi.testclient.TestClient.get`` to accept a ``json``
+body. Not used by ``qh.app``; kept for its tests and for ``mk_store_dispatcher``.
+
+Main entry points:
+
+- ``mk_fastapi_app``: callables (or a dict of callable to config) in, FastAPI app out
+- ``mk_store_dispatcher``: key/value routes over a ``store_getter(store_id)`` mapping
+- ``mk_json_ingress`` / ``mk_json_egress``: per-key and per-type transforms for the above
 """
 
 from typing import Any, Dict, List, Optional, Union, Tuple
