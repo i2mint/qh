@@ -16,6 +16,7 @@ dependencies = [
     "requests>=2.31.0",
     "pydantic>=2.0.0",
     "i2",
+    "httpx2",
 ]
 
 [project.license]
@@ -25,7 +26,7 @@ text = "Apache-2.0"
 Homepage = "https://github.com/i2mint/qh"
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0", "pytest-cov>=4.0", "ruff>=0.1.0", "httpx>=0.24.0"]
+dev = ["pytest>=7.0", "pytest-cov>=4.0", "ruff>=0.1.0", "httpx>=0.24.0", "httpx2"]
 docs = ["sphinx>=6.0", "sphinx-rtd-theme>=1.0"]
 
 [tool.ruff]
