@@ -1,4 +1,16 @@
-"""Core qh"""
+"""Minimal function-to-route dispatch built on ``i2.wrapper.Wrap``.
+
+An early, self-contained take on the qh idea: ``mk_fastapi_app`` turns a
+collection of callables into ``POST`` routes that read a JSON body as keyword
+arguments and return the JSON-encoded result. It is not used by ``qh.app.mk_app``,
+the maintained entry point, and it keeps a process-wide ``default_configs``
+dict that ``mk_fastapi_app`` mutates; prefer ``qh.app`` for new code.
+
+Main entry points:
+
+- ``mk_fastapi_app``: callables in, FastAPI app out
+- ``default_configs``: the mutable process-wide defaults (path, method, mappers)
+"""
 
 from fastapi import FastAPI, Request, Response
 import json

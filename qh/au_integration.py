@@ -5,6 +5,7 @@ This module provides adapters to use au's powerful backend/storage system
 with qh's user-friendly HTTP interface.
 
 Philosophy:
+
 - qh provides the HTTP layer (each function gets its own endpoint)
 - au provides the execution backend and result storage
 - This module bridges them together
@@ -117,12 +118,13 @@ class AuTaskStore(TaskStore):
     def update_task(self, task_info: TaskInfo) -> None:
         """Update task information.
 
-        Note: au manages its own state, so this is mostly a no-op.
+        Note:
+            au manages its own state, so this is mostly a no-op.
         """
         pass
 
     def delete_task(self, task_id: str) -> bool:
-        """Delete a task."""
+        """Delete ``task_id`` from the au store, returning whether it was present."""
         if task_id in self.au_store:
             del self.au_store[task_id]
             return True
@@ -165,8 +167,9 @@ class AuTaskExecutor(TaskExecutor):
     ) -> None:
         """Submit a task to au backend.
 
-        Note: au handles result storage internally, so we don't use the callback.
-        The callback is for qh's built-in backends, but au's store handles this.
+        Note:
+            au handles result storage internally, so we don't use the callback.
+            The callback is for qh's built-in backends, but au's store handles this.
         """
         # Call au backend's launch() method directly with our custom task_id (key)
         # au will store the result in its store when done
@@ -199,7 +202,11 @@ def use_au_backend(
     Returns:
         TaskConfig configured to use au
 
+    Raises:
+        ImportError: If the ``au`` package is not installed.
+
     Example:
+
         >>> from au import ThreadBackend, FileSystemStore  # doctest: +SKIP
         >>> from qh import mk_app  # doctest: +SKIP
         >>> from qh.au_integration import use_au_backend  # doctest: +SKIP
@@ -218,6 +225,7 @@ def use_au_backend(
         ... )
 
     Example with au's global config:
+
         >>> # Set AU environment variables:
         >>> # AU_BACKEND=redis
         >>> # AU_REDIS_URL=redis://localhost:6379

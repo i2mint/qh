@@ -2,6 +2,7 @@
 Transformation rule system for qh.
 
 Supports multi-dimensional matching:
+
 - Type-based
 - Argument name-based
 - Function name-based
@@ -76,6 +77,13 @@ class Rule(Protocol):
     ) -> Optional[TransformSpec]:
         """
         Check if this rule matches the given parameter context.
+
+        Args:
+            param_name: The parameter's name.
+            param_type: The parameter's type annotation.
+            param_default: The parameter's default, or ``inspect.Parameter.empty``.
+            func: The function the parameter belongs to.
+            func_name: ``func``'s name.
 
         Returns:
             TransformSpec if matched, None otherwise
@@ -247,6 +255,13 @@ class RuleChain:
     Chain of rules evaluated in order with first-match semantics.
 
     Rules are tried from most specific to most general.
+
+    >>> chain = RuleChain()
+    >>> chain.add_rule(TypeRule({int: TransformSpec(http_location=HttpLocation.QUERY)}))
+    >>> chain.match(param_name='x', param_type=int).http_location
+    <HttpLocation.QUERY: 'query'>
+    >>> chain.match(param_name='y', param_type=str) is None
+    True
     """
 
     def __init__(self, rules: Optional[list[Rule]] = None):
@@ -268,6 +283,13 @@ class RuleChain:
     ) -> Optional[TransformSpec]:
         """
         Find first matching rule.
+
+        Args:
+            param_name: The parameter's name.
+            param_type: The parameter's type annotation.
+            param_default: The parameter's default, or ``inspect.Parameter.empty``.
+            func: The function the parameter belongs to, if known.
+            func_name: ``func``'s name.
 
         Returns:
             TransformSpec from first matching rule, or None if no match
@@ -354,6 +376,7 @@ def resolve_transform(
     Resolve transformation specification for a parameter.
 
     Resolution order:
+
     1. Rule chain (explicit rules)
     2. Type registry (registered types)
     3. Default fallback (JSON body, no transformation)

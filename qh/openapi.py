@@ -153,11 +153,11 @@ def python_type_to_json_schema(
     *,
     _stack: Optional[frozenset] = None,
 ) -> Dict[str, Any]:
-    """Convert a Python type hint to a JSON Schema fragment.
+    r"""Convert a Python type hint to a JSON Schema fragment.
 
     Primitives, containers and unions are inlined. Named composite types —
-    dataclasses, ``TypedDict``\\ s, Pydantic models, ``NamedTuple``\\ s and
-    ``Enum``\\ s — are registered in ``schemas`` (the OpenAPI
+    dataclasses, ``TypedDict``\ s, Pydantic models, ``NamedTuple``\ s and
+    ``Enum``\ s — are registered in ``schemas`` (the OpenAPI
     ``components.schemas`` table) and returned as a ``$ref``, so the same type
     used in several places is described once.
 
@@ -385,6 +385,13 @@ def build_request_body_schema(
     path/query/header parameters are emitted separately by
     :func:`build_parameters`. A parameter with no default is ``required``.
 
+    Args:
+        func: The function whose parameters are being described.
+        param_specs: Parameter name to ``TransformSpec``, deciding each
+            parameter's HTTP location (see ``_param_location``).
+        schemas: The mutable ``components.schemas`` accumulator, passed
+            through to ``python_type_to_json_schema`` for composite types.
+
     Returns:
         an object JSON Schema, or ``None`` when the function has no body
         parameters (e.g. a GET route whose arguments are all query parameters).
@@ -462,11 +469,29 @@ def get_python_type_name(type_hint: Any) -> str:
     """
     Get a string representation of a Python type.
 
+    ``inspect.Parameter.empty`` and ``None`` map to ``"Any"``. Anything else
+    with a ``__name__`` uses that name alone, with no type arguments — on
+    Python 3.10+ this includes builtin generic aliases (``list[int]``) and
+    ``typing`` generics (``Optional[str]``, ``Dict[str, int]``), since they
+    all carry a ``__name__`` now. The bracketed-argument form only appears
+    for the rare origin type that lacks ``__name__``.
+
+    Args:
+        type_hint: A type or type annotation, or ``inspect.Parameter.empty``.
+
+    Returns:
+        The type's bare name, e.g. ``"int"`` or ``"list"``.
+
     Examples:
-        int → "int"
-        str → "str"
-        list[int] → "list[int]"
-        Optional[str] → "Optional[str]"
+        >>> get_python_type_name(int)
+        'int'
+        >>> get_python_type_name(str)
+        'str'
+        >>> get_python_type_name(list[int])
+        'list'
+        >>> from typing import Optional
+        >>> get_python_type_name(Optional[str])
+        'Optional'
     """
     if type_hint is inspect.Parameter.empty or type_hint is None:
         return "Any"
@@ -493,8 +518,12 @@ def extract_function_signature(func: Callable) -> Dict[str, Any]:
     """
     Extract detailed signature information from a function.
 
+    Args:
+        func: The function to inspect.
+
     Returns:
         Dictionary with signature metadata:
+
         - name: function name
         - module: module path
         - parameters: list of parameter info
@@ -758,6 +787,7 @@ def export_openapi(
         the enhanced OpenAPI schema dictionary.
 
     Example:
+
         >>> from qh import mk_app  # doctest: +SKIP
         >>> from qh.openapi import export_openapi  # doctest: +SKIP
         >>> app = mk_app([my_func])  # doctest: +SKIP

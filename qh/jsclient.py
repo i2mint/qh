@@ -289,6 +289,7 @@ def export_js_client(
         JavaScript code as string
 
     Example:
+
         >>> from qh import mk_app, export_openapi  # doctest: +SKIP
         >>> from qh.jsclient import export_js_client  # doctest: +SKIP
         >>> app = mk_app([add, subtract])  # doctest: +SKIP
@@ -361,6 +362,7 @@ def export_ts_client(
         TypeScript code as string
 
     Example:
+
         >>> from qh import mk_app, export_openapi  # doctest: +SKIP
         >>> from qh.jsclient import export_ts_client  # doctest: +SKIP
         >>> app = mk_app([add, subtract])  # doctest: +SKIP

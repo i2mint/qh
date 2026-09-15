@@ -2,6 +2,7 @@
 Type registry for qh - automatic serialization/deserialization for custom types.
 
 Supports:
+
 - NumPy arrays and dtypes
 - Pandas DataFrames and Series
 - Custom user types
@@ -54,6 +55,21 @@ class TypeRegistry:
     Registry for type handlers.
 
     Manages conversion between Python types and HTTP representations.
+    Comes pre-populated with pass-through handlers for the JSON-native
+    builtins (``str``, ``int``, ``float``, ``bool``, ``list``, ``dict``,
+    ``NoneType``); its ``register`` method adds more. The module-level
+    ``register_type`` (and the ``register_json_type`` decorator built on it)
+    register into the separate, global registry used by the rest of ``qh``,
+    not into a particular ``TypeRegistry`` instance.
+
+    >>> reg = TypeRegistry()
+    >>> reg.get_handler(int).to_json(3)
+    3
+    >>> reg.get_handler(str) is not None
+    True
+    >>> class Unregistered: pass
+    >>> reg.get_handler(Unregistered) is None
+    True
     """
 
     def __init__(self):
@@ -165,6 +181,7 @@ def register_type(
         content_type: Optional content type for binary data
 
     Example:
+
         >>> import numpy as np  # doctest: +SKIP
         >>> register_type(  # doctest: +SKIP
         ...     np.ndarray,
@@ -278,10 +295,21 @@ def register_json_type(
     Decorator to register a custom type.
 
     Can be used as:
+
     1. Class decorator (auto-detect to_dict/from_dict methods)
     2. With explicit serializers
 
+    Args:
+        cls: The class being decorated, when used as ``@register_json_type``
+            with no arguments; ``None`` when called as
+            ``@register_json_type(to_json=..., from_json=...)``.
+        to_json: Serializer; when omitted, falls back to ``cls.to_dict()``,
+            then ``obj.__dict__``.
+        from_json: Deserializer; when omitted, falls back to
+            ``cls.from_dict``, then ``cls(**data)``.
+
     Examples:
+
         >>> @register_json_type
         ... class Point:
         ...     def __init__(self, x, y):

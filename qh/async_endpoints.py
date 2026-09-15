@@ -20,6 +20,7 @@ def add_task_endpoints(
     Add task management endpoints for a specific function.
 
     Creates the following endpoints:
+
     - GET {path_prefix}/{task_id}/status - Get task status
     - GET {path_prefix}/{task_id}/result - Get task result (waits if needed)
     - GET {path_prefix}/{task_id} - Get complete task info
@@ -69,6 +70,15 @@ def add_task_endpoints(
             task_id: Task identifier
             wait: Whether to block until task completes
             timeout: Maximum time to wait in seconds
+
+        Returns:
+            A dict with ``task_id`` and ``status``, plus ``result`` when
+            completed. A failed or still-pending/running task is returned as
+            a ``JSONResponse`` (500 or 202) instead of raising.
+
+        Raises:
+            HTTPException: 404 if ``task_id`` is unknown to this function's
+                task manager; 408 if ``wait`` timed out.
         """
         task_manager = get_task_manager(func_name)
 
@@ -145,6 +155,7 @@ def add_global_task_endpoints(
     Add global task management endpoints (cross all functions).
 
     Creates:
+
     - GET {path_prefix}/ - List all recent tasks
 
     Args:

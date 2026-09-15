@@ -145,14 +145,18 @@ def mk_client_from_openapi(
     Create an HTTP client from an OpenAPI specification.
 
     Args:
-        openapi_spec: OpenAPI spec dictionary
+        openapi_spec: The parsed OpenAPI document (as from ``export_openapi``
+            or ``json.load`` on a spec file), used to build one client function
+            per operation.
         base_url: Base URL for API requests
-        session: Optional requests Session
+        session: An existing session to reuse (e.g. for shared auth/headers);
+            a new one is created if not given.
 
     Returns:
         HttpClient with functions for each endpoint
 
     Example:
+
         >>> from qh.client import mk_client_from_openapi  # doctest: +SKIP
         >>> spec = {'paths': {'/add': {...}}, ...}  # doctest: +SKIP
         >>> client = mk_client_from_openapi(spec, 'http://localhost:8000')  # doctest: +SKIP
@@ -217,12 +221,13 @@ def mk_client_from_url(
     Args:
         openapi_url: URL to OpenAPI JSON spec (e.g., "http://localhost:8000/openapi.json")
         base_url: Base URL for API requests (defaults to same as openapi_url)
-        session: Optional requests Session
+        session: An existing session to reuse; a new one is created if not given.
 
     Returns:
         HttpClient with functions for each endpoint
 
     Example:
+
         >>> from qh.client import mk_client_from_url  # doctest: +SKIP
         >>> client = mk_client_from_url('http://localhost:8000/openapi.json')  # doctest: +SKIP
         >>> result = client.add(x=3, y=5)  # doctest: +SKIP
@@ -255,6 +260,7 @@ def mk_client_from_app(app, base_url: str = "http://testserver") -> HttpClient:
         HttpClient that uses FastAPI TestClient under the hood
 
     Example:
+
         >>> from qh import mk_app  # doctest: +SKIP
         >>> from qh.client import mk_client_from_app  # doctest: +SKIP
         >>> app = mk_app([add, subtract])  # doctest: +SKIP

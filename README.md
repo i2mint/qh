@@ -8,6 +8,16 @@
 pip install qh
 ```
 
+<!-- epythet:agentic-readme:start -->
+## For AI agents
+
+`qh` publishes its documentation in forms made for coding agents. If you are one, start here.
+
+**The documentation, machine-readable**: [`llms.txt`](https://i2mint.github.io/qh/llms.txt) indexes every page; [`qh.md`](https://i2mint.github.io/qh/qh.md) is the whole documentation in one file; every page has a `.md` twin; [`objects.inv`](https://i2mint.github.io/qh/objects.inv) maps symbols to URLs.
+
+If you can't let go of the old ways, the rest of this README is written for you, starting at [Quickstart: From Function to API in 3 Lines](#quickstart-from-function-to-api-in-3-lines).
+<!-- epythet:agentic-readme:end -->
+
 ## Quickstart: From Function to API in 3 Lines
 
 ```python

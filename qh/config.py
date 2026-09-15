@@ -2,6 +2,7 @@
 Configuration system for qh with layered defaults.
 
 Configuration flows from general to specific:
+
 1. Global defaults
 2. App-level config
 3. Function-level config
@@ -18,7 +19,13 @@ if TYPE_CHECKING:
 
 @dataclass
 class RouteConfig:
-    """Configuration for a single route (function endpoint)."""
+    """Configuration for a single route (function endpoint).
+
+    >>> rc = RouteConfig(methods=['GET'])
+    >>> merged = rc.merge_with(RouteConfig(path='/x'))
+    >>> merged.methods, merged.path
+    (['GET'], '/x')
+    """
 
     # Route path (None = auto-generate from function name)
     path: Optional[str] = None
@@ -72,7 +79,12 @@ class RouteConfig:
 
 @dataclass
 class AppConfig:
-    """Global configuration for the entire FastAPI app."""
+    """Global configuration for the entire FastAPI app.
+
+    >>> ac = AppConfig(path_prefix='/api')
+    >>> ac.default_methods, ac.path_prefix
+    (['POST'], '/api')
+    """
 
     # Default HTTP methods for all routes
     default_methods: List[str] = field(default_factory=lambda: ["POST"])
@@ -123,6 +135,7 @@ def resolve_route_config(
     Resolve complete route configuration for a function.
 
     Precedence (highest to lowest):
+
     1. route_config (function-specific)
     2. app_config (app-level defaults)
     3. DEFAULT_ROUTE_CONFIG (global defaults)
@@ -255,6 +268,7 @@ def normalize_funcs_input(
     Normalize various input formats to Dict[Callable, RouteConfig].
 
     Supports:
+
     - Single callable
     - List of callables
     - Dict mapping callable to config dict

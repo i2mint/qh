@@ -1,7 +1,29 @@
-"""
-qh: Quick HTTP service for Python
+"""Quick HTTP: expose Python functions as a FastAPI web service with one call.
 
-Convention-over-configuration tool for exposing Python functions as HTTP services.
+Give ``mk_app`` a function, a list of functions, or a dict of functions to route
+configs, and get back a FastAPI app whose routes call those functions. Type
+hints drive request validation and the OpenAPI document; an optional
+convention layer infers RESTful paths and methods from function names; a rule
+chain and a type registry decide where each parameter lives in the HTTP
+request and how it is (de)serialized. The same app can be tested in-process,
+served, turned into a Python, JavaScript or TypeScript client, and given
+background-task endpoints for long-running functions.
+
+Main entry points:
+
+- ``mk_app``: functions in, FastAPI app out (``qh.app``)
+- ``RouteConfig`` / ``AppConfig``: per-route and app-wide configuration (``qh.config``)
+- ``test_app`` / ``quick_test`` / ``service_running``: in-process and live testing (``qh.testing``)
+- ``mk_client_from_app`` / ``export_openapi``: clients and the OpenAPI document (``qh.client``, ``qh.openapi``)
+- ``TaskConfig``: background execution for functions named in ``async_funcs`` (``qh.async_tasks``)
+
+>>> from qh import mk_app, test_app
+>>> def add(x: int, y: int) -> int:
+...     return x + y
+>>> app = mk_app([add])
+>>> with test_app(app) as client:
+...     client.post('/add', json={'x': 3, 'y': 5}).json()
+8
 """
 
 # New primary API
