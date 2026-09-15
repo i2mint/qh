@@ -43,6 +43,7 @@ def mk_app(
 
     Args:
         funcs: Functions to expose as HTTP endpoints. Can be:
+
             - A single callable
             - A list of callables
             - A dict mapping callables to their route configurations
@@ -51,12 +52,14 @@ def mk_app(
              If None, creates a new app.
 
         config: Optional app-level configuration. Can be:
+
             - AppConfig object
             - Dict that will be converted to AppConfig
             - None (uses defaults)
 
         use_conventions: Whether to use convention-based routing.
             If True, infers paths and methods from function names:
+
             - get_user(user_id) → GET /users/{user_id}
             - list_users() → GET /users
             - create_user(user) → POST /users
@@ -66,6 +69,7 @@ def mk_app(
             get a task ID instead of blocking for the result.
 
         async_config: Configuration for async task processing. Can be:
+
             - None (uses default TaskConfig for functions in async_funcs)
             - TaskConfig object (applies to all async_funcs)
             - Dict mapping function names to TaskConfig objects
@@ -83,27 +87,32 @@ def mk_app(
 
     Examples:
         Simple case - just functions:
+
         >>> def add(x: int, y: int) -> int:
         ...     return x + y
         >>> app = mk_app([add])
 
         With conventions:
+
         >>> def get_user(user_id: str): ...
         >>> def list_users(): ...
         >>> app = mk_app([get_user, list_users], use_conventions=True)
 
         With configuration:
+
         >>> app = mk_app(
         ...     [add],
         ...     config={'path_prefix': '/api', 'default_methods': ['POST']}
         ... )
 
         Per-function configuration:
+
         >>> app = mk_app({
         ...     add: {'methods': ['GET', 'POST'], 'path': '/calculate/add'},
         ... })
 
         With async support:
+
         >>> def expensive_task(n: int) -> int:
         ...     import time
         ...     time.sleep(5)

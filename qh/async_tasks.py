@@ -5,12 +5,14 @@ Provides a minimal, boilerplate-free way to handle long-running operations
 by returning task IDs immediately and allowing clients to poll for results.
 
 Terminology (standard async task processing):
+
 - Task: An asynchronous computation
 - Task ID: Unique identifier for tracking a task
 - Task Status: State of the task (pending, running, completed, failed)
 - Task Result: The output of the completed task
 
 Design Philosophy:
+
 - Convention over configuration with escape hatches
 - Pluggable backends (in-memory, file-based, au, Celery, etc.)
 - HTTP-first patterns (query params, standard endpoints)
@@ -442,7 +444,8 @@ class TaskManager:
         """
         Cancel a task (if possible).
 
-        Note: Cancellation is best-effort and may not work for all executors.
+        Note:
+            Cancellation is best-effort and may not work for all executors.
 
         Returns:
             True if task was cancelled or deleted

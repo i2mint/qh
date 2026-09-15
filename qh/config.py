@@ -2,6 +2,7 @@
 Configuration system for qh with layered defaults.
 
 Configuration flows from general to specific:
+
 1. Global defaults
 2. App-level config
 3. Function-level config
@@ -123,6 +124,7 @@ def resolve_route_config(
     Resolve complete route configuration for a function.
 
     Precedence (highest to lowest):
+
     1. route_config (function-specific)
     2. app_config (app-level defaults)
     3. DEFAULT_ROUTE_CONFIG (global defaults)
@@ -255,6 +257,7 @@ def normalize_funcs_input(
     Normalize various input formats to Dict[Callable, RouteConfig].
 
     Supports:
+
     - Single callable
     - List of callables
     - Dict mapping callable to config dict

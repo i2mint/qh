@@ -2,6 +2,7 @@
 Transformation rule system for qh.
 
 Supports multi-dimensional matching:
+
 - Type-based
 - Argument name-based
 - Function name-based
@@ -354,6 +355,7 @@ def resolve_transform(
     Resolve transformation specification for a parameter.
 
     Resolution order:
+
     1. Rule chain (explicit rules)
     2. Type registry (registered types)
     3. Default fallback (JSON body, no transformation)

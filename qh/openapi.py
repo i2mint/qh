@@ -495,6 +495,7 @@ def extract_function_signature(func: Callable) -> Dict[str, Any]:
 
     Returns:
         Dictionary with signature metadata:
+
         - name: function name
         - module: module path
         - parameters: list of parameter info
@@ -758,6 +759,7 @@ def export_openapi(
         the enhanced OpenAPI schema dictionary.
 
     Example:
+
         >>> from qh import mk_app  # doctest: +SKIP
         >>> from qh.openapi import export_openapi  # doctest: +SKIP
         >>> app = mk_app([my_func])  # doctest: +SKIP

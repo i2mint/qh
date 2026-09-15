@@ -153,6 +153,7 @@ def mk_client_from_openapi(
         HttpClient with functions for each endpoint
 
     Example:
+
         >>> from qh.client import mk_client_from_openapi  # doctest: +SKIP
         >>> spec = {'paths': {'/add': {...}}, ...}  # doctest: +SKIP
         >>> client = mk_client_from_openapi(spec, 'http://localhost:8000')  # doctest: +SKIP
@@ -223,6 +224,7 @@ def mk_client_from_url(
         HttpClient with functions for each endpoint
 
     Example:
+
         >>> from qh.client import mk_client_from_url  # doctest: +SKIP
         >>> client = mk_client_from_url('http://localhost:8000/openapi.json')  # doctest: +SKIP
         >>> result = client.add(x=3, y=5)  # doctest: +SKIP
@@ -255,6 +257,7 @@ def mk_client_from_app(app, base_url: str = "http://testserver") -> HttpClient:
         HttpClient that uses FastAPI TestClient under the hood
 
     Example:
+
         >>> from qh import mk_app  # doctest: +SKIP
         >>> from qh.client import mk_client_from_app  # doctest: +SKIP
         >>> app = mk_app([add, subtract])  # doctest: +SKIP

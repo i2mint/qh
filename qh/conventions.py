@@ -4,6 +4,7 @@ Convention-based routing for qh.
 Automatically infer HTTP paths and methods from function names and signatures.
 
 Supports patterns like:
+
 - get_user(user_id: str) → GET /users/{user_id}
 - list_users(limit: int = 100) → GET /users?limit=100
 - create_user(user: User) → POST /users
@@ -58,6 +59,7 @@ def parse_function_name(func_name: str) -> ParsedFunctionName:
     Parse a function name to extract verb and resource.
 
     Examples:
+
         >>> parse_function_name('get_user')
         ParsedFunctionName(verb='get', resource='user', is_plural=False, is_collection_operation=False)
 
@@ -112,6 +114,7 @@ def infer_http_method(
         HTTP method ('GET', 'POST', 'PUT', 'PATCH', 'DELETE')
 
     Examples:
+
         >>> infer_http_method('get_user')
         'GET'
         >>> infer_http_method('create_user')
@@ -165,6 +168,7 @@ def get_id_params(func: Callable) -> List[str]:
     Extract parameters that look like IDs from function signature.
 
     ID parameters typically:
+
     - End with '_id'
     - Are named 'id'
     - Are the first parameter (for item operations)
@@ -207,6 +211,7 @@ def infer_path_from_function(
         Inferred path
 
     Examples:
+
         >>> def get_user(user_id: str): pass
         >>> infer_path_from_function(get_user)
         '/users/{user_id}'

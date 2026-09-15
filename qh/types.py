@@ -2,6 +2,7 @@
 Type registry for qh - automatic serialization/deserialization for custom types.
 
 Supports:
+
 - NumPy arrays and dtypes
 - Pandas DataFrames and Series
 - Custom user types
@@ -165,6 +166,7 @@ def register_type(
         content_type: Optional content type for binary data
 
     Example:
+
         >>> import numpy as np  # doctest: +SKIP
         >>> register_type(  # doctest: +SKIP
         ...     np.ndarray,
@@ -278,10 +280,12 @@ def register_json_type(
     Decorator to register a custom type.
 
     Can be used as:
+
     1. Class decorator (auto-detect to_dict/from_dict methods)
     2. With explicit serializers
 
     Examples:
+
         >>> @register_json_type
         ... class Point:
         ...     def __init__(self, x, y):

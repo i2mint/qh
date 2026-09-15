@@ -20,6 +20,7 @@ def add_task_endpoints(
     Add task management endpoints for a specific function.
 
     Creates the following endpoints:
+
     - GET {path_prefix}/{task_id}/status - Get task status
     - GET {path_prefix}/{task_id}/result - Get task result (waits if needed)
     - GET {path_prefix}/{task_id} - Get complete task info
@@ -145,6 +146,7 @@ def add_global_task_endpoints(
     Add global task management endpoints (cross all functions).
 
     Creates:
+
     - GET {path_prefix}/ - List all recent tasks
 
     Args:

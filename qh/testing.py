@@ -6,6 +6,7 @@ Provides context managers and helpers for testing HTTP services created with qh.
 Related Tools in Other Packages
 -------------------------------
 This module provides testing utilities similar to those found in:
+
 - `meshed.tools.launch_webservice`: Context manager for launching function-based web services
 - `strand.taskrunning.utils.run_process`: Generic process runner with health checks
 - `py2http`: Various service management utilities
@@ -108,6 +109,7 @@ def service_running(
 
     Examples:
         Test a qh app (will launch and tear down):
+
         >>> from qh import mk_app
         >>> def add(x: int, y: int) -> int:
         ...     return x + y
@@ -118,11 +120,13 @@ def service_running(
         ...     assert not info.was_already_running  # doctest: +SKIP
 
         Test an already-running service (won't tear down):
+
         >>> with service_running(url='https://api.github.com') as info:
         ...     response = requests.get(f'{info.url}/users/octocat')
         ...     assert info.was_already_running  # doctest: +SKIP
 
         Use custom launcher:
+
         >>> def my_launcher():
         ...     # Custom service startup code
         ...     pass  # doctest: +SKIP
@@ -211,6 +215,7 @@ class AppRunner:
 
     Examples:
         Basic usage with TestClient:
+
         >>> from qh import mk_app
         >>> from qh.testing import AppRunner  # doctest: +SKIP
         >>> def add(x: int, y: int) -> int:  # doctest: +SKIP
@@ -221,11 +226,13 @@ class AppRunner:
         ...     assert response.json() == 8
 
         With real server (integration testing):
+
         >>> with AppRunner(app, use_server=True, port=8001) as base_url:  # doctest: +SKIP
         ...     response = requests.post(f'{base_url}/add', json={'x': 3, 'y': 5})
         ...     assert response.json() == 8
 
         Automatic cleanup on error:
+
         >>> with AppRunner(app) as client:  # doctest: +SKIP
         ...     # Server automatically stops if exception occurs
         ...     raise ValueError("Test error")
@@ -362,6 +369,7 @@ def run_app(app: FastAPI, *, use_server: bool = False, **kwargs):
         TestClient or base URL string
 
     Examples:
+
         >>> from qh import mk_app  # doctest: +SKIP
         >>> from qh.testing import run_app  # doctest: +SKIP
         >>> def add(x: int, y: int) -> int:  # doctest: +SKIP
@@ -395,6 +403,7 @@ def test_app(app: FastAPI):
         TestClient instance
 
     Examples:
+
         >>> from qh import mk_app  # doctest: +SKIP
         >>> from qh.testing import test_app  # doctest: +SKIP
         >>> def hello(name: str = "World") -> str:  # doctest: +SKIP
@@ -424,6 +433,7 @@ def serve_app(app: FastAPI, port: int = 8000, host: str = "127.0.0.1"):
         Base URL string
 
     Examples:
+
         >>> from qh import mk_app  # doctest: +SKIP
         >>> from qh.testing import serve_app  # doctest: +SKIP
         >>> import requests  # doctest: +SKIP
@@ -452,6 +462,7 @@ def quick_test(func, **kwargs):
         Response from calling the function
 
     Examples:
+
         >>> from qh.testing import quick_test
         >>>
         >>> def add(x: int, y: int) -> int:

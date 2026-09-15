@@ -112,6 +112,7 @@ def mk_fastapi_app(
     Expose Python callables as FastAPI routes.
 
     funcs can be:
+
       - dict mapping func -> RouteConfig dict
       - list of callables or dicts with 'func' key
       - single callable
