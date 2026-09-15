@@ -297,6 +297,15 @@ def register_json_type(
     1. Class decorator (auto-detect to_dict/from_dict methods)
     2. With explicit serializers
 
+    Args:
+        cls: The class being decorated, when used as ``@register_json_type``
+            with no arguments; ``None`` when called as
+            ``@register_json_type(to_json=..., from_json=...)``.
+        to_json: Serializer; when omitted, falls back to ``cls.to_dict()``,
+            then ``obj.__dict__``.
+        from_json: Deserializer; when omitted, falls back to
+            ``cls.from_dict``, then ``cls(**data)``.
+
     Examples:
 
         >>> @register_json_type

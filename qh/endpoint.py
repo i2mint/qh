@@ -326,6 +326,10 @@ def validate_route_config(func: Callable, config: RouteConfig) -> None:
     """
     Validate that route configuration is compatible with function.
 
+    Args:
+        func: The function the route is for.
+        config: The route configuration to check against ``func``'s signature.
+
     Raises:
         ValueError: If configuration is invalid
     """

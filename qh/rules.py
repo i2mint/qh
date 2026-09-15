@@ -78,6 +78,13 @@ class Rule(Protocol):
         """
         Check if this rule matches the given parameter context.
 
+        Args:
+            param_name: The parameter's name.
+            param_type: The parameter's type annotation.
+            param_default: The parameter's default, or ``inspect.Parameter.empty``.
+            func: The function the parameter belongs to.
+            func_name: ``func``'s name.
+
         Returns:
             TransformSpec if matched, None otherwise
         """
@@ -276,6 +283,13 @@ class RuleChain:
     ) -> Optional[TransformSpec]:
         """
         Find first matching rule.
+
+        Args:
+            param_name: The parameter's name.
+            param_type: The parameter's type annotation.
+            param_default: The parameter's default, or ``inspect.Parameter.empty``.
+            func: The function the parameter belongs to, if known.
+            func_name: ``func``'s name.
 
         Returns:
             TransformSpec from first matching rule, or None if no match

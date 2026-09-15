@@ -385,6 +385,13 @@ def build_request_body_schema(
     path/query/header parameters are emitted separately by
     :func:`build_parameters`. A parameter with no default is ``required``.
 
+    Args:
+        func: The function whose parameters are being described.
+        param_specs: Parameter name to ``TransformSpec``, deciding each
+            parameter's HTTP location (see ``_param_location``).
+        schemas: The mutable ``components.schemas`` accumulator, passed
+            through to ``python_type_to_json_schema`` for composite types.
+
     Returns:
         an object JSON Schema, or ``None`` when the function has no body
         parameters (e.g. a GET route whose arguments are all query parameters).
@@ -469,6 +476,9 @@ def get_python_type_name(type_hint: Any) -> str:
     all carry a ``__name__`` now. The bracketed-argument form only appears
     for the rare origin type that lacks ``__name__``.
 
+    Args:
+        type_hint: A type or type annotation, or ``inspect.Parameter.empty``.
+
     Returns:
         The type's bare name, e.g. ``"int"`` or ``"list"``.
 
@@ -507,6 +517,9 @@ def get_python_type_name(type_hint: Any) -> str:
 def extract_function_signature(func: Callable) -> Dict[str, Any]:
     """
     Extract detailed signature information from a function.
+
+    Args:
+        func: The function to inspect.
 
     Returns:
         Dictionary with signature metadata:

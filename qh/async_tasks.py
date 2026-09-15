@@ -466,6 +466,9 @@ class TaskManager:
         """
         Cancel a task (if possible).
 
+        Args:
+            task_id: Task identifier
+
         Note:
             Cancellation is best-effort and may not work for all executors.
 
