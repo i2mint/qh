@@ -122,6 +122,7 @@ class InMemoryTaskStore(TaskStore):
             del self._tasks[task_id]
 
     def create_task(self, task_id: str, func_name: str) -> TaskInfo:
+        """``TaskStore.create_task``: record a new pending task in memory."""
         with self._lock:
             self._cleanup_expired()
             task_info = TaskInfo(
@@ -133,15 +134,18 @@ class InMemoryTaskStore(TaskStore):
             return task_info
 
     def get_task(self, task_id: str) -> Optional[TaskInfo]:
+        """``TaskStore.get_task``: look up a task, or ``None`` if unknown."""
         with self._lock:
             self._cleanup_expired()
             return self._tasks.get(task_id)
 
     def update_task(self, task_info: TaskInfo) -> None:
+        """``TaskStore.update_task``: overwrite the stored record for its task ID."""
         with self._lock:
             self._tasks[task_info.task_id] = task_info
 
     def delete_task(self, task_id: str) -> bool:
+        """``TaskStore.delete_task``: remove a task, returning whether it existed."""
         with self._lock:
             if task_id in self._tasks:
                 del self._tasks[task_id]
@@ -149,6 +153,7 @@ class InMemoryTaskStore(TaskStore):
             return False
 
     def list_tasks(self, limit: int = 100) -> list[TaskInfo]:
+        """``TaskStore.list_tasks``: the ``limit`` most recently created tasks, newest first."""
         with self._lock:
             self._cleanup_expired()
             # Return most recent tasks first
@@ -210,6 +215,9 @@ class ThreadPoolTaskExecutor(TaskExecutor):
         kwargs: dict,
         callback: Callable[[str, Any, Optional[Exception]], None],
     ) -> None:
+        """``TaskExecutor.submit_task``: run ``func`` on the thread pool, calling
+        ``callback`` with its result or exception when it finishes."""
+
         def wrapper():
             try:
                 result = func(*args, **kwargs)
@@ -220,6 +228,7 @@ class ThreadPoolTaskExecutor(TaskExecutor):
         self._pool.submit(wrapper)
 
     def shutdown(self, wait: bool = True) -> None:
+        """``TaskExecutor.shutdown``: shut down the underlying thread pool."""
         self._pool.shutdown(wait=wait)
 
 
@@ -243,6 +252,9 @@ class ProcessPoolTaskExecutor(TaskExecutor):
         kwargs: dict,
         callback: Callable[[str, Any, Optional[Exception]], None],
     ) -> None:
+        """``TaskExecutor.submit_task``: run ``func`` in a worker process, calling
+        ``callback`` with its result or exception when the future resolves."""
+
         def wrapper():
             return func(*args, **kwargs)
 
@@ -258,6 +270,7 @@ class ProcessPoolTaskExecutor(TaskExecutor):
         future.add_done_callback(done_callback)
 
     def shutdown(self, wait: bool = True) -> None:
+        """``TaskExecutor.shutdown``: shut down the underlying process pool."""
         self._pool.shutdown(wait=wait)
 
 
