@@ -507,8 +507,10 @@ def quick_test(func, **kwargs):
         JSON round-tripping.
 
     Raises:
-        requests.HTTPError: If the response status is 4xx or 5xx (for example
-            a missing required argument, or an exception in ``func``).
+        httpx.HTTPStatusError: If the response status is 4xx or 5xx (for
+            example a missing required argument, or an exception in
+            ``func``); ``fastapi.testclient.TestClient`` is httpx-based, not
+            requests-based.
 
     Examples:
 

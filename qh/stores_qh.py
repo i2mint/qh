@@ -394,6 +394,7 @@ def add_store_access(
             - FastAPI instance: uses this existing app
             - str: creates a new FastAPI app with this title
             - dict: creates a new FastAPI app with these kwargs
+
         methods: Dictionary mapping method names to dispatch configuration
 
             - Key is the mapping method name (e.g., '__iter__', '__getitem__')

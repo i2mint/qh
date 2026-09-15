@@ -322,6 +322,7 @@ def inspect_routes(app: FastAPI) -> List[Dict[str, Any]]:
         map used to build the OpenAPI document).
 
     Examples:
+
         >>> from qh import mk_app, inspect_routes
         >>> def add(x: int, y: int) -> int:
         ...     return x + y
@@ -360,6 +361,7 @@ def print_routes(app: FastAPI) -> None:
         app: FastAPI application
 
     Examples:
+
         >>> from qh import mk_app, print_routes
         >>> def add(x: int, y: int) -> int:
         ...     return x + y

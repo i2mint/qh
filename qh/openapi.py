@@ -153,11 +153,11 @@ def python_type_to_json_schema(
     *,
     _stack: Optional[frozenset] = None,
 ) -> Dict[str, Any]:
-    """Convert a Python type hint to a JSON Schema fragment.
+    r"""Convert a Python type hint to a JSON Schema fragment.
 
     Primitives, containers and unions are inlined. Named composite types —
-    dataclasses, ``TypedDict``\\ s, Pydantic models, ``NamedTuple``\\ s and
-    ``Enum``\\ s — are registered in ``schemas`` (the OpenAPI
+    dataclasses, ``TypedDict``\ s, Pydantic models, ``NamedTuple``\ s and
+    ``Enum``\ s — are registered in ``schemas`` (the OpenAPI
     ``components.schemas`` table) and returned as a ``$ref``, so the same type
     used in several places is described once.
 
