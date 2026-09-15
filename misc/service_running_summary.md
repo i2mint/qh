@@ -87,15 +87,15 @@ from qh import mk_app, service_running
 
 app = mk_app([add, multiply])
 with service_running(app=app, port=8001) as info:
-    response = requests.post(f'{info.url}/add', json={'x': 3, 'y': 5})
+    response = requests.post(f"{info.url}/add", json={"x": 3, "y": 5})
     assert response.json() == 8
 ```
 
 ### Check existing service (won't tear down)
 ```python
-with service_running(url='https://api.github.com') as info:
+with service_running(url="https://api.github.com") as info:
     assert info.was_already_running
-    response = requests.get(f'{info.url}/users/octocat')
+    response = requests.get(f"{info.url}/users/octocat")
 ```
 
 ### Custom launcher
@@ -103,6 +103,7 @@ with service_running(url='https://api.github.com') as info:
 def my_launcher():
     # Custom service startup
     ...
+
 
 with service_running(launcher=my_launcher, port=8002) as info:
     # Test your service

@@ -15,13 +15,16 @@ pip install qh
 ```python
 from qh import mk_app
 
+
 def add(x: int, y: int) -> int:
     """Add two numbers."""
     return x + y
 
+
 def greet(name: str, title: str = "Mr.") -> str:
     """Greet someone with optional title."""
     return f"Hello, {title} {name}!"
+
 
 # Create FastAPI app with automatic endpoints
 app = mk_app([add, greet])
@@ -38,11 +41,11 @@ from qh.testing import test_app
 
 with test_app(app) as client:
     # Test the add function
-    response = client.post('/add', json={'x': 3, 'y': 5})
+    response = client.post("/add", json={"x": 3, "y": 5})
     assert response.json() == 8
 
     # Test the greet function
-    response = client.post('/greet', json={'name': 'Alice'})
+    response = client.post("/greet", json={"name": "Alice"})
     assert response.json() == "Hello, Mr. Alice!"
 ```
 
@@ -51,6 +54,7 @@ with test_app(app) as client:
 ```python
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
 ```
 
@@ -73,30 +77,35 @@ Use RESTful conventions for automatic path and method inference:
 ```python
 from qh import mk_app
 
+
 def get_user(user_id: str) -> dict:
     """Get a user by ID."""
-    return {'user_id': user_id, 'name': 'Test User'}
+    return {"user_id": user_id, "name": "Test User"}
+
 
 def list_users(limit: int = 10) -> list:
     """List users with pagination."""
-    return [{'user_id': str(i), 'name': f'User {i}'} for i in range(limit)]
+    return [{"user_id": str(i), "name": f"User {i}"} for i in range(limit)]
+
 
 def create_user(name: str, email: str) -> dict:
     """Create a new user."""
-    return {'user_id': '123', 'name': name, 'email': email}
+    return {"user_id": "123", "name": name, "email": email}
+
 
 def update_user(user_id: str, name: str) -> dict:
     """Update a user."""
-    return {'user_id': user_id, 'name': name}
+    return {"user_id": user_id, "name": name}
+
 
 def delete_user(user_id: str) -> dict:
     """Delete a user."""
-    return {'user_id': user_id, 'status': 'deleted'}
+    return {"user_id": user_id, "status": "deleted"}
+
 
 # Enable conventions to get RESTful routing
 app = mk_app(
-    [get_user, list_users, create_user, update_user, delete_user],
-    use_conventions=True
+    [get_user, list_users, create_user, update_user, delete_user], use_conventions=True
 )
 ```
 
@@ -123,7 +132,7 @@ client = mk_client_from_app(app)
 result = client.add(x=3, y=5)
 print(result)  # 8
 
-user = client.get_user(user_id='123')
+user = client.get_user(user_id="123")
 print(user)  # {'user_id': '123', 'name': 'Test User'}
 ```
 
@@ -136,7 +145,7 @@ spec = export_openapi(app, include_python_metadata=True)
 ts_code = export_ts_client(spec, use_axios=True)
 
 # Save to file
-with open('api-client.ts', 'w') as f:
+with open("api-client.ts", "w") as f:
     f.write(ts_code)
 ```
 
@@ -176,6 +185,7 @@ Register custom types for automatic serialization:
 ```python
 from qh import mk_app, register_json_type
 
+
 @register_json_type
 class Point:
     def __init__(self, x: float, y: float):
@@ -183,15 +193,17 @@ class Point:
         self.y = y
 
     def to_dict(self):
-        return {'x': self.x, 'y': self.y}
+        return {"x": self.x, "y": self.y}
 
     @classmethod
     def from_dict(cls, data):
-        return cls(data['x'], data['y'])
+        return cls(data["x"], data["y"])
+
 
 def distance(point: Point) -> float:
     """Calculate distance from origin."""
-    return (point.x ** 2 + point.y ** 2) ** 0.5
+    return (point.x**2 + point.y**2) ** 0.5
+
 
 app = mk_app([distance])
 
@@ -199,7 +211,7 @@ app = mk_app([distance])
 from qh.testing import test_app
 
 with test_app(app) as client:
-    response = client.post('/distance', json={'point': {'x': 3.0, 'y': 4.0}})
+    response = client.post("/distance", json={"point": {"x": 3.0, "y": 4.0}})
     assert response.json() == 5.0
 ```
 
@@ -221,7 +233,7 @@ config = AppConfig(
     title="My API",
     version="1.0.0",
     path_prefix="/api/v1",
-    default_methods=['GET', 'POST']
+    default_methods=["GET", "POST"],
 )
 
 app = mk_app([add, subtract], config=config)
@@ -230,10 +242,12 @@ app = mk_app([add, subtract], config=config)
 ### Per-Function Configuration
 
 ```python
-app = mk_app({
-    add: {'path': '/math/add', 'methods': ['GET']},
-    subtract: {'path': '/math/subtract', 'methods': ['POST']},
-})
+app = mk_app(
+    {
+        add: {"path": "/math/add", "methods": ["GET"]},
+        subtract: {"path": "/math/subtract", "methods": ["POST"]},
+    }
+)
 ```
 
 ### Error Handling
@@ -245,17 +259,18 @@ def divide(x: float, y: float) -> float:
         raise ValueError("Cannot divide by zero")
     return x / y
 
+
 app = mk_app([divide])
 
 with test_app(app) as client:
     # Normal case
-    response = client.post('/divide', json={'x': 10.0, 'y': 2.0})
+    response = client.post("/divide", json={"x": 10.0, "y": 2.0})
     assert response.json() == 5.0
 
     # Error case - returns 500 with error message
-    response = client.post('/divide', json={'x': 10.0, 'y': 0.0})
+    response = client.post("/divide", json={"x": 10.0, "y": 0.0})
     assert response.status_code == 500
-    assert "Cannot divide by zero" in response.json()['detail']
+    assert "Cannot divide by zero" in response.json()["detail"]
 ```
 
 ## Philosophy

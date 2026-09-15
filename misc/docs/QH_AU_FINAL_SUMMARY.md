@@ -29,11 +29,8 @@ from qh.au_integration import use_au_thread_backend
 # This works RIGHT NOW:
 app = mk_app(
     [my_func],
-    async_funcs=['my_func'],
-    async_config=use_au_thread_backend(
-        storage_path='/var/tasks',
-        ttl_seconds=3600
-    )
+    async_funcs=["my_func"],
+    async_config=use_au_thread_backend(storage_path="/var/tasks", ttl_seconds=3600),
 )
 ```
 
@@ -75,6 +72,7 @@ au has everything qh needs:
    def my_func(x: int):  # Type hint ignored!
        return x * 2
 
+
    # Should:
    @async_compute
    def my_func(x: int):  # Auto-validates x is int
@@ -94,14 +92,19 @@ au has everything qh needs:
 5. **Convention Over Configuration** - Too verbose
    ```python
    # Currently (verbose):
-   store = FileSystemStore('/tmp/tasks', ttl_seconds=3600)
+   store = FileSystemStore("/tmp/tasks", ttl_seconds=3600)
    backend = ThreadBackend(store)
+
+
    @async_compute(backend=backend, store=store)
-   def my_func(x): return x * 2
+   def my_func(x):
+       return x * 2
+
 
    # Should (convention-based):
    @async_compute  # Uses AU_BACKEND and AU_STORAGE from env
-   def my_func(x): return x * 2
+   def my_func(x):
+       return x * 2
    ```
 
 ### 3. What Should Be Improved/Extended?
@@ -137,12 +140,14 @@ au has everything qh needs:
 
 from au import async_compute, mk_http_interface
 
+
 @async_compute
 def my_func(x: int) -> int:
     return x * 2
 
+
 # Each function gets its own endpoint
-app = mk_http_interface([my_func], pattern='function-per-endpoint')
+app = mk_http_interface([my_func], pattern="function-per-endpoint")
 
 # Now works like qh:
 # POST /my_func {"x": 5}
@@ -154,16 +159,20 @@ app = mk_http_interface([my_func], pattern='function-per-endpoint')
 from au import async_compute
 from pydantic import BaseModel
 
+
 class Input(BaseModel):
     x: int
     multiplier: int = 2
 
+
 class Output(BaseModel):
     result: int
+
 
 @async_compute
 def my_func(input: Input) -> Output:
     return Output(result=input.x * input.multiplier)
+
 
 # Auto-validates input, serializes output
 ```
@@ -179,15 +188,18 @@ def my_func(input: Input) -> Output:
 ```python
 from au import async_compute, export_openapi_spec
 
+
 @async_compute
 def my_func(x: int) -> int:
     return x * 2
+
 
 # Generate OpenAPI 3.0 spec
 spec = export_openapi_spec([my_func])
 
 # Generate Python client
 from au.client import mk_client
+
 client = mk_client(spec)
 result = client.my_func(x=5)
 ```
@@ -196,17 +208,22 @@ result = client.my_func(x=5)
 ```python
 # Auto-configure from environment
 import os
-os.environ['AU_BACKEND'] = 'redis'
-os.environ['AU_REDIS_URL'] = 'redis://localhost:6379'
-os.environ['AU_STORAGE'] = 'filesystem'
-os.environ['AU_STORAGE_PATH'] = '/var/au/tasks'
+
+os.environ["AU_BACKEND"] = "redis"
+os.environ["AU_REDIS_URL"] = "redis://localhost:6379"
+os.environ["AU_STORAGE"] = "filesystem"
+os.environ["AU_STORAGE_PATH"] = "/var/au/tasks"
+
 
 @async_compute  # Uses above config automatically
-def my_func(x): return x * 2
+def my_func(x):
+    return x * 2
+
 
 # Or from config file (au.toml):
-@async_compute.from_config('production')
-def my_func(x): return x * 2
+@async_compute.from_config("production")
+def my_func(x):
+    return x * 2
 ```
 
 ## Strategic Recommendations

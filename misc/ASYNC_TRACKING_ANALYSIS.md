@@ -71,26 +71,29 @@ from qh.rules import TransformSpec, HttpLocation
 from qh.config import AppConfig, RouteConfig
 import uuid
 
+
 # Create ingress function that extracts or generates tracking ID
 def extract_tracking_id(request_value):
     # Value comes from X-Request-ID header
     return request_value or str(uuid.uuid4())
 
-# Global rule that matches any 'request_id' parameter
-tracking_id_rule = NameRule({
-    'request_id': TransformSpec(
-        http_location=HttpLocation.HEADER,
-        http_name='X-Request-ID',
-        ingress=extract_tracking_id
-    )
-})
 
-# Apply globally
-app_config = AppConfig(
-    rule_chain=RuleChain([tracking_id_rule])
+# Global rule that matches any 'request_id' parameter
+tracking_id_rule = NameRule(
+    {
+        "request_id": TransformSpec(
+            http_location=HttpLocation.HEADER,
+            http_name="X-Request-ID",
+            ingress=extract_tracking_id,
+        )
+    }
 )
 
+# Apply globally
+app_config = AppConfig(rule_chain=RuleChain([tracking_id_rule]))
+
 app = mk_app(funcs, config=app_config)
+
 
 # Now any function with a 'request_id' parameter gets it automatically
 def process_data(request_id: str, data: dict):
@@ -106,24 +109,27 @@ from fastapi import BackgroundTasks, Depends
 from qh import mk_app
 import asyncio
 
+
 async def log_request(request_id: str, task_name: str):
     """Log task in background"""
     await asyncio.sleep(1)
     print(f"Completed task {task_name} for request {request_id}")
 
+
 def process_with_background(
     data: dict,
-    request_id: str = Header('X-Request-ID'),
-    background_tasks: BackgroundTasks = Depends()
+    request_id: str = Header("X-Request-ID"),
+    background_tasks: BackgroundTasks = Depends(),
 ):
     """Process and log in background"""
     # Process
-    result = {'processed': data}
-    
+    result = {"processed": data}
+
     # Add background task
     background_tasks.add_task(log_request, request_id, "process_with_background")
-    
+
     return result
+
 
 app = mk_app([process_with_background])
 ```
@@ -139,7 +145,8 @@ from qh.rules import TransformSpec, HttpLocation, NameRule
 import uuid
 
 # Create context variable for tracking ID
-tracking_id_context: ContextVar[str] = ContextVar('tracking_id', default=None)
+tracking_id_context: ContextVar[str] = ContextVar("tracking_id", default=None)
+
 
 def set_tracking_id(header_value: str = None):
     """Set tracking ID in context"""
@@ -147,25 +154,31 @@ def set_tracking_id(header_value: str = None):
     tracking_id_context.set(tid)
     return tid
 
+
 # Rule that sets context
-tracking_rule = NameRule({
-    'request_id': TransformSpec(
-        http_location=HttpLocation.HEADER,
-        http_name='X-Request-ID',
-        ingress=set_tracking_id
-    )
-})
+tracking_rule = NameRule(
+    {
+        "request_id": TransformSpec(
+            http_location=HttpLocation.HEADER,
+            http_name="X-Request-ID",
+            ingress=set_tracking_id,
+        )
+    }
+)
+
 
 # Now any function can access tracking ID
 def get_tracking_id():
     return tracking_id_context.get()
+
 
 async def async_process(request_id: str, data: dict):
     """Async function that can access tracking ID"""
     tid = get_tracking_id()
     print(f"Request ID: {request_id}, Context ID: {tid}")
     # Both are the same ID
-    return {'result': data, 'request_id': tid}
+    return {"result": data, "request_id": tid}
+
 
 app = mk_app([async_process], config=AppConfig(rule_chain=RuleChain([tracking_rule])))
 ```
@@ -180,25 +193,28 @@ from qh import mk_app
 import uuid
 from starlette.middleware.base import BaseHTTPMiddleware
 
+
 class TrackingIDMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         # Extract or generate tracking ID
-        tracking_id = request.headers.get('X-Request-ID', str(uuid.uuid4()))
-        
+        tracking_id = request.headers.get("X-Request-ID", str(uuid.uuid4()))
+
         # Add to request state for access in handlers
         request.state.tracking_id = tracking_id
-        
+
         # Call next handler
         response = await call_next(request)
-        
+
         # Add tracking ID to response headers
-        response.headers['X-Request-ID'] = tracking_id
-        
+        response.headers["X-Request-ID"] = tracking_id
+
         return response
+
 
 def func_with_tracking(data: dict):
     # In a real scenario, would access from request context
-    return {'processed': data}
+    return {"processed": data}
+
 
 # Create app and add middleware
 app = mk_app([func_with_tracking])
@@ -215,48 +231,53 @@ from qh import mk_app, register_json_type
 from qh.rules import TransformSpec, HttpLocation, NameRule
 import uuid
 
+
 @dataclass
 class TrackingContext:
     request_id: str
     user_id: str = None
     session_id: str = None
-    
+
     @classmethod
     def from_headers(cls, request_id_header: str = None, **kwargs):
         return cls(
             request_id=request_id_header or str(uuid.uuid4()),
-            user_id=kwargs.get('user_id'),
-            session_id=kwargs.get('session_id')
+            user_id=kwargs.get("user_id"),
+            session_id=kwargs.get("session_id"),
         )
+
 
 # Register custom type
 register_json_type(
     TrackingContext,
     to_json=lambda ctx: {
-        'request_id': ctx.request_id,
-        'user_id': ctx.user_id,
-        'session_id': ctx.session_id
+        "request_id": ctx.request_id,
+        "user_id": ctx.user_id,
+        "session_id": ctx.session_id,
     },
-    from_json=lambda data: TrackingContext(**data)
+    from_json=lambda data: TrackingContext(**data),
 )
 
 # Rule to extract from headers
-tracking_context_rule = NameRule({
-    'tracking': TransformSpec(
-        http_location=HttpLocation.HEADER,
-        http_name='X-Tracking-Context',
-        ingress=TrackingContext.from_headers
-    )
-})
+tracking_context_rule = NameRule(
+    {
+        "tracking": TransformSpec(
+            http_location=HttpLocation.HEADER,
+            http_name="X-Tracking-Context",
+            ingress=TrackingContext.from_headers,
+        )
+    }
+)
+
 
 async def process_tracked(data: dict, tracking: TrackingContext):
     """Handler with full tracking context"""
     print(f"Request {tracking.request_id} from user {tracking.user_id}")
-    return {'processed': data, 'request_id': tracking.request_id}
+    return {"processed": data, "request_id": tracking.request_id}
+
 
 app = mk_app(
-    [process_tracked],
-    config=AppConfig(rule_chain=RuleChain([tracking_context_rule]))
+    [process_tracked], config=AppConfig(rule_chain=RuleChain([tracking_context_rule]))
 )
 ```
 
@@ -281,11 +302,13 @@ from qh.rules import NameRule, TransformSpec, HttpLocation
 from uuid import uuid4
 
 # Context variable for request-local tracking ID
-REQUEST_ID_CONTEXT: ContextVar[str] = ContextVar('request_id', default=None)
+REQUEST_ID_CONTEXT: ContextVar[str] = ContextVar("request_id", default=None)
+
 
 def get_request_id() -> str:
     """Get current request ID from context"""
     return REQUEST_ID_CONTEXT.get()
+
 
 def set_request_id(header_value: str = None) -> str:
     """Set and return request ID"""
@@ -293,14 +316,17 @@ def set_request_id(header_value: str = None) -> str:
     REQUEST_ID_CONTEXT.set(tid)
     return tid
 
+
 # Predefined rule for automatic tracking ID injection
-TRACKING_ID_RULE = NameRule({
-    'request_id': TransformSpec(
-        http_location=HttpLocation.HEADER,
-        http_name='X-Request-ID',
-        ingress=set_request_id
-    )
-})
+TRACKING_ID_RULE = NameRule(
+    {
+        "request_id": TransformSpec(
+            http_location=HttpLocation.HEADER,
+            http_name="X-Request-ID",
+            ingress=set_request_id,
+        )
+    }
+)
 ```
 
 ### Phase 2: Background Task Integration

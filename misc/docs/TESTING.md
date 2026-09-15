@@ -18,8 +18,10 @@ The fastest way to test a single function:
 ```python
 from qh.testing import quick_test
 
+
 def add(x: int, y: int) -> int:
     return x + y
+
 
 # Test it instantly
 result = quick_test(add, x=3, y=5)
@@ -34,22 +36,25 @@ For more control, use the `test_app` context manager:
 from qh import mk_app
 from qh.testing import test_app
 
+
 def add(x: int, y: int) -> int:
     return x + y
 
+
 def subtract(x: int, y: int) -> int:
     return x - y
+
 
 app = mk_app([add, subtract])
 
 with test_app(app) as client:
     # Test add
-    response = client.post('/add', json={'x': 10, 'y': 3})
+    response = client.post("/add", json={"x": 10, "y": 3})
     assert response.status_code == 200
     assert response.json() == 13
 
     # Test subtract
-    response = client.post('/subtract', json={'x': 10, 'y': 3})
+    response = client.post("/subtract", json={"x": 10, "y": 3})
     assert response.json() == 7
 ```
 
@@ -60,9 +65,11 @@ import pytest
 from qh import mk_app
 from qh.testing import test_app
 
+
 @pytest.fixture
 def app():
     """Create test app."""
+
     def add(x: int, y: int) -> int:
         return x + y
 
@@ -71,16 +78,18 @@ def app():
 
     return mk_app([add, multiply])
 
+
 def test_add(app):
     """Test add function."""
     with test_app(app) as client:
-        response = client.post('/add', json={'x': 3, 'y': 5})
+        response = client.post("/add", json={"x": 3, "y": 5})
         assert response.json() == 8
+
 
 def test_multiply(app):
     """Test multiply function."""
     with test_app(app) as client:
-        response = client.post('/multiply', json={'x': 4, 'y': 5})
+        response = client.post("/multiply", json={"x": 4, "y": 5})
         assert response.json() == 20
 ```
 
@@ -93,14 +102,16 @@ from qh import mk_app
 from qh.testing import serve_app
 import requests
 
+
 def hello(name: str) -> str:
     return f"Hello, {name}!"
+
 
 app = mk_app([hello])
 
 with serve_app(app, port=8001) as url:
     # Server is running at http://127.0.0.1:8001
-    response = requests.post(f'{url}/hello', json={'name': 'World'})
+    response = requests.post(f"{url}/hello", json={"name": "World"})
     assert response.json() == "Hello, World!"
 
 # Server automatically stops after the context
@@ -113,13 +124,16 @@ from qh import mk_app
 from qh.testing import serve_app
 import requests
 
+
 # Service 1
 def service1_hello(name: str) -> str:
     return f"Service 1: Hello, {name}!"
 
+
 # Service 2
 def service2_hello(name: str) -> str:
     return f"Service 2: Hello, {name}!"
+
 
 app1 = mk_app([service1_hello])
 app2 = mk_app([service2_hello])
@@ -128,8 +142,8 @@ app2 = mk_app([service2_hello])
 with serve_app(app1, port=8001) as url1:
     with serve_app(app2, port=8002) as url2:
         # Both servers running simultaneously
-        r1 = requests.post(f'{url1}/service1_hello', json={'name': 'Alice'})
-        r2 = requests.post(f'{url2}/service2_hello', json={'name': 'Bob'})
+        r1 = requests.post(f"{url1}/service1_hello", json={"name": "Alice"})
+        r2 = requests.post(f"{url2}/service2_hello", json={"name": "Bob"})
 
         assert r1.json() == "Service 1: Hello, Alice!"
         assert r2.json() == "Service 2: Hello, Bob!"
@@ -145,20 +159,23 @@ The most flexible testing utility:
 from qh import mk_app
 from qh.testing import AppRunner
 
+
 def add(x: int, y: int) -> int:
     return x + y
+
 
 app = mk_app([add])
 
 # Use as context manager
 with AppRunner(app) as client:
-    response = client.post('/add', json={'x': 3, 'y': 5})
+    response = client.post("/add", json={"x": 3, "y": 5})
     assert response.json() == 8
 
 # Or with real server
 with AppRunner(app, use_server=True, port=8000) as url:
     import requests
-    response = requests.post(f'{url}/add', json={'x': 3, 'y': 5})
+
+    response = requests.post(f"{url}/add", json={"x": 3, "y": 5})
     assert response.json() == 8
 ```
 
@@ -168,7 +185,7 @@ with AppRunner(app, use_server=True, port=8000) as url:
 from qh.testing import AppRunner
 
 # Custom host and port
-with AppRunner(app, use_server=True, host='0.0.0.0', port=9000) as url:
+with AppRunner(app, use_server=True, host="0.0.0.0", port=9000) as url:
     # Server at http://0.0.0.0:9000
     pass
 
@@ -185,9 +202,11 @@ Test that functions work identically through HTTP:
 ```python
 from qh import mk_app, mk_client_from_app
 
+
 def original_function(x: int, y: int) -> int:
     """Original Python function."""
     return x * y + x
+
 
 # Call directly
 direct_result = original_function(3, 5)
@@ -206,6 +225,7 @@ assert direct_result == http_result  # Both are 18
 ```python
 from qh import mk_app, mk_client_from_app, register_json_type
 
+
 @register_json_type
 class Point:
     def __init__(self, x: float, y: float):
@@ -213,24 +233,26 @@ class Point:
         self.y = y
 
     def to_dict(self):
-        return {'x': self.x, 'y': self.y}
+        return {"x": self.x, "y": self.y}
 
     @classmethod
     def from_dict(cls, data):
-        return cls(data['x'], data['y'])
+        return cls(data["x"], data["y"])
 
     def distance_from_origin(self):
-        return (self.x ** 2 + self.y ** 2) ** 0.5
+        return (self.x**2 + self.y**2) ** 0.5
+
 
 def create_point(x: float, y: float) -> Point:
     return Point(x, y)
+
 
 # Test round-trip
 app = mk_app([create_point])
 client = mk_client_from_app(app)
 
 result = client.create_point(x=3.0, y=4.0)
-assert result == {'x': 3.0, 'y': 4.0}
+assert result == {"x": 3.0, "y": 4.0}
 ```
 
 ## Best Practices
@@ -242,9 +264,11 @@ import pytest
 from qh import mk_app
 from qh.testing import test_app
 
+
 @pytest.fixture
 def math_app():
     """Reusable math API."""
+
     def add(x: int, y: int) -> int:
         return x + y
 
@@ -253,11 +277,12 @@ def math_app():
 
     return mk_app([add, multiply])
 
+
 def test_operations(math_app):
     """Test multiple operations."""
     with test_app(math_app) as client:
-        assert client.post('/add', json={'x': 2, 'y': 3}).json() == 5
-        assert client.post('/multiply', json={'x': 2, 'y': 3}).json() == 6
+        assert client.post("/add", json={"x": 2, "y": 3}).json() == 5
+        assert client.post("/multiply", json={"x": 2, "y": 3}).json() == 6
 ```
 
 ### 2. Test Error Cases
@@ -268,18 +293,19 @@ def divide(x: float, y: float) -> float:
         raise ValueError("Cannot divide by zero")
     return x / y
 
+
 app = mk_app([divide])
 
 with test_app(app) as client:
     # Test normal case
-    response = client.post('/divide', json={'x': 10.0, 'y': 2.0})
+    response = client.post("/divide", json={"x": 10.0, "y": 2.0})
     assert response.status_code == 200
     assert response.json() == 5.0
 
     # Test error case
-    response = client.post('/divide', json={'x': 10.0, 'y': 0.0})
+    response = client.post("/divide", json={"x": 10.0, "y": 0.0})
     assert response.status_code == 500
-    assert "Cannot divide by zero" in response.json()['detail']
+    assert "Cannot divide by zero" in response.json()["detail"]
 ```
 
 ### 3. Test with Different HTTP Methods
@@ -287,35 +313,34 @@ with test_app(app) as client:
 ```python
 from qh import mk_app
 
-def get_item(item_id: str) -> dict:
-    return {'item_id': item_id, 'name': f'Item {item_id}'}
 
-app = mk_app({
-    get_item: {'path': '/items/{item_id}', 'methods': ['GET']}
-})
+def get_item(item_id: str) -> dict:
+    return {"item_id": item_id, "name": f"Item {item_id}"}
+
+
+app = mk_app({get_item: {"path": "/items/{item_id}", "methods": ["GET"]}})
 
 with test_app(app) as client:
     # Test GET request
-    response = client.get('/items/123')
-    assert response.json()['item_id'] == '123'
+    response = client.get("/items/123")
+    assert response.json()["item_id"] == "123"
 ```
 
 ### 4. Test with Query Parameters
 
 ```python
 def list_items(limit: int = 10, offset: int = 0) -> list:
-    return [{'id': i} for i in range(offset, offset + limit)]
+    return [{"id": i} for i in range(offset, offset + limit)]
 
-app = mk_app({
-    list_items: {'path': '/items', 'methods': ['GET']}
-})
+
+app = mk_app({list_items: {"path": "/items", "methods": ["GET"]}})
 
 with test_app(app) as client:
     # Test with query parameters
-    response = client.get('/items?limit=5&offset=10')
+    response = client.get("/items?limit=5&offset=10")
     items = response.json()
     assert len(items) == 5
-    assert items[0]['id'] == 10
+    assert items[0]["id"] == 10
 ```
 
 ### 5. Parametrized Testing
@@ -323,12 +348,16 @@ with test_app(app) as client:
 ```python
 import pytest
 
-@pytest.mark.parametrize("x,y,expected", [
-    (2, 3, 5),
-    (0, 0, 0),
-    (-1, 1, 0),
-    (10, -5, 5),
-])
+
+@pytest.mark.parametrize(
+    "x,y,expected",
+    [
+        (2, 3, 5),
+        (0, 0, 0),
+        (-1, 1, 0),
+        (10, -5, 5),
+    ],
+)
 def test_add_parametrized(x, y, expected):
     """Test add with multiple inputs."""
     from qh.testing import quick_test
@@ -346,21 +375,24 @@ def test_add_parametrized(x, y, expected):
 from qh import mk_app
 from qh.testing import test_app
 
+
 def get_user(user_id: str) -> dict:
-    return {'user_id': user_id}
+    return {"user_id": user_id}
+
 
 def list_users(limit: int = 10) -> list:
-    return [{'user_id': str(i)} for i in range(limit)]
+    return [{"user_id": str(i)} for i in range(limit)]
+
 
 app = mk_app([get_user, list_users], use_conventions=True)
 
 with test_app(app) as client:
     # Test GET /users/{user_id}
-    response = client.get('/users/123')
-    assert response.json()['user_id'] == '123'
+    response = client.get("/users/123")
+    assert response.json()["user_id"] == "123"
 
     # Test GET /users?limit=5
-    response = client.get('/users?limit=5')
+    response = client.get("/users?limit=5")
     assert len(response.json()) == 5
 ```
 
@@ -389,10 +421,12 @@ from qh import mk_app
 from qh.testing import serve_app
 import requests
 
+
 def heavy_computation(n: int) -> int:
     """Simulate heavy computation."""
     time.sleep(0.1)
     return sum(range(n))
+
 
 app = mk_app([heavy_computation])
 
@@ -401,9 +435,10 @@ with serve_app(app, port=8000) as url:
 
     # Make 10 concurrent requests
     import concurrent.futures
+
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         futures = [
-            executor.submit(requests.post, f'{url}/heavy_computation', json={'n': 1000})
+            executor.submit(requests.post, f"{url}/heavy_computation", json={"n": 1000})
             for _ in range(10)
         ]
         results = [f.result() for f in futures]

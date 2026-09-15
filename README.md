@@ -23,8 +23,10 @@ If you can't let go of the old ways, the rest of this README is written for you,
 ```python
 from qh import mk_app
 
+
 def add(x: int, y: int) -> int:
     return x + y
+
 
 app = mk_app([add])
 ```
@@ -58,15 +60,14 @@ Handle long-running operations without blocking:
 ```python
 import time
 
+
 def expensive_computation(n: int) -> int:
     time.sleep(5)  # Simulate heavy processing
     return n * 2
 
+
 # Enable async support
-app = mk_app(
-    [expensive_computation],
-    async_funcs=['expensive_computation']
-)
+app = mk_app([expensive_computation], async_funcs=["expensive_computation"])
 ```
 
 Now clients can choose sync or async execution:
@@ -96,16 +97,18 @@ from qh import mk_app, TaskConfig, ProcessPoolTaskExecutor
 
 app = mk_app(
     [cpu_bound_func, io_bound_func],
-    async_funcs=['cpu_bound_func', 'io_bound_func'],
+    async_funcs=["cpu_bound_func", "io_bound_func"],
     async_config={
-        'cpu_bound_func': TaskConfig(
-            executor=ProcessPoolTaskExecutor(max_workers=4),  # Use processes for CPU-bound
+        "cpu_bound_func": TaskConfig(
+            executor=ProcessPoolTaskExecutor(
+                max_workers=4
+            ),  # Use processes for CPU-bound
             ttl=3600,  # Keep results for 1 hour
         ),
-        'io_bound_func': TaskConfig(
-            async_mode='always',  # Always async, no query param needed
+        "io_bound_func": TaskConfig(
+            async_mode="always",  # Always async, no query param needed
         ),
-    }
+    },
 )
 ```
 
@@ -122,16 +125,16 @@ Task management endpoints are automatically created:
 def get_user(user_id: str):
     return {"id": user_id, "name": "Alice"}
 
+
 def list_users():
     return [{"id": "1", "name": "Alice"}]
+
 
 def create_user(name: str, email: str):
     return {"id": "123", "name": name, "email": email}
 
-app = mk_app(
-    [get_user, list_users, create_user],
-    use_conventions=True
-)
+
+app = mk_app([get_user, list_users, create_user], use_conventions=True)
 ```
 
 This automatically creates RESTful routes:
@@ -144,27 +147,33 @@ This automatically creates RESTful routes:
 ```python
 from qh import mk_app, RouteConfig
 
+
 def add(x: int, y: int) -> int:
     return x + y
 
-app = mk_app({
-    add: RouteConfig(
-        path="/calculate/sum",
-        methods=["GET", "POST"],
-        tags=["math"],
-        summary="Add two numbers"
-    )
-})
+
+app = mk_app(
+    {
+        add: RouteConfig(
+            path="/calculate/sum",
+            methods=["GET", "POST"],
+            tags=["math"],
+            summary="Add two numbers",
+        )
+    }
+)
 ```
 
 Or use dictionaries:
 ```python
-app = mk_app({
-    add: {
-        "path": "/calculate/sum",
-        "methods": ["GET", "POST"],
+app = mk_app(
+    {
+        add: {
+            "path": "/calculate/sum",
+            "methods": ["GET", "POST"],
+        }
     }
-})
+)
 ```
 
 ### 🔄 Parameter Transformation
@@ -173,23 +182,26 @@ app = mk_app({
 import numpy as np
 from qh import mk_app, RouteConfig, TransformSpec, HttpLocation
 
+
 def add_arrays(a, b):
     return (a + b).tolist()
 
-app = mk_app({
-    add_arrays: RouteConfig(
-        param_overrides={
-            "a": TransformSpec(
-                http_location=HttpLocation.JSON_BODY,
-                ingress=np.array  # Convert JSON array to numpy
-            ),
-            "b": TransformSpec(
-                http_location=HttpLocation.JSON_BODY,
-                ingress=np.array
-            )
-        }
-    )
-})
+
+app = mk_app(
+    {
+        add_arrays: RouteConfig(
+            param_overrides={
+                "a": TransformSpec(
+                    http_location=HttpLocation.JSON_BODY,
+                    ingress=np.array,  # Convert JSON array to numpy
+                ),
+                "b": TransformSpec(
+                    http_location=HttpLocation.JSON_BODY, ingress=np.array
+                ),
+            }
+        )
+    }
+)
 ```
 
 Now you can send:
@@ -204,8 +216,10 @@ POST /add_arrays
 ```python
 from qh import mk_app, export_openapi, mk_client_from_app
 
+
 def greet(name: str) -> str:
     return f"Hello, {name}!"
+
 
 app = mk_app([greet])
 
@@ -218,6 +232,7 @@ result = client.greet(name="World")  # "Hello, World!"
 
 # Generate TypeScript client
 from qh import export_ts_client
+
 export_ts_client(app, "client.ts")
 ```
 
@@ -227,20 +242,21 @@ export_ts_client(app, "client.ts")
 from qh import register_type
 from datetime import datetime
 
+
 def custom_serializer(dt: datetime) -> str:
     return dt.isoformat()
+
 
 def custom_deserializer(s: str) -> datetime:
     return datetime.fromisoformat(s)
 
-register_type(
-    datetime,
-    serialize=custom_serializer,
-    deserialize=custom_deserializer
-)
+
+register_type(datetime, serialize=custom_serializer, deserialize=custom_deserializer)
+
 
 def get_event_time(event_id: str) -> datetime:
     return datetime.now()
+
 
 app = mk_app([get_event_time])
 ```
@@ -257,7 +273,7 @@ app = mk_app(
         default_methods=["POST"],
         title="Math API",
         version="1.0.0",
-    )
+    ),
 )
 ```
 
@@ -274,6 +290,7 @@ with test_app(app) as client:
 # Serve for external testing
 with serve_app(app, port=8001) as url:
     import requests
+
     response = requests.post(f"{url}/add", json={"x": 3, "y": 5})
 
 # Quick smoke test
@@ -310,21 +327,22 @@ from qh import mk_app
 # In-memory database
 users = {}
 
+
 def create_user(name: str, email: str) -> dict:
     user_id = str(len(users) + 1)
     users[user_id] = {"id": user_id, "name": name, "email": email}
     return users[user_id]
 
+
 def get_user(user_id: str) -> dict:
     return users.get(user_id, {})
+
 
 def list_users() -> list:
     return list(users.values())
 
-app = mk_app(
-    [create_user, get_user, list_users],
-    use_conventions=True
-)
+
+app = mk_app([create_user, get_user, list_users], use_conventions=True)
 ```
 
 ### File Processing with Async
@@ -332,17 +350,19 @@ app = mk_app(
 from qh import mk_app, TaskConfig
 import time
 
+
 def process_large_file(file_path: str) -> dict:
     time.sleep(10)  # Simulate heavy processing
     return {"status": "processed", "path": file_path}
 
+
 app = mk_app(
     [process_large_file],
-    async_funcs=['process_large_file'],
+    async_funcs=["process_large_file"],
     async_config=TaskConfig(
-        async_mode='always',  # Always async
+        async_mode="always",  # Always async
         ttl=3600,  # Keep results for 1 hour
-    )
+    ),
 )
 
 # Client usage:
@@ -356,14 +376,16 @@ def quick_lookup(key: str) -> str:
     """Fast operation - always synchronous"""
     return cache.get(key)
 
+
 def expensive_aggregation(days: int) -> dict:
     """Slow operation - supports async"""
     time.sleep(days * 2)
     return {"result": "..."}
 
+
 app = mk_app(
     [quick_lookup, expensive_aggregation],
-    async_funcs=['expensive_aggregation']  # Only expensive_aggregation supports async
+    async_funcs=["expensive_aggregation"],  # Only expensive_aggregation supports async
 )
 
 # quick_lookup is always synchronous
@@ -376,19 +398,18 @@ import numpy as np
 import pandas as pd
 from qh import mk_app, RouteConfig, TransformSpec
 
-def analyze_data(data: pd.DataFrame) -> dict:
-    return {
-        "mean": data.mean().to_dict(),
-        "std": data.std().to_dict()
-    }
 
-app = mk_app({
-    analyze_data: RouteConfig(
-        param_overrides={
-            "data": TransformSpec(ingress=pd.DataFrame)
-        }
-    )
-})
+def analyze_data(data: pd.DataFrame) -> dict:
+    return {"mean": data.mean().to_dict(), "std": data.std().to_dict()}
+
+
+app = mk_app(
+    {
+        analyze_data: RouteConfig(
+            param_overrides={"data": TransformSpec(ingress=pd.DataFrame)}
+        )
+    }
+)
 
 # POST /analyze_data
 # {"data": {"col1": [1,2,3], "col2": [4,5,6]}}
@@ -442,10 +463,12 @@ pip install au
 from au import async_compute, RQBackend
 from qh import mk_app, TaskConfig
 
+
 # Configure au with Redis backend
-@async_compute(backend=RQBackend('redis://localhost:6379'))
+@async_compute(backend=RQBackend("redis://localhost:6379"))
 def heavy_computation(n: int) -> int:
     return n * 2
+
 
 # Use with qh
 app = mk_app([heavy_computation])
@@ -457,6 +480,7 @@ app = mk_app([heavy_computation])
 ```python
 from qh import TaskExecutor, TaskConfig
 from concurrent.futures import ThreadPoolExecutor
+
 
 class MyCustomExecutor(TaskExecutor):
     def __init__(self):
@@ -470,15 +494,17 @@ class MyCustomExecutor(TaskExecutor):
                 callback(task_id, result, None)
             except Exception as e:
                 callback(task_id, None, e)
+
         self.pool.submit(wrapper)
 
     def shutdown(self, wait=True):
         self.pool.shutdown(wait=wait)
 
+
 app = mk_app(
     [my_func],
-    async_funcs=['my_func'],
-    async_config=TaskConfig(executor=MyCustomExecutor())
+    async_funcs=["my_func"],
+    async_config=TaskConfig(executor=MyCustomExecutor()),
 )
 ```
 
@@ -500,6 +526,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Add custom routes
 @app.get("/health")
 async def health():
@@ -518,7 +545,7 @@ To enable async:
 app = mk_app([my_func])
 
 # New (with async support)
-app = mk_app([my_func], async_funcs=['my_func'])
+app = mk_app([my_func], async_funcs=["my_func"])
 ```
 
 ## Contributing

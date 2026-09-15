@@ -22,9 +22,11 @@ The fastest way to create an HTTP API:
 ```python
 from qh import mk_app
 
+
 def add(x: int, y: int) -> int:
     """Add two numbers."""
     return x + y
+
 
 app = mk_app([add])
 ```
@@ -45,11 +47,14 @@ Create APIs from plain Python functions with no decorators or boilerplate:
 ```python
 from qh import mk_app
 
+
 def multiply(x: int, y: int) -> int:
     return x * y
 
+
 def greet(name: str = "World") -> str:
     return f"Hello, {name}!"
+
 
 app = mk_app([multiply, greet])
 ```
@@ -68,17 +73,17 @@ qh automatically handles type conversion between Python and JSON:
 from typing import List, Dict, Optional
 from datetime import datetime
 
+
 def process_data(
-    values: List[int],
-    metadata: Dict[str, str],
-    timestamp: Optional[datetime] = None
+    values: List[int], metadata: Dict[str, str], timestamp: Optional[datetime] = None
 ) -> dict:
     return {
-        'sum': sum(values),
-        'count': len(values),
-        'metadata': metadata,
-        'processed_at': timestamp or datetime.now()
+        "sum": sum(values),
+        "count": len(values),
+        "metadata": metadata,
+        "processed_at": timestamp or datetime.now(),
     }
+
 
 app = mk_app([process_data])
 ```
@@ -108,16 +113,21 @@ Control which HTTP methods are supported:
 ```python
 from qh import mk_app
 
+
 def get_status() -> dict:
-    return {'status': 'running', 'uptime': 3600}
+    return {"status": "running", "uptime": 3600}
+
 
 def create_item(name: str, value: int) -> dict:
-    return {'id': 123, 'name': name, 'value': value}
+    return {"id": 123, "name": name, "value": value}
 
-app = mk_app({
-    get_status: {'methods': ['GET']},
-    create_item: {'methods': ['POST']},
-})
+
+app = mk_app(
+    {
+        get_status: {"methods": ["GET"]},
+        create_item: {"methods": ["POST"]},
+    }
+)
 ```
 
 ### 4. Path Parameters
@@ -126,14 +136,10 @@ Use path parameters for RESTful URLs:
 
 ```python
 def get_item(item_id: str) -> dict:
-    return {'item_id': item_id, 'name': f'Item {item_id}'}
+    return {"item_id": item_id, "name": f"Item {item_id}"}
 
-app = mk_app({
-    get_item: {
-        'path': '/items/{item_id}',
-        'methods': ['GET']
-    }
-})
+
+app = mk_app({get_item: {"path": "/items/{item_id}", "methods": ["GET"]}})
 ```
 
 **Usage:**
@@ -148,19 +154,10 @@ GET requests automatically use query parameters:
 
 ```python
 def search(query: str, limit: int = 10, offset: int = 0) -> dict:
-    return {
-        'query': query,
-        'limit': limit,
-        'offset': offset,
-        'results': []
-    }
+    return {"query": query, "limit": limit, "offset": offset, "results": []}
 
-app = mk_app({
-    search: {
-        'path': '/search',
-        'methods': ['GET']
-    }
-})
+
+app = mk_app({search: {"path": "/search", "methods": ["GET"]}})
 ```
 
 **Usage:**
@@ -175,24 +172,31 @@ Enable automatic RESTful routing based on function names:
 ```python
 from qh import mk_app
 
+
 # Function names follow patterns: {action}_{resource}
 def get_user(user_id: str) -> dict:
-    return {'user_id': user_id, 'name': 'John'}
+    return {"user_id": user_id, "name": "John"}
+
 
 def list_users(limit: int = 10) -> list:
-    return [{'user_id': str(i)} for i in range(limit)]
+    return [{"user_id": str(i)} for i in range(limit)]
+
 
 def create_user(name: str, email: str) -> dict:
-    return {'user_id': '123', 'name': name, 'email': email}
+    return {"user_id": "123", "name": name, "email": email}
+
 
 def update_user(user_id: str, name: str) -> dict:
-    return {'user_id': user_id, 'name': name}
+    return {"user_id": user_id, "name": name}
+
 
 def delete_user(user_id: str) -> dict:
-    return {'user_id': user_id, 'deleted': True}
+    return {"user_id": user_id, "deleted": True}
 
-app = mk_app([get_user, list_users, create_user, update_user, delete_user],
-             use_conventions=True)
+
+app = mk_app(
+    [get_user, list_users, create_user, update_user, delete_user], use_conventions=True
+)
 ```
 
 **Automatic routes created:**
@@ -218,24 +222,25 @@ Customize individual functions:
 ```python
 from qh import mk_app
 
+
 def health_check() -> dict:
-    return {'status': 'healthy'}
+    return {"status": "healthy"}
+
 
 def analyze_text(text: str) -> dict:
-    return {'length': len(text), 'words': len(text.split())}
+    return {"length": len(text), "words": len(text.split())}
 
-app = mk_app({
-    health_check: {
-        'path': '/health',
-        'methods': ['GET'],
-        'tags': ['monitoring']
-    },
-    analyze_text: {
-        'path': '/analyze',
-        'methods': ['POST'],
-        'tags': ['text-processing']
+
+app = mk_app(
+    {
+        health_check: {"path": "/health", "methods": ["GET"], "tags": ["monitoring"]},
+        analyze_text: {
+            "path": "/analyze",
+            "methods": ["POST"],
+            "tags": ["text-processing"],
+        },
     }
-})
+)
 ```
 
 ### Transform Rules
@@ -247,13 +252,17 @@ from qh import mk_app, mk_rules
 from qh.transform_utils import TransformSpec, HttpLocation
 
 # Global rules apply to all functions
-rules = mk_rules({
-    'user_id': TransformSpec(http_location=HttpLocation.PATH),
-    'api_key': TransformSpec(http_location=HttpLocation.HEADER),
-})
+rules = mk_rules(
+    {
+        "user_id": TransformSpec(http_location=HttpLocation.PATH),
+        "api_key": TransformSpec(http_location=HttpLocation.HEADER),
+    }
+)
+
 
 def get_user_data(user_id: str, api_key: str) -> dict:
-    return {'user_id': user_id, 'authorized': True}
+    return {"user_id": user_id, "authorized": True}
+
 
 app = mk_app([get_user_data], rules=rules)
 ```
@@ -271,23 +280,26 @@ from typing import List, Dict, Optional, Union
 from datetime import datetime, date, time
 from enum import Enum
 
+
 class Status(Enum):
     PENDING = "pending"
     ACTIVE = "active"
     COMPLETED = "completed"
+
 
 def complex_function(
     integers: List[int],
     mapping: Dict[str, float],
     optional_date: Optional[date],
     status: Status,
-    union_type: Union[int, str]
+    union_type: Union[int, str],
 ) -> dict:
     return {
-        'sum': sum(integers),
-        'avg_value': sum(mapping.values()) / len(mapping),
-        'status': status.value
+        "sum": sum(integers),
+        "avg_value": sum(mapping.values()) / len(mapping),
+        "status": status.value,
     }
+
 
 app = mk_app([complex_function])
 ```
@@ -299,6 +311,7 @@ Register custom types for automatic serialization:
 ```python
 from qh import mk_app, register_json_type
 
+
 @register_json_type
 class Point:
     def __init__(self, x: float, y: float):
@@ -306,20 +319,23 @@ class Point:
         self.y = y
 
     def to_dict(self):
-        return {'x': self.x, 'y': self.y}
+        return {"x": self.x, "y": self.y}
 
     @classmethod
     def from_dict(cls, data):
-        return cls(data['x'], data['y'])
+        return cls(data["x"], data["y"])
 
     def distance_from_origin(self):
-        return (self.x ** 2 + self.y ** 2) ** 0.5
+        return (self.x**2 + self.y**2) ** 0.5
+
 
 def create_point(x: float, y: float) -> Point:
     return Point(x, y)
 
+
 def calculate_distance(point: Point) -> float:
     return point.distance_from_origin()
+
 
 app = mk_app([create_point, calculate_distance])
 ```
@@ -349,13 +365,13 @@ import numpy as np
 
 # Custom serializer for numpy arrays
 register_type(
-    np.ndarray,
-    to_json=lambda arr: arr.tolist(),
-    from_json=lambda data: np.array(data)
+    np.ndarray, to_json=lambda arr: arr.tolist(), from_json=lambda data: np.array(data)
 )
+
 
 def matrix_multiply(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     return np.matmul(a, b)
+
 
 app = mk_app([matrix_multiply])
 ```
@@ -370,12 +386,15 @@ Generate Python clients from your API:
 from qh import mk_app, export_openapi
 from qh.client import mk_client_from_app
 
+
 # Create the API
 def add(x: int, y: int) -> int:
     return x + y
 
+
 def multiply(x: int, y: int) -> int:
     return x * y
+
 
 app = mk_app([add, multiply])
 
@@ -395,7 +414,7 @@ print(result)  # 28
 from qh.client import mk_client_from_url
 
 # Connect to running API
-client = mk_client_from_url('http://localhost:8000/openapi.json')
+client = mk_client_from_url("http://localhost:8000/openapi.json")
 result = client.add(x=10, y=20)
 ```
 
@@ -407,9 +426,11 @@ Generate TypeScript clients with full type safety:
 from qh import mk_app, export_openapi
 from qh.jsclient import export_ts_client
 
+
 def add(x: int, y: int) -> int:
     """Add two numbers."""
     return x + y
+
 
 app = mk_app([add])
 spec = export_openapi(app, include_python_metadata=True)
@@ -418,7 +439,7 @@ spec = export_openapi(app, include_python_metadata=True)
 ts_code = export_ts_client(spec, class_name="MathClient", use_axios=True)
 
 # Save to file
-with open('client.ts', 'w') as f:
+with open("client.ts", "w") as f:
     f.write(ts_code)
 ```
 
@@ -470,7 +491,7 @@ from qh.jsclient import export_js_client
 js_code = export_js_client(
     spec,
     class_name="ApiClient",
-    use_axios=False  # Use fetch instead
+    use_axios=False,  # Use fetch instead
 )
 ```
 
@@ -483,21 +504,19 @@ Export OpenAPI specs with Python-specific metadata:
 ```python
 from qh import mk_app, export_openapi
 
+
 def add(x: int, y: int = 10) -> int:
     """Add two numbers together."""
     return x + y
 
+
 app = mk_app([add])
 
 # Export with Python metadata
-spec = export_openapi(
-    app,
-    include_python_metadata=True,
-    include_examples=True
-)
+spec = export_openapi(app, include_python_metadata=True, include_examples=True)
 
 # Save to file
-export_openapi(app, output_file='openapi.json')
+export_openapi(app, output_file="openapi.json")
 ```
 
 **The spec includes:**
@@ -525,6 +544,7 @@ qh includes built-in support for the Store/Mall pattern from the `dol` library:
 ```python
 from qh import mall_to_qh
 
+
 # Create a mall (multi-level store)
 class UserPreferences:
     def __init__(self):
@@ -544,14 +564,15 @@ class UserPreferences:
     def __iter__(self):
         return iter(self._data)
 
+
 mall = UserPreferences()
 
 # Convert to HTTP endpoints
 app = mall_to_qh(
     mall,
     get_obj=lambda user_id: mall[user_id],
-    base_path='/users/{user_id}/preferences',
-    tags=['user-preferences']
+    base_path="/users/{user_id}/preferences",
+    tags=["user-preferences"],
 )
 ```
 
@@ -570,8 +591,10 @@ Test a single function instantly:
 ```python
 from qh.testing import quick_test
 
+
 def add(x: int, y: int) -> int:
     return x + y
+
 
 result = quick_test(add, x=3, y=5)
 assert result == 8
@@ -585,13 +608,15 @@ Use FastAPI's TestClient for fast unit tests:
 from qh import mk_app
 from qh.testing import test_app
 
+
 def add(x: int, y: int) -> int:
     return x + y
+
 
 app = mk_app([add])
 
 with test_app(app) as client:
-    response = client.post('/add', json={'x': 3, 'y': 5})
+    response = client.post("/add", json={"x": 3, "y": 5})
     assert response.status_code == 200
     assert response.json() == 8
 ```
@@ -607,7 +632,7 @@ import requests
 app = mk_app([add])
 
 with serve_app(app, port=8001) as url:
-    response = requests.post(f'{url}/add', json={'x': 3, 'y': 5})
+    response = requests.post(f"{url}/add", json={"x": 3, "y": 5})
     assert response.json() == 8
 ```
 
@@ -618,8 +643,10 @@ Verify functions work identically through HTTP:
 ```python
 from qh import mk_app, mk_client_from_app
 
+
 def calculate(x: int, y: int) -> int:
     return x * y + x
+
 
 # Direct call
 direct = calculate(3, 5)
@@ -644,6 +671,7 @@ def divide(x: float, y: float) -> float:
         raise ValueError("Cannot divide by zero")
     return x / y
 
+
 app = mk_app([divide])
 ```
 
@@ -662,6 +690,7 @@ Function defaults work as expected:
 ```python
 def greet(name: str = "World", title: str = "Mr.") -> str:
     return f"Hello, {title} {name}!"
+
 
 app = mk_app([greet])
 ```
@@ -694,7 +723,8 @@ def analyze_sentiment(text: str) -> dict:
         Dictionary with sentiment score and label
     """
     # ... implementation ...
-    return {'score': 0.8, 'label': 'positive'}
+    return {"score": 0.8, "label": "positive"}
+
 
 app = mk_app([analyze_sentiment])
 ```
@@ -727,18 +757,22 @@ Use FastAPI middleware and dependencies:
 from qh import mk_app
 from fastapi import Depends, Header
 
+
 def verify_token(x_api_key: str = Header(...)):
     if x_api_key != "secret":
         raise HTTPException(401, "Invalid API key")
     return x_api_key
 
+
 def protected_operation(value: int, token: str = Depends(verify_token)) -> int:
     return value * 2
+
 
 app = mk_app([protected_operation])
 
 # Add middleware
 from fastapi.middleware.cors import CORSMiddleware
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -757,6 +791,7 @@ Always use type annotations for best results:
 def add(x: int, y: int) -> int:
     return x + y
 
+
 # Works but no validation
 def add(x, y):
     return x + y
@@ -771,8 +806,10 @@ Use clear function names, especially with conventions:
 def get_user(user_id: str) -> dict:
     pass
 
+
 def list_orders(user_id: str, limit: int = 10) -> list:
     pass
+
 
 # Avoid - unclear intent
 def fetch(id: str) -> dict:
@@ -786,6 +823,7 @@ Use custom types for domain objects:
 ```python
 from qh import register_json_type
 
+
 @register_json_type
 class Order:
     def __init__(self, order_id: str, items: list, total: float):
@@ -794,15 +832,12 @@ class Order:
         self.total = total
 
     def to_dict(self):
-        return {
-            'order_id': self.order_id,
-            'items': self.items,
-            'total': self.total
-        }
+        return {"order_id": self.order_id, "items": self.items, "total": self.total}
 
     @classmethod
     def from_dict(cls, data):
         return cls(**data)
+
 
 def create_order(items: list, total: float) -> Order:
     return Order("ORD123", items, total)

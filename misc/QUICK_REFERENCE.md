@@ -22,24 +22,24 @@
 ### AppConfig (app-level)
 ```python
 AppConfig(
-    default_methods=['POST'],
-    path_template='/{func_name}',
-    path_prefix='/api',
+    default_methods=["POST"],
+    path_template="/{func_name}",
+    path_prefix="/api",
     rule_chain=DEFAULT_RULE_CHAIN,
-    title='My API',
-    version='0.1.0'
+    title="My API",
+    version="0.1.0",
 )
 ```
 
 ### RouteConfig (function-level)
 ```python
 RouteConfig(
-    path='/custom/path',
-    methods=['GET', 'POST'],
+    path="/custom/path",
+    methods=["GET", "POST"],
     rule_chain=custom_rules,
-    param_overrides={'param': TransformSpec(...)},
-    summary='Brief description',
-    tags=['tag1', 'tag2']
+    param_overrides={"param": TransformSpec(...)},
+    summary="Brief description",
+    tags=["tag1", "tag2"],
 )
 ```
 
@@ -49,7 +49,7 @@ TransformSpec(
     http_location=HttpLocation.QUERY,
     ingress=custom_converter,  # HTTP → Python
     egress=custom_serializer,  # Python → HTTP
-    http_name='different_name'
+    http_name="different_name",
 )
 ```
 
@@ -89,6 +89,7 @@ TransformSpec(
 def add(x: int, y: int) -> int:
     return x + y
 
+
 app = mk_app([add])
 # → POST /add with JSON body
 ```
@@ -96,10 +97,12 @@ app = mk_app([add])
 ### With Conventions
 ```python
 def get_user(user_id: str) -> dict:
-    return {'user_id': user_id}
+    return {"user_id": user_id}
+
 
 def list_users(limit: int = 10) -> list:
     return [...]
+
 
 app = mk_app([get_user, list_users], use_conventions=True)
 # → GET /users/{user_id}
@@ -110,10 +113,10 @@ app = mk_app([get_user, list_users], use_conventions=True)
 ```python
 app = mk_app(
     {
-        func1: RouteConfig(path='/custom', methods=['GET']),
-        func2: {'path': '/other', 'methods': ['POST', 'PUT']},
+        func1: RouteConfig(path="/custom", methods=["GET"]),
+        func2: {"path": "/other", "methods": ["POST", "PUT"]},
     },
-    config=AppConfig(path_prefix='/api/v1')
+    config=AppConfig(path_prefix="/api/v1"),
 )
 ```
 
@@ -121,17 +124,15 @@ app = mk_app(
 ```python
 from qh.rules import NameRule, TransformSpec, HttpLocation
 
-my_rule = NameRule({
-    'api_key': TransformSpec(
-        http_location=HttpLocation.HEADER,
-        http_name='Authorization'
-    )
-})
-
-app = mk_app(
-    [func],
-    config=AppConfig(rule_chain=RuleChain([my_rule]))
+my_rule = NameRule(
+    {
+        "api_key": TransformSpec(
+            http_location=HttpLocation.HEADER, http_name="Authorization"
+        )
+    }
 )
+
+app = mk_app([func], config=AppConfig(rule_chain=RuleChain([my_rule])))
 ```
 
 ### Type Registration
@@ -140,13 +141,13 @@ import numpy as np
 from qh import register_type
 
 register_type(
-    np.ndarray,
-    to_json=lambda arr: arr.tolist(),
-    from_json=lambda lst: np.array(lst)
+    np.ndarray, to_json=lambda arr: arr.tolist(), from_json=lambda lst: np.array(lst)
 )
+
 
 def process(data: np.ndarray) -> np.ndarray:
     return data * 2
+
 
 app = mk_app([process])
 # JSON arrays ↔ NumPy arrays automatically
@@ -167,6 +168,7 @@ async def fetch_data(url: str) -> dict:
     response = await some_http_client.get(url)
     return response.json()
 
+
 app = mk_app([fetch_data])
 # Works seamlessly, handler awaits automatically
 ```
@@ -176,13 +178,15 @@ app = mk_app([fetch_data])
 ```python
 from qh.testing import test_app
 
+
 def add(x: int, y: int) -> int:
     return x + y
+
 
 app = mk_app([add])
 
 with test_app(app) as client:
-    response = client.post('/add', json={'x': 3, 'y': 5})
+    response = client.post("/add", json={"x": 3, "y": 5})
     assert response.json() == 8
 ```
 

@@ -53,9 +53,11 @@ All 12 tests passing:
 ```python
 from qh import mk_app
 
+
 def add(x: int, y: int) -> int:
     """Add two numbers."""
     return x + y
+
 
 app = mk_app([add])
 # That's it! You now have:
@@ -144,9 +146,11 @@ export PYTHONPATH=/path/to/qh:$PYTHONPATH
 ```python
 from qh import mk_app
 
+
 # Single function
 def greet(name: str) -> str:
     return f"Hello, {name}!"
+
 
 app = mk_app(greet)
 
@@ -154,16 +158,15 @@ app = mk_app(greet)
 app = mk_app([func1, func2, func3])
 
 # With configuration
-app = mk_app(
-    [func1, func2],
-    config={'path_prefix': '/api/v1'}
-)
+app = mk_app([func1, func2], config={"path_prefix": "/api/v1"})
 
 # Per-function config
-app = mk_app({
-    func1: {'path': '/custom', 'methods': ['GET', 'POST']},
-    func2: None,  # Use defaults
-})
+app = mk_app(
+    {
+        func1: {"path": "/custom", "methods": ["GET", "POST"]},
+        func2: None,  # Use defaults
+    }
+)
 ```
 
 ### Running

@@ -63,8 +63,8 @@ from qh.au_integration import use_au_thread_backend
 
 app = mk_app(
     [my_func],
-    async_funcs=['my_func'],
-    async_config=use_au_thread_backend()  # ← One line!
+    async_funcs=["my_func"],
+    async_config=use_au_thread_backend(),  # ← One line!
 )
 ```
 
@@ -104,7 +104,7 @@ app = mk_app(
    policy = RetryPolicy(
        max_attempts=3,
        backoff=BackoffStrategy.EXPONENTIAL,
-       retry_on=[TimeoutError, ConnectionError]
+       retry_on=[TimeoutError, ConnectionError],
    )
    ```
 
@@ -129,8 +129,10 @@ app = mk_app(
    from au.testing import SyncTestBackend, mock_async
 
    with mock_async() as mock:
+
        @async_compute
-       def my_func(x): return x * 2
+       def my_func(x):
+           return x * 2
 
        handle = my_func.async_run(x=5)
        assert handle.get_result() == 10
@@ -150,7 +152,9 @@ Current:
 ```python
 # Option A: Use decorator (no HTTP)
 @async_compute
-def my_func(x): return x * 2
+def my_func(x):
+    return x * 2
+
 
 # Option B: Use HTTP (manual registration)
 app = mk_http_interface([my_func])
@@ -159,8 +163,10 @@ app = mk_http_interface([my_func])
 Should be:
 ```python
 # Decorator should optionally create HTTP endpoints
-@async_compute(http=True, path='/compute')
-def my_func(x): return x * 2
+@async_compute(http=True, path="/compute")
+def my_func(x):
+    return x * 2
+
 
 # Or auto-discover decorated functions
 app = create_app_from_decorator()  # Finds all @async_compute
@@ -191,6 +197,7 @@ No Pydantic integration for validation:
 def my_func(x: int) -> int:  # Type hints ignored
     return x * 2
 
+
 # Should: Auto-validate with Pydantic
 @async_compute
 def my_func(x: int) -> int:  # Auto-validates x is int
@@ -215,17 +222,21 @@ def my_func(x: int) -> int:  # Auto-validates x is int
 Need more shortcuts:
 ```python
 # Current: Too verbose
-store = FileSystemStore('/tmp/tasks', ttl_seconds=3600)
+store = FileSystemStore("/tmp/tasks", ttl_seconds=3600)
 backend = ThreadBackend(store)
+
+
 @async_compute(backend=backend, store=store)
 def my_func(x): ...
+
 
 # Should: Convention-based
 @async_compute  # Uses env vars or defaults
 def my_func(x): ...
 
+
 # Or named configs
-@async_compute.with_config('production')  # Loads from config file
+@async_compute.with_config("production")  # Loads from config file
 def my_func(x): ...
 ```
 
@@ -242,7 +253,8 @@ try:
         use_au_process_backend,
         use_au_redis_backend,
     )
-    __all__ += ['use_au_backend', 'use_au_thread_backend', ...]
+
+    __all__ += ["use_au_backend", "use_au_thread_backend", ...]
 except ImportError:
     pass  # au not installed
 ```
@@ -267,8 +279,7 @@ Add tests:
 ```python
 # tests/test_au_integration.py
 @pytest.mark.skipif(not HAS_AU, reason="au not installed")
-def test_qh_with_au_backend():
-    ...
+def test_qh_with_au_backend(): ...
 ```
 
 ### 5. **Async Decorator Integration**
@@ -278,8 +289,11 @@ Allow using au's decorator directly:
 from au import async_compute
 from qh import mk_app
 
+
 @async_compute(backend=ThreadBackend(store))
-def my_func(x): return x * 2
+def my_func(x):
+    return x * 2
+
 
 # qh should detect and use au's async
 app = mk_app([my_func])  # Auto-detects au decorator
@@ -369,7 +383,7 @@ app = mk_app([my_func])  # Auto-detects au decorator
 # Development (built-in)
 app = mk_app(
     [my_func],
-    async_funcs=['my_func']  # Uses qh built-in
+    async_funcs=["my_func"],  # Uses qh built-in
 )
 
 # Production (au with filesystem)
@@ -377,10 +391,8 @@ from qh.au_integration import use_au_thread_backend
 
 app = mk_app(
     [my_func],
-    async_funcs=['my_func'],
-    async_config=use_au_thread_backend(
-        storage_path='/var/app/tasks'
-    )
+    async_funcs=["my_func"],
+    async_config=use_au_thread_backend(storage_path="/var/app/tasks"),
 )
 
 # Scale (au with Redis)
@@ -388,10 +400,8 @@ from qh.au_integration import use_au_redis_backend
 
 app = mk_app(
     [my_func],
-    async_funcs=['my_func'],
-    async_config=use_au_redis_backend(
-        redis_url='redis://cluster:6379'
-    )
+    async_funcs=["my_func"],
+    async_config=use_au_redis_backend(redis_url="redis://cluster:6379"),
 )
 ```
 
@@ -401,11 +411,11 @@ app = mk_app(
 # CPU-bound with processes, I/O-bound with threads
 app = mk_app(
     [cpu_func, io_func],
-    async_funcs=['cpu_func', 'io_func'],
+    async_funcs=["cpu_func", "io_func"],
     async_config={
-        'cpu_func': use_au_process_backend(),
-        'io_func': use_au_thread_backend(),
-    }
+        "cpu_func": use_au_process_backend(),
+        "io_func": use_au_thread_backend(),
+    },
 )
 ```
 
@@ -417,15 +427,12 @@ from qh.au_integration import use_au_backend
 
 app = mk_app(
     [flaky_func],
-    async_funcs=['flaky_func'],
+    async_funcs=["flaky_func"],
     async_config=use_au_backend(
-        backend=ThreadBackend(
-            store=store,
-            middleware=[LoggingMiddleware()]
-        ),
+        backend=ThreadBackend(store=store, middleware=[LoggingMiddleware()]),
         store=store,
         # TODO: retry policy support in qh
-    )
+    ),
 )
 ```
 

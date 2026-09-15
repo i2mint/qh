@@ -53,8 +53,10 @@ qh/
 def add(x: int, y: int) -> int:
     return x + y
 
+
 def list_users(limit: int = 10) -> list:
     return [...]
+
 
 # Simple case - uses defaults
 app = mk_app([add, list_users])
@@ -64,8 +66,7 @@ app = mk_app([add, list_users], use_conventions=True)
 
 # With custom config
 app = mk_app(
-    {add: {'path': '/math/add', 'methods': ['POST']}},
-    config={'path_prefix': '/api/v1'}
+    {add: {"path": "/math/add", "methods": ["POST"]}}, config={"path_prefix": "/api/v1"}
 )
 ```
 
@@ -138,13 +139,13 @@ Creates FastAPI-compatible async endpoint functions that:
 
 **HttpLocation Enum**:
 ```python
-- JSON_BODY       # Default for POST/PUT/PATCH
-- PATH            # URL path parameter
-- QUERY           # Query string parameter
-- HEADER          # HTTP header
-- COOKIE          # HTTP cookie
-- BINARY_BODY     # Raw binary payload
-- FORM_DATA       # Multipart form data
+-JSON_BODY  # Default for POST/PUT/PATCH
+-PATH  # URL path parameter
+-QUERY  # Query string parameter
+-HEADER  # HTTP header
+-COOKIE  # HTTP cookie
+-BINARY_BODY  # Raw binary payload
+-FORM_DATA  # Multipart form data
 ```
 
 **TransformSpec Dataclass**:
@@ -230,8 +231,9 @@ def delete_user(user_id: str) → DELETE /users/{user_id}
 register_type(
     MyClass,
     to_json=lambda obj: obj.to_dict(),
-    from_json=lambda data: MyClass.from_dict(data)
+    from_json=lambda data: MyClass.from_dict(data),
 )
+
 
 # Method 2: Decorator (auto-detects to_dict/from_dict)
 @register_json_type
@@ -264,9 +266,10 @@ class Point:
 ### Async Test Support
 ```python
 # From test_core.py
-async def async_greeter(greeting: str, name: str = 'world') -> str:
+async def async_greeter(greeting: str, name: str = "world") -> str:
     await asyncio.sleep(0.1)  # Simulate async operation
     return f"{greeting}, {name}!"
+
 
 # Works naturally with TestClient
 app = mk_fastapi_app([async_greeter])
@@ -310,10 +313,10 @@ response = TestClient(app).post("/async_greeter", ...)
    ```python
    RouteConfig(
        param_overrides={
-           'param_name': TransformSpec(
+           "param_name": TransformSpec(
                http_location=HttpLocation.HEADER,
                ingress=custom_decoder,
-               egress=custom_encoder
+               egress=custom_encoder,
            )
        }
    )
@@ -401,13 +404,15 @@ mk_store_dispatcher(
 from qh import mk_app
 from qh.testing import test_app
 
+
 def add(x: int, y: int) -> int:
     return x + y
+
 
 app = mk_app([add])
 
 with test_app(app) as client:
-    response = client.post('/add', json={'x': 3, 'y': 5})
+    response = client.post("/add", json={"x": 3, "y": 5})
     assert response.json() == 8
 ```
 

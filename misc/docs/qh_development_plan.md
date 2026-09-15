@@ -34,17 +34,19 @@ app = mk_app([foo, bar, baz])
 app = mk_app(
     funcs=[foo, bar],
     config={
-        'input_trans': {...},
-        'output_trans': {...},
-        'path_template': '/api/{func_name}',
-    }
+        "input_trans": {...},
+        "output_trans": {...},
+        "path_template": "/api/{func_name}",
+    },
 )
 
 # Dict-based for per-function config
-app = mk_app({
-    foo: {'methods': ['GET'], 'path': '/foo/{x}'},
-    bar: {'methods': ['POST', 'PUT']},
-})
+app = mk_app(
+    {
+        foo: {"methods": ["GET"], "path": "/foo/{x}"},
+        bar: {"methods": ["POST", "PUT"]},
+    }
+)
 ```
 
 ### 1.2 Configuration Schema
@@ -54,26 +56,29 @@ Adopt the wip_qh refactoring pattern with a clear configuration hierarchy:
 ```python
 # Global defaults
 DEFAULT_CONFIG = {
-    'methods': ['POST'],
-    'path_template': '/{func_name}',
-    'input_trans': smart_json_ingress,  # Auto-detect types
-    'output_trans': smart_json_egress,  # Auto-serialize
-    'error_handler': standard_error_handler,
-    'tags': None,
-    'summary': lambda f: f.__doc__.split('\n')[0] if f.__doc__ else None,
+    "methods": ["POST"],
+    "path_template": "/{func_name}",
+    "input_trans": smart_json_ingress,  # Auto-detect types
+    "output_trans": smart_json_egress,  # Auto-serialize
+    "error_handler": standard_error_handler,
+    "tags": None,
+    "summary": lambda f: f.__doc__.split("\n")[0] if f.__doc__ else None,
 }
 
 # Per-function config overrides
-RouteConfig = TypedDict('RouteConfig', {
-    'path': str,
-    'methods': List[str],
-    'input_trans': Callable,
-    'output_trans': Callable,
-    'defaults': Dict[str, Any],
-    'summary': str,
-    'tags': List[str],
-    'response_model': Type,
-})
+RouteConfig = TypedDict(
+    "RouteConfig",
+    {
+        "path": str,
+        "methods": List[str],
+        "input_trans": Callable,
+        "output_trans": Callable,
+        "defaults": Dict[str, Any],
+        "summary": str,
+        "tags": List[str],
+        "response_model": Type,
+    },
+)
 ```
 
 ### 1.3 Smart Type Inference
@@ -87,11 +92,12 @@ from typing import Annotated
 import numpy as np
 from pathlib import Path
 
+
 def process_image(
     image: Annotated[np.ndarray, "image/jpeg"],  # Auto-detect from annotation
-    threshold: float = 0.5
-) -> dict[str, Any]:
-    ...
+    threshold: float = 0.5,
+) -> dict[str, Any]: ...
+
 
 # qh auto-generates:
 # - Input transformer: base64 → np.ndarray
@@ -116,14 +122,18 @@ Learn from function signatures to generate RESTful paths:
 def get_user(user_id: str) -> User:
     """Automatically becomes GET /users/{user_id}"""
 
+
 def list_users(limit: int = 100) -> List[User]:
     """Automatically becomes GET /users?limit=100"""
+
 
 def create_user(user: User) -> User:
     """Automatically becomes POST /users"""
 
+
 def update_user(user_id: str, user: User) -> User:
     """Automatically becomes PUT /users/{user_id}"""
+
 
 def delete_user(user_id: str) -> None:
     """Automatically becomes DELETE /users/{user_id}"""
@@ -146,11 +156,11 @@ async def endpoint(request: Request):
     params.update(request.path_params)
 
     # 2. Query parameters (for GET)
-    if request.method == 'GET':
+    if request.method == "GET":
         params.update(request.query_params)
 
     # 3. JSON body (for POST/PUT)
-    if request.method in ['POST', 'PUT', 'PATCH']:
+    if request.method in ["POST", "PUT", "PATCH"]:
         params.update(await request.json())
 
     # 4. Form data (multipart)
@@ -172,19 +182,21 @@ from dol import Store
 # Expose a store factory
 app = mk_store_app(
     store_factory=lambda uri: Store(uri),
-    methods=['list', 'read', 'write', 'delete'],  # or '__iter__', '__getitem__', etc.
+    methods=["list", "read", "write", "delete"],  # or '__iter__', '__getitem__', etc.
     auth=require_token,
 )
+
 
 # Expose an object's methods
 class DataService:
     def get_data(self, key: str) -> bytes: ...
     def put_data(self, key: str, data: bytes): ...
 
+
 app = mk_object_app(
     obj_factory=lambda user_id: DataService(user_id),
-    methods=['get_data', 'put_data'],
-    base_path='/users/{user_id}/data',
+    methods=["get_data", "put_data"],
+    base_path="/users/{user_id}/data",
 )
 ```
 
@@ -225,7 +237,7 @@ Generate client-side Python functions from OpenAPI:
 from qh.client import mk_client_from_openapi
 
 # From URL
-client = mk_client_from_openapi('http://api.example.com/openapi.json')
+client = mk_client_from_openapi("http://api.example.com/openapi.json")
 
 # client.foo(x=3) → makes HTTP request → returns result
 # Signature matches original function!
@@ -246,7 +258,7 @@ from qh import export_js_client
 
 js_code = export_js_client(
     app,
-    module_name='myApi',
+    module_name="myApi",
     include_types=True,  # TypeScript definitions
 )
 ```
@@ -270,7 +282,7 @@ client = TestClient(app)
 assert client.foo(x=3) == 5
 
 # Or make actual HTTP requests
-response = client.post('/foo', json={'x': 3})
+response = client.post("/foo", json={"x": 3})
 assert response.json() == 5
 
 # Test OpenAPI round-tripping
@@ -390,8 +402,10 @@ Received: POST /foo with JSON body {}
 # This should be all you need for simple cases
 from qh import mk_app
 
+
 def add(x: int, y: int) -> int:
     return x + y
+
 
 app = mk_app([add])
 # ✓ POST /add endpoint
@@ -405,15 +419,17 @@ app = mk_app([add])
 
 ```python
 # But you can customize everything when needed
-app = mk_app({
-    add: {
-        'path': '/calculator/add',
-        'methods': ['POST', 'GET'],
-        'input_trans': custom_transformer,
-        'rate_limit': '100/hour',
-        'auth': require_api_key,
+app = mk_app(
+    {
+        add: {
+            "path": "/calculator/add",
+            "methods": ["POST", "GET"],
+            "input_trans": custom_transformer,
+            "rate_limit": "100/hour",
+            "auth": require_api_key,
+        }
     }
-})
+)
 ```
 
 ### 6.3 Stay Close to FastAPI
@@ -423,12 +439,11 @@ app = mk_app({
 from fastapi import Depends, Header
 from qh import mk_app
 
+
 def get_user(
-    user_id: str,
-    token: str = Header(...),
-    db: Database = Depends(get_db)
-) -> User:
-    ...
+    user_id: str, token: str = Header(...), db: Database = Depends(get_db)
+) -> User: ...
+
 
 app = mk_app([get_user])  # FastAPI's Depends/Header just work
 ```
@@ -467,9 +482,11 @@ Provide clear examples:
 from py2http import mk_app
 from py2http.decorators import mk_flat, handle_json_req
 
+
 @mk_flat
 class Service:
     def method(self, x: int): ...
+
 
 app = mk_app([Service.method])
 
@@ -477,10 +494,7 @@ app = mk_app([Service.method])
 from qh import mk_app, mk_object_app
 
 service = Service()
-app = mk_object_app(
-    obj=service,
-    methods=['method']
-)
+app = mk_object_app(obj=service, methods=["method"])
 # Or even simpler:
 app = mk_app([service.method])
 ```
@@ -503,11 +517,14 @@ app = mk_app([service.method])
 ```python
 from qh import mk_app
 
+
 def greet(name: str = "World") -> str:
     return f"Hello, {name}!"
 
+
 def add(x: int, y: int) -> int:
     return x + y
+
 
 app = mk_app([greet, add])
 ```
@@ -516,6 +533,7 @@ app = mk_app([greet, add])
 ```python
 import numpy as np
 from qh import mk_app, register_type
+
 
 @register_type(np.ndarray)
 class NumpyArrayType:
@@ -527,8 +545,10 @@ class NumpyArrayType:
     def deserialize(data: list) -> np.ndarray:
         return np.array(data)
 
+
 def process(data: np.ndarray) -> np.ndarray:
     return data * 2
+
 
 app = mk_app([process])
 ```
@@ -541,7 +561,7 @@ from dol import LocalStore
 app = mk_store_app(
     store_factory=lambda uri: LocalStore(uri),
     auth=validate_token,
-    base_path='/stores/{uri}',
+    base_path="/stores/{uri}",
 )
 
 # Automatically creates:
@@ -556,20 +576,22 @@ app = mk_store_app(
 # Server side
 from qh import mk_app, export_openapi
 
+
 def process_data(data: dict, threshold: float = 0.5) -> dict:
     """Process data with threshold."""
-    return {'result': data, 'threshold': threshold}
+    return {"result": data, "threshold": threshold}
+
 
 app = mk_app([process_data])
-export_openapi(app, 'openapi.json')
+export_openapi(app, "openapi.json")
 
 # Client side (different machine/process)
 from qh.client import mk_client_from_openapi
 
-client = mk_client_from_openapi('http://api.example.com/openapi.json')
+client = mk_client_from_openapi("http://api.example.com/openapi.json")
 
 # Use exactly like the original function!
-result = client.process_data({'x': 1}, threshold=0.7)
+result = client.process_data({"x": 1}, threshold=0.7)
 ```
 
 ---

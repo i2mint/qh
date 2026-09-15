@@ -13,14 +13,18 @@ Automatically infer HTTP paths and methods from function names following RESTful
 ```python
 from qh import mk_app
 
+
 def get_user(user_id: str) -> dict:
-    return {'user_id': user_id, 'name': 'John'}
+    return {"user_id": user_id, "name": "John"}
+
 
 def list_users(limit: int = 10) -> list:
     return [...]
 
+
 def create_user(name: str) -> dict:
-    return {'user_id': '123', 'name': name}
+    return {"user_id": "123", "name": name}
+
 
 # Enable conventions with one parameter
 app = mk_app([get_user, list_users, create_user], use_conventions=True)
@@ -49,13 +53,13 @@ import numpy as np
 
 # Register a custom type
 register_type(
-    np.ndarray,
-    to_json=lambda arr: arr.tolist(),
-    from_json=lambda data: np.array(data)
+    np.ndarray, to_json=lambda arr: arr.tolist(), from_json=lambda data: np.array(data)
 )
+
 
 def process_array(data: np.ndarray) -> np.ndarray:
     return data * 2
+
 
 app = mk_app([process_array])
 # NumPy arrays automatically converted to/from JSON!
@@ -75,11 +79,12 @@ from qh.types import register_type
 register_type(
     MyClass,
     to_json=lambda obj: obj.to_dict(),
-    from_json=lambda data: MyClass.from_dict(data)
+    from_json=lambda data: MyClass.from_dict(data),
 )
 
 # Method 2: Decorator (auto-detects to_dict/from_dict methods)
 from qh.types import register_json_type
+
 
 @register_json_type
 class Point:
@@ -88,11 +93,11 @@ class Point:
         self.y = y
 
     def to_dict(self):
-        return {'x': self.x, 'y': self.y}
+        return {"x": self.x, "y": self.y}
 
     @classmethod
     def from_dict(cls, data):
-        return cls(data['x'], data['y'])
+        return cls(data["x"], data["y"])
 ```
 
 ### 3. Enhanced Path Parameter Handling
@@ -165,11 +170,14 @@ app = mk_app([search_products], use_conventions=True)
 ```python
 from qh import mk_app
 
+
 def get_product(product_id: str) -> dict:
-    return {'product_id': product_id, 'name': 'Widget'}
+    return {"product_id": product_id, "name": "Widget"}
+
 
 def list_products(category: str = None) -> list:
-    return [{'product_id': '1', 'name': 'Widget'}]
+    return [{"product_id": "1", "name": "Widget"}]
+
 
 app = mk_app([get_product, list_products], use_conventions=True)
 
@@ -185,13 +193,13 @@ from qh import mk_app, register_type
 import numpy as np
 
 register_type(
-    np.ndarray,
-    to_json=lambda arr: arr.tolist(),
-    from_json=lambda lst: np.array(lst)
+    np.ndarray, to_json=lambda arr: arr.tolist(), from_json=lambda lst: np.array(lst)
 )
+
 
 def add_arrays(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     return a + b
+
 
 app = mk_app([add_arrays])
 
@@ -205,18 +213,21 @@ app = mk_app([add_arrays])
 ```python
 from qh import mk_app
 
+
 def get_user(user_id: str) -> dict:
-    return {'user_id': user_id}
+    return {"user_id": user_id}
+
 
 def special_endpoint(data: dict) -> dict:
-    return {'processed': True}
+    return {"processed": True}
+
 
 app = mk_app(
     {
         get_user: {},  # Use conventions
-        special_endpoint: {'path': '/custom', 'methods': ['POST']},  # Override
+        special_endpoint: {"path": "/custom", "methods": ["POST"]},  # Override
     },
-    use_conventions=True
+    use_conventions=True,
 )
 
 # GET /users/{user_id}  (from conventions)

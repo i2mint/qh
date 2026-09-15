@@ -23,6 +23,7 @@ On the backend I have an object that wraps a Mapping like this:
 from dataclasses import dataclass
 from typing import MutableMapping
 
+
 @dataclass
 class StoreAccess:
     """
@@ -37,7 +38,7 @@ class StoreAccess:
 
     @classmethod
     def from_uri(cls, uri: str):
-       """code that makes a MutableMapping interface for the data pointed to by uri"""
+        """code that makes a MutableMapping interface for the data pointed to by uri"""
 
     def list(self):
         return list(self.store.keys())
@@ -74,7 +75,9 @@ Create a new Python file for your FastAPI application, for example, `main.py`, a
 
 ```python
 from fastapi import FastAPI, HTTPException
-from yourmodule import StoreAccess  # Ensure this points to where your StoreAccess class is defined.
+from yourmodule import (
+    StoreAccess,
+)  # Ensure this points to where your StoreAccess class is defined.
 
 app = FastAPI()
 ```
@@ -108,7 +111,9 @@ async def read_key(uri: str, key: str):
 
 ```python
 @app.post("/write/{uri}")
-async def write_key(uri: str, key: str, value: str):  # Adjust value type based on your use case
+async def write_key(
+    uri: str, key: str, value: str
+):  # Adjust value type based on your use case
     store = StoreAccess.from_uri(uri)
     store.write(key, value)
     return {"message": "Value written successfully"}
@@ -171,7 +176,8 @@ def routes_of_app(app):
     for route in app._function_builders:
         yield route._function._name, route._function._func
 
-# example: 
+
+# example:
 # dict(routes_of_app(app))
 ```
 
@@ -183,6 +189,7 @@ For example:
 ```python
 registered_routes = {}
 
+
 def register_route(route, methods):
     def decorator(func):
         # Register the function in your own registry.
@@ -191,6 +198,7 @@ def register_route(route, methods):
             "handler": func,
         }
         return func
+
     return decorator
 ```
 
@@ -201,10 +209,10 @@ import azure.functions as af
 
 app = FunctionApp(http_auth_level=af.AuthLevel.ANONYMOUS)
 
+
 @app.route(route="foo", methods=["GET"])
 @register_route("foo", ["GET"])
-def foo(req: af.HttpRequest) -> af.HttpResponse:
-    ...
+def foo(req: af.HttpRequest) -> af.HttpResponse: ...
 ```
 
 or to pack both decorators in one:
@@ -215,6 +223,7 @@ from azure.functions import FunctionApp
 
 # Custom registry to keep track of routes and their handlers.
 registered_routes = {}
+
 
 def add_route(app: FunctionApp, route: str, methods: list, **kwargs):
     """
@@ -230,6 +239,7 @@ def add_route(app: FunctionApp, route: str, methods: list, **kwargs):
     Returns:
         A decorator that registers the function with both the custom registry and the app.
     """
+
     def decorator(func_handler):
         # Add the route to the custom registry.
         registered_routes[route] = {
@@ -238,16 +248,15 @@ def add_route(app: FunctionApp, route: str, methods: list, **kwargs):
         }
         # Register the route using the standard app.route decorator.
         return app.route(route=route, methods=methods, **kwargs)(func_handler)
+
     return decorator
 ```
 
 which could then be used like this:
 
 ```python
-
 @add_route(app, route="foo", methods=["GET"])
-def foo(req: func.HttpRequest) -> func.HttpResponse:
-    ...
+def foo(req: func.HttpRequest) -> func.HttpResponse: ...
 ```
 
 
