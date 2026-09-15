@@ -280,6 +280,15 @@ class TaskConfig:
     Configuration for async task processing.
 
     This is the explicit configuration. The convention is to use sane defaults.
+    Pass an instance (or a dict) as ``async_config`` to ``qh.mk_app``; ``store``
+    and ``executor`` are built lazily by ``get_store``/``get_executor`` from
+    ``default_executor`` when left ``None``.
+
+    >>> tc = TaskConfig(ttl=60, default_executor='thread')
+    >>> tc.ttl, tc.async_mode
+    (60, 'query')
+    >>> type(tc.get_executor()).__name__
+    'ThreadPoolTaskExecutor'
     """
 
     # Storage backend for task state

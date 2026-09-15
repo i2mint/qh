@@ -248,6 +248,13 @@ class RuleChain:
     Chain of rules evaluated in order with first-match semantics.
 
     Rules are tried from most specific to most general.
+
+    >>> chain = RuleChain()
+    >>> chain.add_rule(TypeRule({int: TransformSpec(http_location=HttpLocation.QUERY)}))
+    >>> chain.match(param_name='x', param_type=int).http_location
+    <HttpLocation.QUERY: 'query'>
+    >>> chain.match(param_name='y', param_type=str) is None
+    True
     """
 
     def __init__(self, rules: Optional[list[Rule]] = None):

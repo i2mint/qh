@@ -55,6 +55,19 @@ class TypeRegistry:
     Registry for type handlers.
 
     Manages conversion between Python types and HTTP representations.
+    Comes pre-populated with pass-through handlers for the JSON-native
+    builtins (``str``, ``int``, ``float``, ``bool``, ``list``, ``dict``,
+    ``NoneType``); ``register_type`` adds more, including via
+    ``register_json_type``.
+
+    >>> reg = TypeRegistry()
+    >>> reg.get_handler(int).to_json(3)
+    3
+    >>> reg.get_handler(str) is not None
+    True
+    >>> class Unregistered: pass
+    >>> reg.get_handler(Unregistered) is None
+    True
     """
 
     def __init__(self):
