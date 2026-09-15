@@ -124,7 +124,7 @@ class AuTaskStore(TaskStore):
         pass
 
     def delete_task(self, task_id: str) -> bool:
-        """Delete a task."""
+        """Delete ``task_id`` from the au store, returning whether it was present."""
         if task_id in self.au_store:
             del self.au_store[task_id]
             return True

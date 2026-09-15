@@ -374,7 +374,7 @@ def apply_conventions_to_funcs(
     Apply conventions to a list of functions.
 
     Args:
-        funcs: List of functions
+        funcs: The functions to route.
         use_conventions: Whether to use conventions
         base_path: Base path to prepend to all routes
         use_plurals: Whether to use plural resource names
