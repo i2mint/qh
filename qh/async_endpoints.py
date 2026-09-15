@@ -71,8 +71,14 @@ def add_task_endpoints(
             wait: Whether to block until task completes
             timeout: Maximum time to wait in seconds
 
+        Returns:
+            A dict with ``task_id`` and ``status``, plus ``result`` when
+            completed. A failed or still-pending/running task is returned as
+            a ``JSONResponse`` (500 or 202) instead of raising.
+
         Raises:
-            HTTPException: 404 if ``task_id`` is unknown to this function's task manager.
+            HTTPException: 404 if ``task_id`` is unknown to this function's
+                task manager; 408 if ``wait`` timed out.
         """
         task_manager = get_task_manager(func_name)
 

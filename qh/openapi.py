@@ -462,11 +462,26 @@ def get_python_type_name(type_hint: Any) -> str:
     """
     Get a string representation of a Python type.
 
+    ``inspect.Parameter.empty`` and ``None`` map to ``"Any"``. Anything else
+    with a ``__name__`` uses that name alone, with no type arguments — on
+    Python 3.10+ this includes builtin generic aliases (``list[int]``) and
+    ``typing`` generics (``Optional[str]``, ``Dict[str, int]``), since they
+    all carry a ``__name__`` now. The bracketed-argument form only appears
+    for the rare origin type that lacks ``__name__``.
+
+    Returns:
+        The type's bare name, e.g. ``"int"`` or ``"list"``.
+
     Examples:
-        int → "int"
-        str → "str"
-        list[int] → "list[int]"
-        Optional[str] → "Optional[str]"
+        >>> get_python_type_name(int)
+        'int'
+        >>> get_python_type_name(str)
+        'str'
+        >>> get_python_type_name(list[int])
+        'list'
+        >>> from typing import Optional
+        >>> get_python_type_name(Optional[str])
+        'Optional'
     """
     if type_hint is inspect.Parameter.empty or type_hint is None:
         return "Any"

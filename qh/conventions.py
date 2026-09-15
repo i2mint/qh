@@ -58,6 +58,11 @@ def parse_function_name(func_name: str) -> ParsedFunctionName:
     """
     Parse a function name to extract verb and resource.
 
+    Returns:
+        A ``ParsedFunctionName``. When the name is ``<verb>_<rest>`` and
+        ``verb`` is a known CRUD verb, ``resource`` is ``rest``; otherwise
+        the whole name is the resource and ``verb`` is ``""``.
+
     Examples:
 
         >>> parse_function_name('get_user')
