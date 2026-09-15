@@ -57,8 +57,10 @@ class TypeRegistry:
     Manages conversion between Python types and HTTP representations.
     Comes pre-populated with pass-through handlers for the JSON-native
     builtins (``str``, ``int``, ``float``, ``bool``, ``list``, ``dict``,
-    ``NoneType``); ``register_type`` adds more, including via
-    ``register_json_type``.
+    ``NoneType``); its ``register`` method adds more. The module-level
+    ``register_type`` (and the ``register_json_type`` decorator built on it)
+    register into the separate, global registry used by the rest of ``qh``,
+    not into a particular ``TypeRegistry`` instance.
 
     >>> reg = TypeRegistry()
     >>> reg.get_handler(int).to_json(3)

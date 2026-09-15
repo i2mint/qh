@@ -110,6 +110,9 @@ def mk_app(
 
     Raises:
         TypeError: If ``config`` is neither ``None``, an ``AppConfig``, nor a dict.
+        ValueError: If a per-function route config is invalid for that function
+            (see ``qh.endpoint.validate_route_config``), e.g. a ``path`` whose
+            ``{param}`` placeholders don't match the function's parameters.
 
     See Also:
         ``qh.testing.test_app``: call the resulting app in-process without a server.

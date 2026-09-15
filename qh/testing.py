@@ -101,8 +101,7 @@ def service_running(
 
     This context manager checks if a service is already running at the specified URL.
     If not running, it launches the service using one of the provided methods (app,
-    launcher) and tears it down on exit. If the service was already running, it leaves
-    it running on exit.
+    launcher). Either way, it leaves the service running on exit -- see the Note below.
 
     Exactly one of ``url``, ``app``, or ``launcher`` must be provided.
 
