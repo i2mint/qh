@@ -1,4 +1,0 @@
-qh.app
-======
-.. automodule:: qh.app
-   :members:

@@ -1,4 +1,0 @@
-qh.testing
-==========
-.. automodule:: qh.testing
-   :members:

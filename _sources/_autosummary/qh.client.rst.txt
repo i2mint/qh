@@ -1,0 +1,20 @@
+qh.client
+=========
+
+.. automodule:: qh.client
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      mk_client_from_app
+      mk_client_from_openapi
+      mk_client_from_url
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      HttpClient
+   

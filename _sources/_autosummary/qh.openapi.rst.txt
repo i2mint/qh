@@ -1,0 +1,21 @@
+qh.openapi
+==========
+
+.. automodule:: qh.openapi
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      build_parameters
+      build_request_body_schema
+      build_response_schema
+      enhance_openapi_schema
+      export_openapi
+      extract_function_signature
+      generate_examples_for_function
+      get_python_type_name
+      install_enhanced_openapi
+      python_type_to_json_schema
+   

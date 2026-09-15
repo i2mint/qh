@@ -1,4 +1,0 @@
-qh.examples.simple
-==================
-.. automodule:: qh.examples.simple
-   :members:

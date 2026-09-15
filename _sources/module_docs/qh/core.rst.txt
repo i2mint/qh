@@ -1,4 +1,0 @@
-qh.core
-=======
-.. automodule:: qh.core
-   :members:

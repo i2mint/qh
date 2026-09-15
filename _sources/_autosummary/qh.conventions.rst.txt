@@ -1,0 +1,26 @@
+qh.conventions
+==============
+
+.. automodule:: qh.conventions
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      apply_conventions_to_funcs
+      get_id_params
+      infer_http_method
+      infer_path_from_function
+      infer_route_config
+      merge_convention_config
+      parse_function_name
+      pluralize
+      singularize
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      ParsedFunctionName
+   

@@ -1,0 +1,16 @@
+qh.base
+=======
+
+.. automodule:: qh.base
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      mk_fastapi_app
+      mk_json_egress
+      mk_json_ingress
+      mk_store_dispatcher
+      name_based_ingress
+   

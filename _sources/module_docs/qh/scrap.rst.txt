@@ -1,4 +1,0 @@
-qh.scrap
-========
-.. automodule:: qh.scrap
-   :members:

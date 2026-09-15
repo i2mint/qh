@@ -1,0 +1,86 @@
+﻿qh
+==
+
+.. automodule:: qh
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      mk_app
+      inspect_routes
+      print_routes
+      register_type
+      register_json_type
+      export_openapi
+      enhance_openapi_schema
+      install_enhanced_openapi
+      python_type_to_json_schema
+      mk_client_from_openapi
+      mk_client_from_url
+      mk_client_from_app
+      export_js_client
+      export_ts_client
+      run_app
+      test_app
+      serve_app
+      quick_test
+      service_running
+      use_au_backend
+      use_au_thread_backend
+      use_au_process_backend
+      use_au_redis_backend
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      AppConfig
+      RouteConfig
+      ConfigBuilder
+      RuleChain
+      TransformSpec
+      HttpLocation
+      TypeRule
+      NameRule
+      FuncRule
+      FuncNameRule
+      TypeRegistry
+      HttpClient
+      TaskConfig
+      TaskStatus
+      TaskInfo
+      TaskStore
+      InMemoryTaskStore
+      TaskExecutor
+      ThreadPoolTaskExecutor
+      ProcessPoolTaskExecutor
+      TaskManager
+      AppRunner
+      ServiceInfo
+      AuTaskStore
+      AuTaskExecutor
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   app
+   async_endpoints
+   async_tasks
+   au_integration
+   base
+   client
+   config
+   conventions
+   core
+   endpoint
+   jsclient
+   openapi
+   rules
+   stores_qh
+   testing
+   types

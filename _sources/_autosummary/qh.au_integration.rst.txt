@@ -1,0 +1,22 @@
+qh.au\_integration
+==================
+
+.. automodule:: qh.au_integration
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      use_au_backend
+      use_au_process_backend
+      use_au_redis_backend
+      use_au_thread_backend
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      AuTaskExecutor
+      AuTaskStore
+   

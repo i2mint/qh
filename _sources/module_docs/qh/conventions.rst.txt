@@ -1,4 +1,0 @@
-qh.conventions
-==============
-.. automodule:: qh.conventions
-   :members:

@@ -1,4 +1,0 @@
-qh.scrap.store_dispatch_1
-=========================
-.. automodule:: qh.scrap.store_dispatch_1
-   :members:

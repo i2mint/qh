@@ -1,0 +1,23 @@
+qh.config
+=========
+
+.. automodule:: qh.config
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      from_dict
+      normalize_funcs_input
+      resolve_route_config
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      AppConfig
+      ConfigBuilder
+      FunctionConfigBuilder
+      RouteConfig
+   

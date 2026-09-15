@@ -1,0 +1,22 @@
+qh.types
+========
+
+.. automodule:: qh.types
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_transform_spec_for_type
+      get_type_handler
+      register_json_type
+      register_type
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      TypeHandler
+      TypeRegistry
+   

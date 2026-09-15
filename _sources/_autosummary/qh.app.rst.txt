@@ -1,0 +1,16 @@
+qh.app
+======
+
+.. automodule:: qh.app
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      create_app
+      inspect_routes
+      make_app
+      mk_app
+      print_routes
+   

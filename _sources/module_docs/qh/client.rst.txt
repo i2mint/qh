@@ -1,4 +1,0 @@
-qh.client
-=========
-.. automodule:: qh.client
-   :members:

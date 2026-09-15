@@ -1,0 +1,35 @@
+# qh
+
+> Quick Http web-service construction
+
+
+## Pages
+
+- [qh](index.html.md): **Quick HTTP web-service construction** - From Python functions to production-ready HTTP services, w...
+- [API reference](api.html.md): | [`qh`](_autosummary/qh.html.md#module-qh)   | Quick HTTP: expose Python functions as a FastAPI web...
+- [qh](_autosummary/qh.html.md): Quick HTTP: expose Python functions as a FastAPI web service with one call.
+- [qh.app](_autosummary/qh.app.html.md): Build a FastAPI application from plain Python functions.
+- [qh.async_endpoints](_autosummary/qh.async_endpoints.html.md): Helper functions to create task management endpoints.
+- [qh.async_tasks](_autosummary/qh.async_tasks.html.md): Async task processing for qh.
+- [qh.au_integration](_autosummary/qh.au_integration.html.md): Integration layer between qh and au.
+- [qh.base](_autosummary/qh.base.html.md): Config-free dispatch of Python callables as FastAPI routes, plus a store dispatcher.
+- [qh.client](_autosummary/qh.client.html.md): Python client generation from OpenAPI specs.
+- [qh.config](_autosummary/qh.config.html.md): Configuration system for qh with layered defaults.
+- [qh.conventions](_autosummary/qh.conventions.html.md): Convention-based routing for qh.
+- [qh.core](_autosummary/qh.core.html.md): Minimal function-to-route dispatch built on `i2.wrapper.Wrap`.
+- [qh.endpoint](_autosummary/qh.endpoint.html.md): Endpoint creation using i2.Wrap to transform functions into FastAPI routes.
+- [qh.jsclient](_autosummary/qh.jsclient.html.md): JavaScript and TypeScript client generation from OpenAPI specs.
+- [qh.openapi](_autosummary/qh.openapi.html.md): OpenAPI generation for qh — including JSON Schema derived from Python type hints.
+- [qh.rules](_autosummary/qh.rules.html.md): Transformation rule system for qh.
+- [qh.stores_qh](_autosummary/qh.stores_qh.html.md): FastAPI service for operating on stores objects.
+- [qh.testing](_autosummary/qh.testing.html.md): Run a qh (or any FastAPI) app for a test: in-process, or on a real port.
+- [qh.types](_autosummary/qh.types.html.md): Type registry for qh - automatic serialization/deserialization for custom types.
+- [About this build](about-this-build.html.md): This documentation was built on **2026-09-15 12:16 UTC** from commit <a href="https://github.com/i2m...
+
+---
+
+For more comprehensive documentation, see [qh.md](qh.md)
+
+## Build
+
+- [build_info.json](build_info.json): build provenance (commit, version, tool versions, whether the docs match the package)

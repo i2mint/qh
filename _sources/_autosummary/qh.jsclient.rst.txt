@@ -1,0 +1,17 @@
+qh.jsclient
+===========
+
+.. automodule:: qh.jsclient
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      export_js_client
+      export_ts_client
+      generate_js_function
+      generate_ts_function
+      generate_ts_interface
+      python_type_to_ts_type
+   

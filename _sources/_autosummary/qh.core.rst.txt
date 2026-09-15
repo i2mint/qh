@@ -1,0 +1,16 @@
+qh.core
+=======
+
+.. automodule:: qh.core
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      default_input_mapper
+      default_output_mapper
+      get_config_for_func
+      mk_fastapi_app
+      mk_wrapped_func
+   

@@ -1,270 +1,779 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
+
+<html :class="{ 'dark' : darkMode === true }" data-content_root="./" lang="en" x-data="{ darkMode: $persist(window.matchMedia('(prefers-color-scheme: dark)').matches), activeSection: ''}">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<script>
+    (function () {
+      // Set initial color scheme
+      if ((localStorage.getItem("_x_darkMode") === "true") || (window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        document.documentElement.classList.add("dark");
+      }
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to qh’s documentation! &mdash; qh 0.0.16 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
-      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
-
-  
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=c7cdf6fe"></script>
-      <script src="_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
-      <script src="_static/toggleprompt.js?v=d7ede5d2"></script>
-      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
-      <script src="_static/copybutton.js?v=f281be69"></script>
-    <script src="_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="qh" href="module_docs/qh.html" /> 
-</head>
-
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-
-          
-          
-          <a href="#" class="icon icon-home">
-            qh
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh.html">qh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/app.html">qh.app</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/async_endpoints.html">qh.async_endpoints</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/async_tasks.html">qh.async_tasks</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/au_integration.html">qh.au_integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/base.html">qh.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/client.html">qh.client</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/config.html">qh.config</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/conventions.html">qh.conventions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/core.html">qh.core</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/endpoint.html">qh.endpoint</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/examples/async_example.html">qh.examples.async_example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/examples/simple.html">qh.examples.simple</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/jsclient.html">qh.jsclient</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/openapi.html">qh.openapi</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/rules.html">qh.rules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/scrap.html">qh.scrap</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/scrap/simple_fastapi_dispatch.html">qh.scrap.simple_fastapi_dispatch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/scrap/store_dispatch_1.html">qh.scrap.store_dispatch_1</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/scrap/store_dispatch_2.html">qh.scrap.store_dispatch_2</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/scrap/test_store_dispatch.html">qh.scrap.test_store_dispatch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/stores_qh.html">qh.stores_qh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/testing.html">qh.testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/types.html">qh.types</a></li>
-</ul>
-
-        </div>
-      </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">qh</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Welcome to qh’s documentation!</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
-  <section id="welcome-to-qh-s-documentation">
-<h1>Welcome to qh’s documentation!<a class="headerlink" href="#welcome-to-qh-s-documentation" title="Link to this heading"></a></h1>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh.html">qh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/app.html">qh.app</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/app.html#qh.app.create_app"><code class="docutils literal notranslate"><span class="pre">create_app()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/app.html#qh.app.inspect_routes"><code class="docutils literal notranslate"><span class="pre">inspect_routes()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/app.html#qh.app.make_app"><code class="docutils literal notranslate"><span class="pre">make_app()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/app.html#qh.app.mk_app"><code class="docutils literal notranslate"><span class="pre">mk_app()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/app.html#qh.app.print_routes"><code class="docutils literal notranslate"><span class="pre">print_routes()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/async_endpoints.html">qh.async_endpoints</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/async_tasks.html">qh.async_tasks</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/async_tasks.html#qh.async_tasks.InMemoryTaskStore"><code class="docutils literal notranslate"><span class="pre">InMemoryTaskStore</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/async_tasks.html#qh.async_tasks.ProcessPoolTaskExecutor"><code class="docutils literal notranslate"><span class="pre">ProcessPoolTaskExecutor</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/async_tasks.html#qh.async_tasks.TaskConfig"><code class="docutils literal notranslate"><span class="pre">TaskConfig</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/async_tasks.html#qh.async_tasks.TaskExecutor"><code class="docutils literal notranslate"><span class="pre">TaskExecutor</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/async_tasks.html#qh.async_tasks.TaskInfo"><code class="docutils literal notranslate"><span class="pre">TaskInfo</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/async_tasks.html#qh.async_tasks.TaskManager"><code class="docutils literal notranslate"><span class="pre">TaskManager</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/async_tasks.html#qh.async_tasks.TaskStatus"><code class="docutils literal notranslate"><span class="pre">TaskStatus</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/async_tasks.html#qh.async_tasks.TaskStore"><code class="docutils literal notranslate"><span class="pre">TaskStore</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/async_tasks.html#qh.async_tasks.ThreadPoolTaskExecutor"><code class="docutils literal notranslate"><span class="pre">ThreadPoolTaskExecutor</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/async_tasks.html#qh.async_tasks.get_task_manager"><code class="docutils literal notranslate"><span class="pre">get_task_manager()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/async_tasks.html#qh.async_tasks.should_run_async"><code class="docutils literal notranslate"><span class="pre">should_run_async()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/au_integration.html">qh.au_integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/base.html">qh.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/client.html">qh.client</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/client.html#qh.client.HttpClient"><code class="docutils literal notranslate"><span class="pre">HttpClient</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/client.html#qh.client.mk_client_from_app"><code class="docutils literal notranslate"><span class="pre">mk_client_from_app()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/client.html#qh.client.mk_client_from_openapi"><code class="docutils literal notranslate"><span class="pre">mk_client_from_openapi()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/client.html#qh.client.mk_client_from_url"><code class="docutils literal notranslate"><span class="pre">mk_client_from_url()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/config.html">qh.config</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/config.html#qh.config.AppConfig"><code class="docutils literal notranslate"><span class="pre">AppConfig</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/config.html#qh.config.ConfigBuilder"><code class="docutils literal notranslate"><span class="pre">ConfigBuilder</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/config.html#qh.config.FunctionConfigBuilder"><code class="docutils literal notranslate"><span class="pre">FunctionConfigBuilder</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/config.html#qh.config.RouteConfig"><code class="docutils literal notranslate"><span class="pre">RouteConfig</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/config.html#qh.config.from_dict"><code class="docutils literal notranslate"><span class="pre">from_dict()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/config.html#qh.config.normalize_funcs_input"><code class="docutils literal notranslate"><span class="pre">normalize_funcs_input()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/config.html#qh.config.resolve_route_config"><code class="docutils literal notranslate"><span class="pre">resolve_route_config()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/conventions.html">qh.conventions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/conventions.html#qh.conventions.ParsedFunctionName"><code class="docutils literal notranslate"><span class="pre">ParsedFunctionName</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/conventions.html#qh.conventions.apply_conventions_to_funcs"><code class="docutils literal notranslate"><span class="pre">apply_conventions_to_funcs()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/conventions.html#qh.conventions.get_id_params"><code class="docutils literal notranslate"><span class="pre">get_id_params()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/conventions.html#qh.conventions.infer_http_method"><code class="docutils literal notranslate"><span class="pre">infer_http_method()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/conventions.html#qh.conventions.infer_path_from_function"><code class="docutils literal notranslate"><span class="pre">infer_path_from_function()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/conventions.html#qh.conventions.infer_route_config"><code class="docutils literal notranslate"><span class="pre">infer_route_config()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/conventions.html#qh.conventions.merge_convention_config"><code class="docutils literal notranslate"><span class="pre">merge_convention_config()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/conventions.html#qh.conventions.parse_function_name"><code class="docutils literal notranslate"><span class="pre">parse_function_name()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/conventions.html#qh.conventions.pluralize"><code class="docutils literal notranslate"><span class="pre">pluralize()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/conventions.html#qh.conventions.singularize"><code class="docutils literal notranslate"><span class="pre">singularize()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/core.html">qh.core</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/endpoint.html">qh.endpoint</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/endpoint.html#qh.endpoint.apply_egress_transform"><code class="docutils literal notranslate"><span class="pre">apply_egress_transform()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/endpoint.html#qh.endpoint.apply_ingress_transforms"><code class="docutils literal notranslate"><span class="pre">apply_ingress_transforms()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/endpoint.html#qh.endpoint.extract_http_params"><code class="docutils literal notranslate"><span class="pre">extract_http_params()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/endpoint.html#qh.endpoint.make_endpoint"><code class="docutils literal notranslate"><span class="pre">make_endpoint()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/endpoint.html#qh.endpoint.validate_route_config"><code class="docutils literal notranslate"><span class="pre">validate_route_config()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/examples/async_example.html">qh.examples.async_example</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/examples/simple.html">qh.examples.simple</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/jsclient.html">qh.jsclient</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/jsclient.html#qh.jsclient.export_js_client"><code class="docutils literal notranslate"><span class="pre">export_js_client()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/jsclient.html#qh.jsclient.export_ts_client"><code class="docutils literal notranslate"><span class="pre">export_ts_client()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/jsclient.html#qh.jsclient.generate_js_function"><code class="docutils literal notranslate"><span class="pre">generate_js_function()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/jsclient.html#qh.jsclient.generate_ts_function"><code class="docutils literal notranslate"><span class="pre">generate_ts_function()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/jsclient.html#qh.jsclient.generate_ts_interface"><code class="docutils literal notranslate"><span class="pre">generate_ts_interface()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/jsclient.html#qh.jsclient.python_type_to_ts_type"><code class="docutils literal notranslate"><span class="pre">python_type_to_ts_type()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/openapi.html">qh.openapi</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/openapi.html#qh.openapi.build_parameters"><code class="docutils literal notranslate"><span class="pre">build_parameters()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/openapi.html#qh.openapi.build_request_body_schema"><code class="docutils literal notranslate"><span class="pre">build_request_body_schema()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/openapi.html#qh.openapi.build_response_schema"><code class="docutils literal notranslate"><span class="pre">build_response_schema()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/openapi.html#qh.openapi.enhance_openapi_schema"><code class="docutils literal notranslate"><span class="pre">enhance_openapi_schema()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/openapi.html#qh.openapi.export_openapi"><code class="docutils literal notranslate"><span class="pre">export_openapi()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/openapi.html#qh.openapi.extract_function_signature"><code class="docutils literal notranslate"><span class="pre">extract_function_signature()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/openapi.html#qh.openapi.generate_examples_for_function"><code class="docutils literal notranslate"><span class="pre">generate_examples_for_function()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/openapi.html#qh.openapi.get_python_type_name"><code class="docutils literal notranslate"><span class="pre">get_python_type_name()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/openapi.html#qh.openapi.install_enhanced_openapi"><code class="docutils literal notranslate"><span class="pre">install_enhanced_openapi()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/openapi.html#qh.openapi.python_type_to_json_schema"><code class="docutils literal notranslate"><span class="pre">python_type_to_json_schema()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/rules.html">qh.rules</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/rules.html#qh.rules.CompositeRule"><code class="docutils literal notranslate"><span class="pre">CompositeRule</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/rules.html#qh.rules.DefaultValueRule"><code class="docutils literal notranslate"><span class="pre">DefaultValueRule</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/rules.html#qh.rules.FuncNameRule"><code class="docutils literal notranslate"><span class="pre">FuncNameRule</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/rules.html#qh.rules.FuncRule"><code class="docutils literal notranslate"><span class="pre">FuncRule</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/rules.html#qh.rules.HttpLocation"><code class="docutils literal notranslate"><span class="pre">HttpLocation</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/rules.html#qh.rules.NameRule"><code class="docutils literal notranslate"><span class="pre">NameRule</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/rules.html#qh.rules.Rule"><code class="docutils literal notranslate"><span class="pre">Rule</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/rules.html#qh.rules.RuleChain"><code class="docutils literal notranslate"><span class="pre">RuleChain</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/rules.html#qh.rules.TransformSpec"><code class="docutils literal notranslate"><span class="pre">TransformSpec</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/rules.html#qh.rules.TypeRule"><code class="docutils literal notranslate"><span class="pre">TypeRule</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/rules.html#qh.rules.extract_param_context"><code class="docutils literal notranslate"><span class="pre">extract_param_context()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/rules.html#qh.rules.resolve_transform"><code class="docutils literal notranslate"><span class="pre">resolve_transform()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/scrap.html">qh.scrap</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/scrap/simple_fastapi_dispatch.html">qh.scrap.simple_fastapi_dispatch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/scrap/store_dispatch_1.html">qh.scrap.store_dispatch_1</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/scrap/store_dispatch_2.html">qh.scrap.store_dispatch_2</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/scrap/test_store_dispatch.html">qh.scrap.test_store_dispatch</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/stores_qh.html">qh.stores_qh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/testing.html">qh.testing</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/qh/types.html">qh.types</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/types.html#qh.types.TypeHandler"><code class="docutils literal notranslate"><span class="pre">TypeHandler</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/types.html#qh.types.TypeRegistry"><code class="docutils literal notranslate"><span class="pre">TypeRegistry</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/types.html#qh.types.get_transform_spec_for_type"><code class="docutils literal notranslate"><span class="pre">get_transform_spec_for_type()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/types.html#qh.types.get_type_handler"><code class="docutils literal notranslate"><span class="pre">get_type_handler()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/types.html#qh.types.register_json_type"><code class="docutils literal notranslate"><span class="pre">register_json_type()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/qh/types.html#qh.types.register_type"><code class="docutils literal notranslate"><span class="pre">register_type()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</div>
-</section>
-<section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
-</ul>
-<p>Release: 0.0.16</p>
-<p>Last change: May 27, 2026</p>
-</section>
-
-
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="module_docs/qh.html" class="btn btn-neutral float-right" title="qh" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright NO COPYRIGHT.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
-      </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
+      // Watch for media preference changes
+      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (event) => {
+        localStorage.setItem("_x_darkMode", event.matches);
+        document.documentElement.classList.toggle("dark", event.matches);
       });
-  </script> 
+    })();
+  </script>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta charset="utf-8"/>
+<meta content="#ffffff" media="(prefers-color-scheme: light)" name="theme-color"/>
+<meta content="#030711" media="(prefers-color-scheme: dark)" name="theme-color"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<link href="index.html.md" rel="alternate" type="text/markdown"/>
+<link href="llms.txt" rel="describedby" type="text/markdown"/>
+<title>qh</title>
+<meta content="qh" property="og:title"/>
+<meta content="qh" name="twitter:title"/>
+<link href="_static/pygments.css?v=d75fae25" rel="stylesheet" type="text/css"/>
+<link href="_static/theme.css?v=d6d7c91b" rel="stylesheet" type="text/css"/>
+<link href="_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
+<link href="_static/epythet.css?v=4eca2ba3" rel="stylesheet" type="text/css"/>
+<link href="search.html" rel="search" title="Search"/>
+<link href="genindex.html" rel="index" title="Index"/>
+<link href="api.html" rel="next" title="API reference"/>
+</head>
+<body :class="{ 'overflow-hidden': showSidebar }" class="min-h-screen font-sans antialiased bg-background text-foreground" x-data="{ showSidebar: false, showScrollTop: false }">
+<div @click.self="showSidebar = false" class="fixed inset-0 z-50 overflow-hidden bg-background/80 backdrop-blur-sm md:hidden" x-cloak="" x-show="showSidebar"></div><div class="relative flex flex-col min-h-screen" id="page"><a class="absolute top-0 left-0 z-[100] block bg-background p-4 text-xl transition -translate-x-full opacity-0 focus:translate-x-0 focus:opacity-100" href="#content">
+      Skip to content
+    </a><header class="sticky top-0 z-40 w-full border-b shadow-xs border-border bg-background/90 backdrop-blur"><div class="container flex items-center h-14">
+<div class="hidden mr-4 md:flex">
+<a class="flex items-center mr-6" href="#"><span class="hidden font-bold sm:inline-block text-clip whitespace-nowrap">qh</span>
+</a><nav class="flex items-center gap-6 text-sm font-medium">
+<a class="transition-colors hover:text-foreground/80 text-foreground/60" href="https://github.com/i2mint/qh" rel="noopener nofollow">GitHub</a>
+</nav></div><button @click="showSidebar = true" class="inline-flex items-center justify-center h-10 px-0 py-2 mr-2 text-base font-medium transition-colors rounded-md hover:text-accent-foreground hover:bg-transparent md:hidden" type="button">
+<svg aria-hidden="true" fill="currentColor" height="24" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M152.587 825.087q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440Zm0-203.587q-19.152 0-32.326-13.174T107.087 576q0-19.152 13.174-32.326t32.326-13.174h320q19.152 0 32.326 13.174T518.087 576q0 19.152-13.174 32.326T472.587 621.5h-320Zm0-203.587q-19.152 0-32.326-13.174t-13.174-32.326q0-19.152 13.174-32.326t32.326-13.174h440q19.152 0 32.326 13.174t13.174 32.326q0 19.152-13.174 32.326t-32.326 13.174h-440ZM708.913 576l112.174 112.174q12.674 12.674 12.674 31.826t-12.674 31.826Q808.413 764.5 789.261 764.5t-31.826-12.674l-144-144Q600 594.391 600 576t13.435-31.826l144-144q12.674-12.674 31.826-12.674t31.826 12.674q12.674 12.674 12.674 31.826t-12.674 31.826L708.913 576Z"></path>
+</svg>
+<span class="sr-only">Toggle navigation menu</span>
+</button>
+<div class="flex items-center justify-between flex-1 gap-2 sm:gap-4 md:justify-end">
+<div class="flex-1 w-full md:w-auto md:flex-none"><form @keydown.k.window.meta="$refs.search.focus()" action="search.html" class="relative flex items-center group" id="searchbox" method="get">
+<input aria-label="Search the docs" class="inline-flex items-center font-medium transition-colors bg-transparent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background border border-input hover:bg-accent focus:bg-accent hover:text-accent-foreground focus:text-accent-foreground hover:placeholder-accent-foreground py-2 px-4 relative h-9 w-full justify-start rounded-[0.5rem] text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64" id="search-input" name="q" placeholder="Search ..." type="search" x-ref="search"/>
+<kbd class="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none text-muted-foreground items-center gap-1 rounded border border-border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex group-hover:bg-accent group-hover:text-accent-foreground">
+<span class="text-xs">⌘</span>
+    K
+  </kbd>
+</form>
+</div>
+<nav class="flex items-center gap-1">
+<button @click="darkMode = !darkMode" class="relative inline-flex items-center justify-center px-0 text-sm font-medium transition-colors rounded-md hover:bg-accent hover:text-accent-foreground h-9 w-9" title="Toggle color scheme" type="button">
+<svg class="absolute transition-all scale-100 rotate-0 dark:-rotate-90 dark:scale-0" fill="currentColor" height="16" viewbox="0 96 960 960" width="16" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 685q45.456 0 77.228-31.772Q589 621.456 589 576q0-45.456-31.772-77.228Q525.456 467 480 467q-45.456 0-77.228 31.772Q371 530.544 371 576q0 45.456 31.772 77.228Q434.544 685 480 685Zm0 91q-83 0-141.5-58.5T280 576q0-83 58.5-141.5T480 376q83 0 141.5 58.5T680 576q0 83-58.5 141.5T480 776ZM80 621.5q-19.152 0-32.326-13.174T34.5 576q0-19.152 13.174-32.326T80 530.5h80q19.152 0 32.326 13.174T205.5 576q0 19.152-13.174 32.326T160 621.5H80Zm720 0q-19.152 0-32.326-13.174T754.5 576q0-19.152 13.174-32.326T800 530.5h80q19.152 0 32.326 13.174T925.5 576q0 19.152-13.174 32.326T880 621.5h-80Zm-320-320q-19.152 0-32.326-13.174T434.5 256v-80q0-19.152 13.174-32.326T480 130.5q19.152 0 32.326 13.174T525.5 176v80q0 19.152-13.174 32.326T480 301.5Zm0 720q-19.152 0-32.326-13.17Q434.5 995.152 434.5 976v-80q0-19.152 13.174-32.326T480 850.5q19.152 0 32.326 13.174T525.5 896v80q0 19.152-13.174 32.33-13.174 13.17-32.326 13.17ZM222.174 382.065l-43-42Q165.5 327.391 166 308.239t13.174-33.065q13.435-13.674 32.587-13.674t32.065 13.674l42.239 43q12.674 13.435 12.555 31.706-.12 18.272-12.555 31.946-12.674 13.674-31.445 13.413-18.772-.261-32.446-13.174Zm494 494.761-42.239-43q-12.674-13.435-12.674-32.087t12.674-31.565Q686.609 756.5 705.38 757q18.772.5 32.446 13.174l43 41.761Q794.5 824.609 794 843.761t-13.174 33.065Q767.391 890.5 748.239 890.5t-32.065-13.674Zm-42-494.761Q660.5 369.391 661 350.62q.5-18.772 13.174-32.446l41.761-43Q728.609 261.5 747.761 262t33.065 13.174q13.674 13.435 13.674 32.587t-13.674 32.065l-43 42.239q-13.435 12.674-31.706 12.555-18.272-.12-31.946-12.555Zm-495 494.761Q165.5 863.391 165.5 844.239t13.674-32.065l43-42.239q13.435-12.674 32.087-12.674t31.565 12.674Q299.5 782.609 299 801.38q-.5 18.772-13.174 32.446l-41.761 43Q231.391 890.5 212.239 890t-33.065-13.174ZM480 576Z"></path>
+</svg>
+<svg class="absolute transition-all scale-0 rotate-90 dark:rotate-0 dark:scale-100" fill="currentColor" height="16" viewbox="0 96 960 960" width="16" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 936q-151 0-255.5-104.5T120 576q0-138 90-239.5T440 218q25-3 39 18t-1 44q-17 26-25.5 55t-8.5 61q0 90 63 153t153 63q31 0 61.5-9t54.5-25q21-14 43-1.5t19 39.5q-14 138-117.5 229T480 936Zm0-80q88 0 158-48.5T740 681q-20 5-40 8t-40 3q-123 0-209.5-86.5T364 396q0-20 3-40t8-40q-78 32-126.5 102T200 576q0 116 82 198t198 82Zm-10-270Z"></path>
+</svg>
+</button>
+</nav>
+</div>
+</div>
+</header>
+<div class="flex-1"><div class="container md:grid md:grid-cols-[220px_minmax(0,1fr)] md:gap-6 lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10"><aside :aria-hidden="!showSidebar" :class="{ 'translate-x-0': showSidebar }" class="fixed inset-y-0 left-0 md:top-14 z-50 md:z-30 bg-background md:bg-transparent transition-all duration-100 -translate-x-full md:translate-x-0 ml-0 p-6 md:p-0 md:-ml-2 md:h-[calc(100vh-3.5rem)] w-5/6 md:w-full overflow-y-auto border-r border-border md:sticky" id="left-sidebar">
+<a class="justify-start text-sm md:!hidden bg-background" href="#"><span class="font-bold text-clip whitespace-nowrap">qh</span>
+</a>
+<div class="relative overflow-hidden md:overflow-auto my-4 md:my-0">
+<div class="overflow-y-auto h-full w-full relative pr-6"><nav class="flex md:hidden flex-col font-medium mt-4">
+<a href="https://github.com/i2mint/qh" rel="nofollow noopener">GitHub</a>
+</nav><nav class="table w-full min-w-full my-6 lg:my-8">
+<ul>
+<li class="toctree-l1" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="api.html">API reference<button @click.prevent.stop="expanded = !expanded" type="button" x-cloak=""><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-cloak="" x-show="expanded">
+<li class="toctree-l2" x-data="{ expanded: $el.classList.contains('current') ? true : false }"><a :class="{ 'expanded' : expanded }" @click="expanded = !expanded" class="reference internal expandable" href="_autosummary/qh.html">qh<button @click.prevent.stop="expanded = !expanded" type="button" x-cloak=""><span class="sr-only"></span><svg fill="currentColor" height="18px" stroke="none" viewbox="0 0 24 24" width="18px" xmlns="http://www.w3.org/2000/svg"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg></button></a><ul x-cloak="" x-show="expanded">
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.app.html">qh.app</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.async_endpoints.html">qh.async_endpoints</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.async_tasks.html">qh.async_tasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.au_integration.html">qh.au_integration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.base.html">qh.base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.client.html">qh.client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.config.html">qh.config</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.conventions.html">qh.conventions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.core.html">qh.core</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.endpoint.html">qh.endpoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.jsclient.html">qh.jsclient</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.openapi.html">qh.openapi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.rules.html">qh.rules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.stores_qh.html">qh.stores_qh</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.testing.html">qh.testing</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.types.html">qh.types</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+<button @click="showSidebar = false" class="absolute md:hidden right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100" type="button">
+<svg class="h-4 w-4" fill="currentColor" height="24" stroke="none" viewbox="0 96 960 960" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M480 632 284 828q-11 11-28 11t-28-11q-11-11-11-28t11-28l196-196-196-196q-11-11-11-28t11-28q11-11 28-11t28 11l196 196 196-196q11-11 28-11t28 11q11 11 11 28t-11 28L536 576l196 196q11 11 11 28t-11 28q-11 11-28 11t-28-11L480 632Z"></path>
+</svg>
+</button>
+</aside>
+<main class="relative py-6 lg:gap-10 lg:py-8 xl:grid xl:grid-cols-[1fr_300px]">
+<div class="w-full min-w-0 mx-auto">
+<div id="content" role="main">
 
+<section id="qh">
+<h1>qh<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh">¶</a></h1>
+<p><strong>Quick HTTP web-service construction</strong> - From Python functions to production-ready HTTP services, with minimal boilerplate.</p>
+<p><code class="docutils literal notranslate"><span class="pre">qh</span></code> (pronounced “quick”) is a convention-over-configuration framework for exposing Python functions as HTTP services. Built on FastAPI, it provides a delightfully simple API while giving you escape hatches for advanced use cases.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">pip<span class="w"> </span>install<span class="w"> </span>qh
+</span></code></pre></div>
+</div>
+
+<section id="for-ai-agents">
+<h2>For AI agents<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#for-ai-agents" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#for-ai-agents'">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">qh</span></code> publishes its documentation in forms made for coding agents. If you are one, start here.</p>
+<p><strong>The documentation, machine-readable</strong>: <a class="reference external" href="https://i2mint.github.io/qh/llms.txt" rel="nofollow noopener"><code class="docutils literal notranslate"><span class="pre">llms.txt</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> indexes every page; <a class="reference external" href="https://i2mint.github.io/qh/qh.md" rel="nofollow noopener"><code class="docutils literal notranslate"><span class="pre">qh.md</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> is the whole documentation in one file; every page has a <code class="docutils literal notranslate"><span class="pre">.md</span></code> twin; <a class="reference external" href="https://i2mint.github.io/qh/objects.inv" rel="nofollow noopener"><code class="docutils literal notranslate"><span class="pre">objects.inv</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> maps symbols to URLs.</p>
+<p>If you can’t let go of the old ways, the rest of this README is written for you, starting at <a class="reference internal" href="#quickstart-from-function-to-api-in-3-lines">Quickstart: From Function to API in 3 Lines</a>.</p>
+
+</section>
+<section id="quickstart-from-function-to-api-in-3-lines">
+<h2>Quickstart: From Function to API in 3 Lines<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#quickstart-from-function-to-api-in-3-lines" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#quickstart-from-function-to-api-in-3-lines'">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-4">    <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+</span><span id="line-5">
+</span><span id="line-6"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">([</span><span class="n">add</span><span class="p">])</span>
+</span></code></pre></div>
+</div>
+<p>That’s it! You now have a FastAPI app with:</p>
+<ul class="simple">
+<li><p>✅ Automatic request/response handling</p></li>
+<li><p>✅ Type validation from your annotations</p></li>
+<li><p>✅ OpenAPI documentation at <code class="docutils literal notranslate"><span class="pre">/docs</span></code></p></li>
+<li><p>✅ Multiple input formats (JSON body, query params, etc.)</p></li>
+</ul>
+<p>Run it:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">uvicorn<span class="w"> </span>your_module:app
+</span></code></pre></div>
+</div>
+<p>Or test it:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh.testing</span><span class="w"> </span><span class="kn">import</span> <span class="n">test_app</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="k">with</span> <span class="n">test_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+</span><span id="line-4">    <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/add"</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">"x"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+</span><span id="line-5">    <span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>  <span class="c1"># 8</span>
+</span></code></pre></div>
+</div>
+</section>
+<section id="what-you-can-do-from-here">
+<h2>What You Can Do From Here<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#what-you-can-do-from-here" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#what-you-can-do-from-here'">¶</a></h2>
+<section id="async-task-processing-new-in-v0-5-0">
+<h3>🚀 Async Task Processing (NEW in v0.5.0)<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#async-task-processing-new-in-v0-5-0" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#async-task-processing-new-in-v0-5-0'">¶</a></h3>
+<p>Handle long-running operations without blocking:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="k">def</span><span class="w"> </span><span class="nf">expensive_computation</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-4">    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># Simulate heavy processing</span>
+</span><span id="line-5">    <span class="k">return</span> <span class="n">n</span> <span class="o">*</span> <span class="mi">2</span>
+</span><span id="line-6">
+</span><span id="line-7"><span class="c1"># Enable async support</span>
+</span><span id="line-8"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">(</span>
+</span><span id="line-9">    <span class="p">[</span><span class="n">expensive_computation</span><span class="p">],</span>
+</span><span id="line-10">    <span class="n">async_funcs</span><span class="o">=</span><span class="p">[</span><span class="s1">'expensive_computation'</span><span class="p">]</span>
+</span><span id="line-11"><span class="p">)</span>
+</span></code></pre></div>
+</div>
+<p>Now clients can choose sync or async execution:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="c1"># Synchronous (blocks for 5 seconds)</span>
+</span><span id="line-2"><span class="n">POST</span> <span class="o">/</span><span class="n">expensive_computation</span><span class="err">?</span><span class="n">n</span><span class="o">=</span><span class="mi">10</span>
+</span><span id="line-3"><span class="err">→</span> <span class="mi">20</span>
+</span><span id="line-4">
+</span><span id="line-5"><span class="c1"># Asynchronous (returns immediately)</span>
+</span><span id="line-6"><span class="n">POST</span> <span class="o">/</span><span class="n">expensive_computation</span><span class="err">?</span><span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="o">&amp;</span><span class="k">async</span><span class="o">=</span><span class="n">true</span>
+</span><span id="line-7"><span class="err">→</span> <span class="p">{</span><span class="s2">"task_id"</span><span class="p">:</span> <span class="s2">"abc-123"</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"submitted"</span><span class="p">}</span>
+</span><span id="line-8">
+</span><span id="line-9"><span class="c1"># Check status</span>
+</span><span id="line-10"><span class="n">GET</span> <span class="o">/</span><span class="n">tasks</span><span class="o">/</span><span class="n">abc</span><span class="o">-</span><span class="mi">123</span><span class="o">/</span><span class="n">status</span>
+</span><span id="line-11"><span class="err">→</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"running"</span><span class="p">,</span> <span class="s2">"started_at"</span><span class="p">:</span> <span class="mi">1234567890</span><span class="p">}</span>
+</span><span id="line-12">
+</span><span id="line-13"><span class="c1"># Get result (blocks until ready, or returns immediately if done)</span>
+</span><span id="line-14"><span class="n">GET</span> <span class="o">/</span><span class="n">tasks</span><span class="o">/</span><span class="n">abc</span><span class="o">-</span><span class="mi">123</span><span class="o">/</span><span class="n">result</span><span class="err">?</span><span class="n">wait</span><span class="o">=</span><span class="n">true</span><span class="o">&amp;</span><span class="n">timeout</span><span class="o">=</span><span class="mi">10</span>
+</span><span id="line-15"><span class="err">→</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"completed"</span><span class="p">,</span> <span class="s2">"result"</span><span class="p">:</span> <span class="mi">20</span><span class="p">}</span>
+</span></code></pre></div>
+</div>
+<p><strong>Advanced async configuration:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span><span class="p">,</span> <span class="n">TaskConfig</span><span class="p">,</span> <span class="n">ProcessPoolTaskExecutor</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">(</span>
+</span><span id="line-4">    <span class="p">[</span><span class="n">cpu_bound_func</span><span class="p">,</span> <span class="n">io_bound_func</span><span class="p">],</span>
+</span><span id="line-5">    <span class="n">async_funcs</span><span class="o">=</span><span class="p">[</span><span class="s1">'cpu_bound_func'</span><span class="p">,</span> <span class="s1">'io_bound_func'</span><span class="p">],</span>
+</span><span id="line-6">    <span class="n">async_config</span><span class="o">=</span><span class="p">{</span>
+</span><span id="line-7">        <span class="s1">'cpu_bound_func'</span><span class="p">:</span> <span class="n">TaskConfig</span><span class="p">(</span>
+</span><span id="line-8">            <span class="n">executor</span><span class="o">=</span><span class="n">ProcessPoolTaskExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span>  <span class="c1"># Use processes for CPU-bound</span>
+</span><span id="line-9">            <span class="n">ttl</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>  <span class="c1"># Keep results for 1 hour</span>
+</span><span id="line-10">        <span class="p">),</span>
+</span><span id="line-11">        <span class="s1">'io_bound_func'</span><span class="p">:</span> <span class="n">TaskConfig</span><span class="p">(</span>
+</span><span id="line-12">            <span class="n">async_mode</span><span class="o">=</span><span class="s1">'always'</span><span class="p">,</span>  <span class="c1"># Always async, no query param needed</span>
+</span><span id="line-13">        <span class="p">),</span>
+</span><span id="line-14">    <span class="p">}</span>
+</span><span id="line-15"><span class="p">)</span>
+</span></code></pre></div>
+</div>
+<p>Task management endpoints are automatically created:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/tasks/</span></code> - List all tasks</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/tasks/{id}</span></code> - Get complete task info</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/tasks/{id}/status</span></code> - Get task status</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/tasks/{id}/result</span></code> - Get result (with optional wait)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DELETE</span> <span class="pre">/tasks/{id}</span></code> - Cancel/delete task</p></li>
+</ul>
+</section>
+<section id="convention-based-routing">
+<h3>📝 Convention-Based Routing<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#convention-based-routing" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#convention-based-routing'">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="k">def</span><span class="w"> </span><span class="nf">get_user</span><span class="p">(</span><span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-2">    <span class="k">return</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Alice"</span><span class="p">}</span>
+</span><span id="line-3">
+</span><span id="line-4"><span class="k">def</span><span class="w"> </span><span class="nf">list_users</span><span class="p">():</span>
+</span><span id="line-5">    <span class="k">return</span> <span class="p">[{</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"1"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="s2">"Alice"</span><span class="p">}]</span>
+</span><span id="line-6">
+</span><span id="line-7"><span class="k">def</span><span class="w"> </span><span class="nf">create_user</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="line-8">    <span class="k">return</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="s2">"123"</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">"email"</span><span class="p">:</span> <span class="n">email</span><span class="p">}</span>
+</span><span id="line-9">
+</span><span id="line-10"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">(</span>
+</span><span id="line-11">    <span class="p">[</span><span class="n">get_user</span><span class="p">,</span> <span class="n">list_users</span><span class="p">,</span> <span class="n">create_user</span><span class="p">],</span>
+</span><span id="line-12">    <span class="n">use_conventions</span><span class="o">=</span><span class="kc">True</span>
+</span><span id="line-13"><span class="p">)</span>
+</span></code></pre></div>
+</div>
+<p>This automatically creates RESTful routes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/users/{user_id}</span></code> → <code class="docutils literal notranslate"><span class="pre">get_user(user_id)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/users</span></code> → <code class="docutils literal notranslate"><span class="pre">list_users()</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/users</span></code> → <code class="docutils literal notranslate"><span class="pre">create_user(name,</span> <span class="pre">email)</span></code></p></li>
+</ul>
+</section>
+<section id="explicit-configuration">
+<h3>🎯 Explicit Configuration<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#explicit-configuration" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#explicit-configuration'">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span><span class="p">,</span> <span class="n">RouteConfig</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-4">    <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span>
+</span><span id="line-5">
+</span><span id="line-6"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">({</span>
+</span><span id="line-7">    <span class="n">add</span><span class="p">:</span> <span class="n">RouteConfig</span><span class="p">(</span>
+</span><span id="line-8">        <span class="n">path</span><span class="o">=</span><span class="s2">"/calculate/sum"</span><span class="p">,</span>
+</span><span id="line-9">        <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s2">"GET"</span><span class="p">,</span> <span class="s2">"POST"</span><span class="p">],</span>
+</span><span id="line-10">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"math"</span><span class="p">],</span>
+</span><span id="line-11">        <span class="n">summary</span><span class="o">=</span><span class="s2">"Add two numbers"</span>
+</span><span id="line-12">    <span class="p">)</span>
+</span><span id="line-13"><span class="p">})</span>
+</span></code></pre></div>
+</div>
+<p>Or use dictionaries:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">({</span>
+</span><span id="line-2">    <span class="n">add</span><span class="p">:</span> <span class="p">{</span>
+</span><span id="line-3">        <span class="s2">"path"</span><span class="p">:</span> <span class="s2">"/calculate/sum"</span><span class="p">,</span>
+</span><span id="line-4">        <span class="s2">"methods"</span><span class="p">:</span> <span class="p">[</span><span class="s2">"GET"</span><span class="p">,</span> <span class="s2">"POST"</span><span class="p">],</span>
+</span><span id="line-5">    <span class="p">}</span>
+</span><span id="line-6"><span class="p">})</span>
+</span></code></pre></div>
+</div>
+</section>
+<section id="parameter-transformation">
+<h3>🔄 Parameter Transformation<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#parameter-transformation" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#parameter-transformation'">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="line-2"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span><span class="p">,</span> <span class="n">RouteConfig</span><span class="p">,</span> <span class="n">TransformSpec</span><span class="p">,</span> <span class="n">HttpLocation</span>
+</span><span id="line-3">
+</span><span id="line-4"><span class="k">def</span><span class="w"> </span><span class="nf">add_arrays</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+</span><span id="line-5">    <span class="k">return</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-6">
+</span><span id="line-7"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">({</span>
+</span><span id="line-8">    <span class="n">add_arrays</span><span class="p">:</span> <span class="n">RouteConfig</span><span class="p">(</span>
+</span><span id="line-9">        <span class="n">param_overrides</span><span class="o">=</span><span class="p">{</span>
+</span><span id="line-10">            <span class="s2">"a"</span><span class="p">:</span> <span class="n">TransformSpec</span><span class="p">(</span>
+</span><span id="line-11">                <span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span><span class="p">,</span>
+</span><span id="line-12">                <span class="n">ingress</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span>  <span class="c1"># Convert JSON array to numpy</span>
+</span><span id="line-13">            <span class="p">),</span>
+</span><span id="line-14">            <span class="s2">"b"</span><span class="p">:</span> <span class="n">TransformSpec</span><span class="p">(</span>
+</span><span id="line-15">                <span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">JSON_BODY</span><span class="p">,</span>
+</span><span id="line-16">                <span class="n">ingress</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span>
+</span><span id="line-17">            <span class="p">)</span>
+</span><span id="line-18">        <span class="p">}</span>
+</span><span id="line-19">    <span class="p">)</span>
+</span><span id="line-20"><span class="p">})</span>
+</span></code></pre></div>
+</div>
+<p>Now you can send:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">POST<span class="w"> </span>/add_arrays
+</span><span id="line-2"><span class="o">{</span><span class="s2">"a"</span>:<span class="w"> </span><span class="o">[</span><span class="m">1</span>,2,3<span class="o">]</span>,<span class="w"> </span><span class="s2">"b"</span>:<span class="w"> </span><span class="o">[</span><span class="m">4</span>,5,6<span class="o">]}</span>
+</span><span id="line-3">→<span class="w"> </span><span class="o">[</span><span class="m">5</span>,<span class="w"> </span><span class="m">7</span>,<span class="w"> </span><span class="m">9</span><span class="o">]</span>
+</span></code></pre></div>
+</div>
+</section>
+<section id="openapi-client-generation">
+<h3>🌐 OpenAPI &amp; Client Generation<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#openapi-client-generation" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#openapi-client-generation'">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span><span class="p">,</span> <span class="n">export_openapi</span><span class="p">,</span> <span class="n">mk_client_from_app</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-4">    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!"</span>
+</span><span id="line-5">
+</span><span id="line-6"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">([</span><span class="n">greet</span><span class="p">])</span>
+</span><span id="line-7">
+</span><span id="line-8"><span class="c1"># Export OpenAPI spec</span>
+</span><span id="line-9"><span class="n">export_openapi</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="s2">"api.json"</span><span class="p">)</span>
+</span><span id="line-10">
+</span><span id="line-11"><span class="c1"># Generate Python client</span>
+</span><span id="line-12"><span class="n">client</span> <span class="o">=</span> <span class="n">mk_client_from_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+</span><span id="line-13"><span class="n">result</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">greet</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">"World"</span><span class="p">)</span>  <span class="c1"># "Hello, World!"</span>
+</span><span id="line-14">
+</span><span id="line-15"><span class="c1"># Generate TypeScript client</span>
+</span><span id="line-16"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">export_ts_client</span>
+</span><span id="line-17"><span class="n">export_ts_client</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="s2">"client.ts"</span><span class="p">)</span>
+</span></code></pre></div>
+</div>
+</section>
+<section id="custom-types">
+<h3>🎨 Custom Types<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#custom-types" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#custom-types'">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">register_type</span>
+</span><span id="line-2"><span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+</span><span id="line-3">
+</span><span id="line-4"><span class="k">def</span><span class="w"> </span><span class="nf">custom_serializer</span><span class="p">(</span><span class="n">dt</span><span class="p">:</span> <span class="n">datetime</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-5">    <span class="k">return</span> <span class="n">dt</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+</span><span id="line-6">
+</span><span id="line-7"><span class="k">def</span><span class="w"> </span><span class="nf">custom_deserializer</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+</span><span id="line-8">    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</span><span id="line-9">
+</span><span id="line-10"><span class="n">register_type</span><span class="p">(</span>
+</span><span id="line-11">    <span class="n">datetime</span><span class="p">,</span>
+</span><span id="line-12">    <span class="n">serialize</span><span class="o">=</span><span class="n">custom_serializer</span><span class="p">,</span>
+</span><span id="line-13">    <span class="n">deserialize</span><span class="o">=</span><span class="n">custom_deserializer</span>
+</span><span id="line-14"><span class="p">)</span>
+</span><span id="line-15">
+</span><span id="line-16"><span class="k">def</span><span class="w"> </span><span class="nf">get_event_time</span><span class="p">(</span><span class="n">event_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
+</span><span id="line-17">    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+</span><span id="line-18">
+</span><span id="line-19"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">([</span><span class="n">get_event_time</span><span class="p">])</span>
+</span></code></pre></div>
+</div>
+</section>
+<section id="global-configuration">
+<h3>⚙️ Global Configuration<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#global-configuration" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#global-configuration'">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span><span class="p">,</span> <span class="n">AppConfig</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">(</span>
+</span><span id="line-4">    <span class="n">funcs</span><span class="o">=</span><span class="p">[</span><span class="n">add</span><span class="p">,</span> <span class="n">multiply</span><span class="p">,</span> <span class="n">divide</span><span class="p">],</span>
+</span><span id="line-5">    <span class="n">config</span><span class="o">=</span><span class="n">AppConfig</span><span class="p">(</span>
+</span><span id="line-6">        <span class="n">path_prefix</span><span class="o">=</span><span class="s2">"/api/v1"</span><span class="p">,</span>
+</span><span id="line-7">        <span class="n">default_methods</span><span class="o">=</span><span class="p">[</span><span class="s2">"POST"</span><span class="p">],</span>
+</span><span id="line-8">        <span class="n">title</span><span class="o">=</span><span class="s2">"Math API"</span><span class="p">,</span>
+</span><span id="line-9">        <span class="n">version</span><span class="o">=</span><span class="s2">"1.0.0"</span><span class="p">,</span>
+</span><span id="line-10">    <span class="p">)</span>
+</span><span id="line-11"><span class="p">)</span>
+</span></code></pre></div>
+</div>
+</section>
+<section id="testing-utilities">
+<h3>🧪 Testing Utilities<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#testing-utilities" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#testing-utilities'">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">test_app</span><span class="p">,</span> <span class="n">serve_app</span><span class="p">,</span> <span class="n">quick_test</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="c1"># Quick inline testing</span>
+</span><span id="line-4"><span class="k">with</span> <span class="n">test_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span> <span class="k">as</span> <span class="n">client</span><span class="p">:</span>
+</span><span id="line-5">    <span class="n">response</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">"/add"</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">"x"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+</span><span id="line-6">    <span class="k">assert</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span> <span class="o">==</span> <span class="mi">8</span>
+</span><span id="line-7">
+</span><span id="line-8"><span class="c1"># Serve for external testing</span>
+</span><span id="line-9"><span class="k">with</span> <span class="n">serve_app</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8001</span><span class="p">)</span> <span class="k">as</span> <span class="n">url</span><span class="p">:</span>
+</span><span id="line-10">    <span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+</span><span id="line-11">    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">/add"</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">"x"</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">"y"</span><span class="p">:</span> <span class="mi">5</span><span class="p">})</span>
+</span><span id="line-12">
+</span><span id="line-13"><span class="c1"># Quick smoke test</span>
+</span><span id="line-14"><span class="n">quick_test</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># Tests all endpoints with example data</span>
+</span></code></pre></div>
+</div>
+</section>
+</section>
+<section id="features">
+<h2>Features<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#features" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#features'">¶</a></h2>
+<section id="built-in">
+<h3>Built-in<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#built-in" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#built-in'">¶</a></h3>
+<ul class="simple">
+<li><p>✅ <strong>Minimal boilerplate</strong> - Define functions, get HTTP service</p></li>
+<li><p>✅ <strong>Type-driven</strong> - Uses Python type hints for validation</p></li>
+<li><p>✅ <strong>FastAPI-powered</strong> - Full async support, high performance</p></li>
+<li><p>✅ <strong>Automatic OpenAPI</strong> - Interactive docs at <code class="docutils literal notranslate"><span class="pre">/docs</span></code></p></li>
+<li><p>✅ <strong>Client generation</strong> - Python, TypeScript, JavaScript clients</p></li>
+<li><p>✅ <strong>Convention over configuration</strong> - RESTful routing from function names</p></li>
+<li><p>✅ <strong>Flexible parameter handling</strong> - JSON, query, path, headers, forms</p></li>
+<li><p>✅ <strong>Custom transformations</strong> - Transform inputs/outputs as needed</p></li>
+<li><p>✅ <strong>Testing utilities</strong> - Built-in test client and helpers</p></li>
+</ul>
+</section>
+<section id="phase-4-new-async-task-processing">
+<h3>Phase 4 (NEW): Async Task Processing<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#phase-4-new-async-task-processing" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#phase-4-new-async-task-processing'">¶</a></h3>
+<ul class="simple">
+<li><p>✅ <strong>Background tasks</strong> - Long-running operations without blocking</p></li>
+<li><p>✅ <strong>Task tracking</strong> - Status monitoring and result retrieval</p></li>
+<li><p>✅ <strong>Flexible execution</strong> - Thread pools, process pools, or custom executors</p></li>
+<li><p>✅ <strong>Client-controlled</strong> - Let users choose sync vs async</p></li>
+<li><p>✅ <strong>Standard HTTP patterns</strong> - Poll for status, wait for results</p></li>
+<li><p>✅ <strong>Task management</strong> - List, query, cancel tasks via HTTP</p></li>
+</ul>
+</section>
+</section>
+<section id="examples">
+<h2>Examples<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#examples" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#examples'">¶</a></h2>
+<section id="simple-crud-api">
+<h3>Simple CRUD API<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#simple-crud-api" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#simple-crud-api'">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span>
+</span><span id="line-2">
+</span><span id="line-3"><span class="c1"># In-memory database</span>
+</span><span id="line-4"><span class="n">users</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="line-5">
+</span><span id="line-6"><span class="k">def</span><span class="w"> </span><span class="nf">create_user</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">email</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="line-7">    <span class="n">user_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">users</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+</span><span id="line-8">    <span class="n">users</span><span class="p">[</span><span class="n">user_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"id"</span><span class="p">:</span> <span class="n">user_id</span><span class="p">,</span> <span class="s2">"name"</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">"email"</span><span class="p">:</span> <span class="n">email</span><span class="p">}</span>
+</span><span id="line-9">    <span class="k">return</span> <span class="n">users</span><span class="p">[</span><span class="n">user_id</span><span class="p">]</span>
+</span><span id="line-10">
+</span><span id="line-11"><span class="k">def</span><span class="w"> </span><span class="nf">get_user</span><span class="p">(</span><span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="line-12">    <span class="k">return</span> <span class="n">users</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-13">
+</span><span id="line-14"><span class="k">def</span><span class="w"> </span><span class="nf">list_users</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+</span><span id="line-15">    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">users</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</span><span id="line-16">
+</span><span id="line-17"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">(</span>
+</span><span id="line-18">    <span class="p">[</span><span class="n">create_user</span><span class="p">,</span> <span class="n">get_user</span><span class="p">,</span> <span class="n">list_users</span><span class="p">],</span>
+</span><span id="line-19">    <span class="n">use_conventions</span><span class="o">=</span><span class="kc">True</span>
+</span><span id="line-20"><span class="p">)</span>
+</span></code></pre></div>
+</div>
+</section>
+<section id="file-processing-with-async">
+<h3>File Processing with Async<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#file-processing-with-async" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#file-processing-with-async'">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span><span class="p">,</span> <span class="n">TaskConfig</span>
+</span><span id="line-2"><span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+</span><span id="line-3">
+</span><span id="line-4"><span class="k">def</span><span class="w"> </span><span class="nf">process_large_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="line-5">    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>  <span class="c1"># Simulate heavy processing</span>
+</span><span id="line-6">    <span class="k">return</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"processed"</span><span class="p">,</span> <span class="s2">"path"</span><span class="p">:</span> <span class="n">file_path</span><span class="p">}</span>
+</span><span id="line-7">
+</span><span id="line-8"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">(</span>
+</span><span id="line-9">    <span class="p">[</span><span class="n">process_large_file</span><span class="p">],</span>
+</span><span id="line-10">    <span class="n">async_funcs</span><span class="o">=</span><span class="p">[</span><span class="s1">'process_large_file'</span><span class="p">],</span>
+</span><span id="line-11">    <span class="n">async_config</span><span class="o">=</span><span class="n">TaskConfig</span><span class="p">(</span>
+</span><span id="line-12">        <span class="n">async_mode</span><span class="o">=</span><span class="s1">'always'</span><span class="p">,</span>  <span class="c1"># Always async</span>
+</span><span id="line-13">        <span class="n">ttl</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>  <span class="c1"># Keep results for 1 hour</span>
+</span><span id="line-14">    <span class="p">)</span>
+</span><span id="line-15"><span class="p">)</span>
+</span><span id="line-16">
+</span><span id="line-17"><span class="c1"># Client usage:</span>
+</span><span id="line-18"><span class="c1"># POST /process_large_file -&gt; Returns task_id immediately</span>
+</span><span id="line-19"><span class="c1"># GET /tasks/{task_id}/result?wait=true -&gt; Blocks until done</span>
+</span></code></pre></div>
+</div>
+</section>
+<section id="mixed-sync-async-api">
+<h3>Mixed Sync/Async API<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#mixed-sync-async-api" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#mixed-sync-async-api'">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="k">def</span><span class="w"> </span><span class="nf">quick_lookup</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-2"><span class="w">    </span><span class="sd">"""Fast operation - always synchronous"""</span>
+</span><span id="line-3">    <span class="k">return</span> <span class="n">cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+</span><span id="line-4">
+</span><span id="line-5"><span class="k">def</span><span class="w"> </span><span class="nf">expensive_aggregation</span><span class="p">(</span><span class="n">days</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="line-6"><span class="w">    </span><span class="sd">"""Slow operation - supports async"""</span>
+</span><span id="line-7">    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">days</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+</span><span id="line-8">    <span class="k">return</span> <span class="p">{</span><span class="s2">"result"</span><span class="p">:</span> <span class="s2">"..."</span><span class="p">}</span>
+</span><span id="line-9">
+</span><span id="line-10"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">(</span>
+</span><span id="line-11">    <span class="p">[</span><span class="n">quick_lookup</span><span class="p">,</span> <span class="n">expensive_aggregation</span><span class="p">],</span>
+</span><span id="line-12">    <span class="n">async_funcs</span><span class="o">=</span><span class="p">[</span><span class="s1">'expensive_aggregation'</span><span class="p">]</span>  <span class="c1"># Only expensive_aggregation supports async</span>
+</span><span id="line-13"><span class="p">)</span>
+</span><span id="line-14">
+</span><span id="line-15"><span class="c1"># quick_lookup is always synchronous</span>
+</span><span id="line-16"><span class="c1"># expensive_aggregation can be called with ?async=true</span>
+</span></code></pre></div>
+</div>
+</section>
+<section id="data-science-api">
+<h3>Data Science API<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#data-science-api" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#data-science-api'">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="line-2"><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</span><span id="line-3"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span><span class="p">,</span> <span class="n">RouteConfig</span><span class="p">,</span> <span class="n">TransformSpec</span>
+</span><span id="line-4">
+</span><span id="line-5"><span class="k">def</span><span class="w"> </span><span class="nf">analyze_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="line-6">    <span class="k">return</span> <span class="p">{</span>
+</span><span id="line-7">        <span class="s2">"mean"</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span>
+</span><span id="line-8">        <span class="s2">"std"</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">std</span><span class="p">()</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+</span><span id="line-9">    <span class="p">}</span>
+</span><span id="line-10">
+</span><span id="line-11"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">({</span>
+</span><span id="line-12">    <span class="n">analyze_data</span><span class="p">:</span> <span class="n">RouteConfig</span><span class="p">(</span>
+</span><span id="line-13">        <span class="n">param_overrides</span><span class="o">=</span><span class="p">{</span>
+</span><span id="line-14">            <span class="s2">"data"</span><span class="p">:</span> <span class="n">TransformSpec</span><span class="p">(</span><span class="n">ingress</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span>
+</span><span id="line-15">        <span class="p">}</span>
+</span><span id="line-16">    <span class="p">)</span>
+</span><span id="line-17"><span class="p">})</span>
+</span><span id="line-18">
+</span><span id="line-19"><span class="c1"># POST /analyze_data</span>
+</span><span id="line-20"><span class="c1"># {"data": {"col1": [1,2,3], "col2": [4,5,6]}}</span>
+</span></code></pre></div>
+</div>
+</section>
+</section>
+<section id="philosophy">
+<h2>Philosophy<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#philosophy" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#philosophy'">¶</a></h2>
+<p><strong>Convention over configuration, but configuration when you need it.</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">qh</span></code> follows a layered approach:</p>
+<ol class="arabic simple">
+<li><p><strong>Simple case</strong> - Just pass functions, get working HTTP service</p></li>
+<li><p><strong>Common cases</strong> - Use conventions (RESTful routing, type-driven validation)</p></li>
+<li><p><strong>Advanced cases</strong> - Explicit configuration for full control</p></li>
+</ol>
+<p>You write Python functions. <code class="docutils literal notranslate"><span class="pre">qh</span></code> handles the HTTP layer.</p>
+</section>
+<section id="comparison">
+<h2>Comparison<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#comparison" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#comparison'">¶</a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Feature</p></th>
+<th class="head"><p>qh</p></th>
+<th class="head"><p>FastAPI</p></th>
+<th class="head"><p>Flask</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>From functions to HTTP</p></td>
+<td><p>1 line</p></td>
+<td><p>~10 lines</p></td>
+<td><p>~15 lines</p></td>
+</tr>
+<tr class="row-odd"><td><p>Type validation</p></td>
+<td><p>Automatic</p></td>
+<td><p>Automatic</p></td>
+<td><p>Manual</p></td>
+</tr>
+<tr class="row-even"><td><p>OpenAPI docs</p></td>
+<td><p>Automatic</p></td>
+<td><p>Automatic</p></td>
+<td><p>Extensions</p></td>
+</tr>
+<tr class="row-odd"><td><p>Client generation</p></td>
+<td><p>✅ Built-in</p></td>
+<td><p>❌ External tools</p></td>
+<td><p>❌ Manual</p></td>
+</tr>
+<tr class="row-even"><td><p>Convention routing</p></td>
+<td><p>✅ Yes</p></td>
+<td><p>❌ No</p></td>
+<td><p>❌ No</p></td>
+</tr>
+<tr class="row-odd"><td><p>Async tasks</p></td>
+<td><p>✅ Built-in</p></td>
+<td><p>❌ Manual setup</p></td>
+<td><p>❌ Extensions</p></td>
+</tr>
+<tr class="row-even"><td><p>Task tracking</p></td>
+<td><p>✅ Automatic</p></td>
+<td><p>❌ Manual</p></td>
+<td><p>❌ Manual</p></td>
+</tr>
+<tr class="row-odd"><td><p>Learning curve</p></td>
+<td><p>Minutes</p></td>
+<td><p>Hours</p></td>
+<td><p>Hours</p></td>
+</tr>
+<tr class="row-even"><td><p>Suitable for production</p></td>
+<td><p>Yes (it’s FastAPI!)</p></td>
+<td><p>Yes</p></td>
+<td><p>Yes</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="under-the-hood">
+<h2>Under the Hood<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#under-the-hood" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#under-the-hood'">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">qh</span></code> is built on:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://fastapi.tiangolo.com/" rel="nofollow noopener">FastAPI<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> - Modern, fast web framework</p></li>
+<li><p><a class="reference external" href="https://github.com/i2mint/i2" rel="nofollow noopener">i2<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> - Function signature manipulation</p></li>
+<li><p><a class="reference external" href="https://pydantic-docs.helpmanual.io/" rel="nofollow noopener">Pydantic<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> - Data validation</p></li>
+</ul>
+<p>When you create an app with <code class="docutils literal notranslate"><span class="pre">qh</span></code>, you get a fully-featured FastAPI application. All FastAPI features are available.</p>
+</section>
+<section id="advanced-topics">
+<h2>Advanced Topics<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#advanced-topics" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#advanced-topics'">¶</a></h2>
+<section id="using-au-package-external-async-backend">
+<h3>Using au Package (External Async Backend)<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#using-au-package-external-async-backend" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#using-au-package-external-async-backend'">¶</a></h3>
+<p>The built-in async functionality is perfect for most use cases, but if you need distributed task processing, you can integrate with <a class="reference external" href="https://github.com/i2mint/au" rel="nofollow noopener">au<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">pip<span class="w"> </span>install<span class="w"> </span>au
+</span></code></pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">au</span><span class="w"> </span><span class="kn">import</span> <span class="n">async_compute</span><span class="p">,</span> <span class="n">RQBackend</span>
+</span><span id="line-2"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span><span class="p">,</span> <span class="n">TaskConfig</span>
+</span><span id="line-3">
+</span><span id="line-4"><span class="c1"># Configure au with Redis backend</span>
+</span><span id="line-5"><span class="nd">@async_compute</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">RQBackend</span><span class="p">(</span><span class="s1">'redis://localhost:6379'</span><span class="p">))</span>
+</span><span id="line-6"><span class="k">def</span><span class="w"> </span><span class="nf">heavy_computation</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-7">    <span class="k">return</span> <span class="n">n</span> <span class="o">*</span> <span class="mi">2</span>
+</span><span id="line-8">
+</span><span id="line-9"><span class="c1"># Use with qh</span>
+</span><span id="line-10"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">([</span><span class="n">heavy_computation</span><span class="p">])</span>
+</span><span id="line-11"><span class="c1"># Now heavy_computation can be distributed across multiple workers</span>
+</span></code></pre></div>
+</div>
+</section>
+<section id="custom-task-executors">
+<h3>Custom Task Executors<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#custom-task-executors" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#custom-task-executors'">¶</a></h3>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">TaskExecutor</span><span class="p">,</span> <span class="n">TaskConfig</span>
+</span><span id="line-2"><span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
+</span><span id="line-3">
+</span><span id="line-4"><span class="k">class</span><span class="w"> </span><span class="nc">MyCustomExecutor</span><span class="p">(</span><span class="n">TaskExecutor</span><span class="p">):</span>
+</span><span id="line-5">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-6">        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span> <span class="o">=</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</span><span id="line-7">
+</span><span id="line-8">    <span class="k">def</span><span class="w"> </span><span class="nf">submit_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_id</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">callback</span><span class="p">):</span>
+</span><span id="line-9">        <span class="c1"># Custom task submission logic</span>
+</span><span id="line-10">        <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">():</span>
+</span><span id="line-11">            <span class="k">try</span><span class="p">:</span>
+</span><span id="line-12">                <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-13">                <span class="n">callback</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="line-14">            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="line-15">                <span class="n">callback</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</span><span id="line-16">        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">wrapper</span><span class="p">)</span>
+</span><span id="line-17">
+</span><span id="line-18">    <span class="k">def</span><span class="w"> </span><span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+</span><span id="line-19">        <span class="bp">self</span><span class="o">.</span><span class="n">pool</span><span class="o">.</span><span class="n">shutdown</span><span class="p">(</span><span class="n">wait</span><span class="o">=</span><span class="n">wait</span><span class="p">)</span>
+</span><span id="line-20">
+</span><span id="line-21"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">(</span>
+</span><span id="line-22">    <span class="p">[</span><span class="n">my_func</span><span class="p">],</span>
+</span><span id="line-23">    <span class="n">async_funcs</span><span class="o">=</span><span class="p">[</span><span class="s1">'my_func'</span><span class="p">],</span>
+</span><span id="line-24">    <span class="n">async_config</span><span class="o">=</span><span class="n">TaskConfig</span><span class="p">(</span><span class="n">executor</span><span class="o">=</span><span class="n">MyCustomExecutor</span><span class="p">())</span>
+</span><span id="line-25"><span class="p">)</span>
+</span></code></pre></div>
+</div>
+</section>
+<section id="middleware-and-extensions">
+<h3>Middleware and Extensions<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#middleware-and-extensions" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#middleware-and-extensions'">¶</a></h3>
+<p>Since <code class="docutils literal notranslate"><span class="pre">qh</span></code> creates a FastAPI app, you can use all FastAPI features:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span>
+</span><span id="line-2"><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.middleware.cors</span><span class="w"> </span><span class="kn">import</span> <span class="n">CORSMiddleware</span>
+</span><span id="line-3">
+</span><span id="line-4"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">([</span><span class="n">my_func</span><span class="p">])</span>
+</span><span id="line-5">
+</span><span id="line-6"><span class="c1"># Add CORS</span>
+</span><span id="line-7"><span class="n">app</span><span class="o">.</span><span class="n">add_middleware</span><span class="p">(</span>
+</span><span id="line-8">    <span class="n">CORSMiddleware</span><span class="p">,</span>
+</span><span id="line-9">    <span class="n">allow_origins</span><span class="o">=</span><span class="p">[</span><span class="s2">"*"</span><span class="p">],</span>
+</span><span id="line-10">    <span class="n">allow_methods</span><span class="o">=</span><span class="p">[</span><span class="s2">"*"</span><span class="p">],</span>
+</span><span id="line-11">    <span class="n">allow_headers</span><span class="o">=</span><span class="p">[</span><span class="s2">"*"</span><span class="p">],</span>
+</span><span id="line-12"><span class="p">)</span>
+</span><span id="line-13">
+</span><span id="line-14"><span class="c1"># Add custom routes</span>
+</span><span id="line-15"><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/health"</span><span class="p">)</span>
+</span><span id="line-16"><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">health</span><span class="p">():</span>
+</span><span id="line-17">    <span class="k">return</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"healthy"</span><span class="p">}</span>
+</span></code></pre></div>
+</div>
+</section>
+</section>
+<section id="migration-guide">
+<h2>Migration Guide<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#migration-guide" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#migration-guide'">¶</a></h2>
+<section id="from-v0-4-0-to-v0-5-0">
+<h3>From v0.4.0 to v0.5.0<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#from-v0-4-0-to-v0-5-0" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#from-v0-4-0-to-v0-5-0'">¶</a></h3>
+<p>The async task feature is fully backward compatible. Existing apps will work without changes.</p>
+<p>To enable async:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="c1"># Old (still works)</span>
+</span><span id="line-2"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">([</span><span class="n">my_func</span><span class="p">])</span>
+</span><span id="line-3">
+</span><span id="line-4"><span class="c1"># New (with async support)</span>
+</span><span id="line-5"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">([</span><span class="n">my_func</span><span class="p">],</span> <span class="n">async_funcs</span><span class="o">=</span><span class="p">[</span><span class="s1">'my_func'</span><span class="p">])</span>
+</span></code></pre></div>
+</div>
+</section>
+</section>
+<section id="contributing">
+<h2>Contributing<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#contributing" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#contributing'">¶</a></h2>
+<p>We welcome contributions! See <a class="reference internal" href="#CONTRIBUTING.md"><span class="xref myst">CONTRIBUTING.md</span></a> for guidelines.</p>
+</section>
+<section id="license">
+<h2>License<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#license" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#license'">¶</a></h2>
+<p>Apache 2.0</p>
+</section>
+<section id="links">
+<h2>Links<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#links" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#links'">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Documentation</strong>: https://github.com/i2mint/qh</p></li>
+<li><p><strong>Source Code</strong>: https://github.com/i2mint/qh</p></li>
+<li><p><strong>Issue Tracker</strong>: https://github.com/i2mint/qh/issues</p></li>
+<li><p><strong>Related Projects</strong>:</p>
+<ul>
+<li><p><a class="reference external" href="https://github.com/i2mint/i2" rel="nofollow noopener">i2<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> - Function signature manipulation</p></li>
+<li><p><a class="reference external" href="https://github.com/i2mint/au" rel="nofollow noopener">au<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> - Async utilities for distributed computing</p></li>
+<li><p><a class="reference external" href="https://fastapi.tiangolo.com/" rel="nofollow noopener">FastAPI<svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a> - The underlying web framework</p></li>
+</ul>
+</li>
+</ul>
+<hr class="docutils"/>
+<p>Made with ❤️ by the i2mint team</p>
+<p class="epythet-aggregates">This documentation as a single file: <a href="qh.md">qh.md</a> (Markdown, for agents).</p>
+
+</section>
+</section>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-15 12:16 UTC from <a href="https://github.com/i2mint/qh/commit/789a9cae460b66140a0b74a80fdb23427d4f8b24">789a9ca</a> (master) · qh 0.0.17 · <a href="about-this-build.html">about this build</a></p>
+</div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
+<div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
+<ul>
+<li><a :data-current="activeSection === '#for-ai-agents'" class="reference internal" href="#for-ai-agents">For AI agents</a></li>
+<li><a :data-current="activeSection === '#quickstart-from-function-to-api-in-3-lines'" class="reference internal" href="#quickstart-from-function-to-api-in-3-lines">Quickstart: From Function to API in 3 Lines</a></li>
+<li><a :data-current="activeSection === '#what-you-can-do-from-here'" class="reference internal" href="#what-you-can-do-from-here">What You Can Do From Here</a><ul>
+<li><a :data-current="activeSection === '#async-task-processing-new-in-v0-5-0'" class="reference internal" href="#async-task-processing-new-in-v0-5-0">🚀 Async Task Processing (NEW in v0.5.0)</a></li>
+<li><a :data-current="activeSection === '#convention-based-routing'" class="reference internal" href="#convention-based-routing">📝 Convention-Based Routing</a></li>
+<li><a :data-current="activeSection === '#explicit-configuration'" class="reference internal" href="#explicit-configuration">🎯 Explicit Configuration</a></li>
+<li><a :data-current="activeSection === '#parameter-transformation'" class="reference internal" href="#parameter-transformation">🔄 Parameter Transformation</a></li>
+<li><a :data-current="activeSection === '#openapi-client-generation'" class="reference internal" href="#openapi-client-generation">🌐 OpenAPI &amp; Client Generation</a></li>
+<li><a :data-current="activeSection === '#custom-types'" class="reference internal" href="#custom-types">🎨 Custom Types</a></li>
+<li><a :data-current="activeSection === '#global-configuration'" class="reference internal" href="#global-configuration">⚙️ Global Configuration</a></li>
+<li><a :data-current="activeSection === '#testing-utilities'" class="reference internal" href="#testing-utilities">🧪 Testing Utilities</a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#features'" class="reference internal" href="#features">Features</a><ul>
+<li><a :data-current="activeSection === '#built-in'" class="reference internal" href="#built-in">Built-in</a></li>
+<li><a :data-current="activeSection === '#phase-4-new-async-task-processing'" class="reference internal" href="#phase-4-new-async-task-processing">Phase 4 (NEW): Async Task Processing</a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#examples'" class="reference internal" href="#examples">Examples</a><ul>
+<li><a :data-current="activeSection === '#simple-crud-api'" class="reference internal" href="#simple-crud-api">Simple CRUD API</a></li>
+<li><a :data-current="activeSection === '#file-processing-with-async'" class="reference internal" href="#file-processing-with-async">File Processing with Async</a></li>
+<li><a :data-current="activeSection === '#mixed-sync-async-api'" class="reference internal" href="#mixed-sync-async-api">Mixed Sync/Async API</a></li>
+<li><a :data-current="activeSection === '#data-science-api'" class="reference internal" href="#data-science-api">Data Science API</a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#philosophy'" class="reference internal" href="#philosophy">Philosophy</a></li>
+<li><a :data-current="activeSection === '#comparison'" class="reference internal" href="#comparison">Comparison</a></li>
+<li><a :data-current="activeSection === '#under-the-hood'" class="reference internal" href="#under-the-hood">Under the Hood</a></li>
+<li><a :data-current="activeSection === '#advanced-topics'" class="reference internal" href="#advanced-topics">Advanced Topics</a><ul>
+<li><a :data-current="activeSection === '#using-au-package-external-async-backend'" class="reference internal" href="#using-au-package-external-async-backend">Using au Package (External Async Backend)</a></li>
+<li><a :data-current="activeSection === '#custom-task-executors'" class="reference internal" href="#custom-task-executors">Custom Task Executors</a></li>
+<li><a :data-current="activeSection === '#middleware-and-extensions'" class="reference internal" href="#middleware-and-extensions">Middleware and Extensions</a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#migration-guide'" class="reference internal" href="#migration-guide">Migration Guide</a><ul>
+<li><a :data-current="activeSection === '#from-v0-4-0-to-v0-5-0'" class="reference internal" href="#from-v0-4-0-to-v0-5-0">From v0.4.0 to v0.5.0</a></li>
+</ul>
+</li>
+<li><a :data-current="activeSection === '#contributing'" class="reference internal" href="#contributing">Contributing</a></li>
+<li><a :data-current="activeSection === '#license'" class="reference internal" href="#license">License</a></li>
+<li><a :data-current="activeSection === '#links'" class="reference internal" href="#links">Links</a></li>
+</ul>
+</div>
+</aside>
+</main>
+</div>
+</div><footer class="py-6 border-t border-border md:py-0">
+<div class="container flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
+<div class="flex flex-col items-center gap-4 px-8 md:flex-row md:gap-2 md:px-0">
+<p class="text-sm leading-loose text-center text-muted-foreground md:text-left"></p>
+</div>
+</div>
+</footer>
+</div>
+<script src="_static/documentation_options.js?v=63b572e7"></script>
+<script src="_static/doctools.js?v=fd6eb6e6"></script>
+<script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+<script src="_static/clipboard.min.js?v=a7894cd8"></script>
+<script src="_static/copybutton.js?v=fd10adb8"></script>
+<script defer="defer" src="_static/theme.js?v=5db23cf8"></script>
 </body>
 </html>

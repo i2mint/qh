@@ -1,0 +1,20 @@
+qh.stores\_qh
+=============
+
+.. automodule:: qh.stores_qh
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      add_mall_access
+      add_store_access
+      create_method_endpoint
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      StoreValue
+   

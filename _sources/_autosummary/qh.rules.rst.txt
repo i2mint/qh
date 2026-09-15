@@ -1,0 +1,28 @@
+qh.rules
+========
+
+.. automodule:: qh.rules
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      extract_param_context
+      resolve_transform
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      CompositeRule
+      DefaultValueRule
+      FuncNameRule
+      FuncRule
+      HttpLocation
+      NameRule
+      Rule
+      RuleChain
+      TransformSpec
+      TypeRule
+   

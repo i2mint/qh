@@ -1,4 +1,0 @@
-qh.scrap.simple_fastapi_dispatch
-================================
-.. automodule:: qh.scrap.simple_fastapi_dispatch
-   :members:

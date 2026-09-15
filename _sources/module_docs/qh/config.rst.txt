@@ -1,4 +1,0 @@
-qh.config
-=========
-.. automodule:: qh.config
-   :members:

@@ -1,4 +1,0 @@
-qh.stores_qh
-============
-.. automodule:: qh.stores_qh
-   :members:

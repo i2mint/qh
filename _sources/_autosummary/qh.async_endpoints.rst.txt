@@ -1,0 +1,13 @@
+qh.async\_endpoints
+===================
+
+.. automodule:: qh.async_endpoints
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      add_global_task_endpoints
+      add_task_endpoints
+   

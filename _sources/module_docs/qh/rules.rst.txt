@@ -1,4 +1,0 @@
-qh.rules
-========
-.. automodule:: qh.rules
-   :members:
