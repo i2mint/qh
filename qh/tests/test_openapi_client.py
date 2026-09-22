@@ -27,10 +27,10 @@ class TestEnhancedOpenAPI:
         spec = export_openapi(app)
 
         # Check basic structure
-        assert 'openapi' in spec
-        assert 'paths' in spec
-        assert '/add' in spec['paths']
-        assert 'post' in spec['paths']['/add']
+        assert "openapi" in spec
+        assert "paths" in spec
+        assert "/add" in spec["paths"]
+        assert "post" in spec["paths"]["/add"]
 
     def test_python_signature_metadata(self):
         """Test x-python-signature extension is added."""
@@ -43,28 +43,28 @@ class TestEnhancedOpenAPI:
         spec = export_openapi(app, include_python_metadata=True)
 
         # Check x-python-signature
-        operation = spec['paths']['/add']['post']
-        assert 'x-python-signature' in operation
+        operation = spec["paths"]["/add"]["post"]
+        assert "x-python-signature" in operation
 
-        sig = operation['x-python-signature']
-        assert sig['name'] == 'add'
-        assert sig['return_type'] == 'int'
-        assert sig['docstring'] == 'Add two numbers.'
+        sig = operation["x-python-signature"]
+        assert sig["name"] == "add"
+        assert sig["return_type"] == "int"
+        assert sig["docstring"] == "Add two numbers."
 
         # Check parameters
-        params = sig['parameters']
+        params = sig["parameters"]
         assert len(params) == 2
 
         # Check x parameter
-        x_param = next(p for p in params if p['name'] == 'x')
-        assert x_param['type'] == 'int'
-        assert x_param['required'] is True
+        x_param = next(p for p in params if p["name"] == "x")
+        assert x_param["type"] == "int"
+        assert x_param["required"] is True
 
         # Check y parameter with default
-        y_param = next(p for p in params if p['name'] == 'y')
-        assert y_param['type'] == 'int'
-        assert y_param['required'] is False
-        assert y_param['default'] == 10
+        y_param = next(p for p in params if p["name"] == "y")
+        assert y_param["type"] == "int"
+        assert y_param["required"] is False
+        assert y_param["default"] == 10
 
     def test_optional_parameters_in_signature(self):
         """Test that Optional parameters are handled correctly."""
@@ -78,12 +78,27 @@ class TestEnhancedOpenAPI:
         app = mk_app([greet])
         spec = export_openapi(app, include_python_metadata=True)
 
-        sig = spec['paths']['/greet']['post']['x-python-signature']
-        params = sig['parameters']
+        sig = spec["paths"]["/greet"]["post"]["x-python-signature"]
+        params = sig["parameters"]
 
-        title_param = next(p for p in params if p['name'] == 'title')
-        assert 'Optional' in title_param['type']
-        assert title_param['required'] is False
+        title_param = next(p for p in params if p["name"] == "title")
+        # `Optional[str]` is `Union[str, None]`; every union spelling normalises to
+        # `Union[...]` so that `Optional[str]` and `str | None` -- the same type --
+        # cannot generate two different clients. This used to assert the bare word
+        # `Optional`, which was all the extractor kept: the `str` was discarded and
+        # the client typed the parameter `any`.
+        assert title_param["type"] == "Union[str, NoneType]"
+        assert title_param["required"] is False
+
+        def greet604(name: str, title: str | None = None) -> str:
+            return name
+
+        spec604 = export_openapi(mk_app([greet604]), include_python_metadata=True)
+        pep604 = spec604["paths"]["/greet604"]["post"]["x-python-signature"]
+        assert (
+            next(p for p in pep604["parameters"] if p["name"] == "title")["type"]
+            == (title_param["type"])
+        )
 
     def test_examples_generation(self):
         """Test that examples are generated for requests."""
@@ -95,7 +110,7 @@ class TestEnhancedOpenAPI:
         spec = export_openapi(app, include_examples=True)
 
         # Check examples exist (may not be in requestBody if FastAPI doesn't create it)
-        operation = spec['paths']['/add']['post']
+        operation = spec["paths"]["/add"]["post"]
         # Examples might be added if requestBody exists
         # For now, just verify the export doesn't crash
         assert operation is not None
@@ -116,13 +131,13 @@ class TestEnhancedOpenAPI:
         spec = export_openapi(app, include_python_metadata=True)
 
         # Check all functions are present
-        assert '/add' in spec['paths']
-        assert '/subtract' in spec['paths']
-        assert '/multiply' in spec['paths']
+        assert "/add" in spec["paths"]
+        assert "/subtract" in spec["paths"]
+        assert "/multiply" in spec["paths"]
 
         # Check all have signatures
-        for path in ['/add', '/subtract', '/multiply']:
-            assert 'x-python-signature' in spec['paths'][path]['post']
+        for path in ["/add", "/subtract", "/multiply"]:
+            assert "x-python-signature" in spec["paths"][path]["post"]
 
 
 class TestClientGeneration:
@@ -138,7 +153,7 @@ class TestClientGeneration:
         client = mk_client_from_app(app)
 
         # Client should have add function
-        assert hasattr(client, 'add')
+        assert hasattr(client, "add")
 
         # Test calling the function
         result = client.add(x=3, y=5)
@@ -173,8 +188,8 @@ class TestClientGeneration:
         app = mk_app([add, multiply])
         client = mk_client_from_app(app)
 
-        assert hasattr(client, 'add')
-        assert hasattr(client, 'multiply')
+        assert hasattr(client, "add")
+        assert hasattr(client, "multiply")
 
         assert client.add(x=3, y=5) == 8
         assert client.multiply(x=3, y=5) == 15
@@ -183,17 +198,17 @@ class TestClientGeneration:
         """Test client generation with convention-based routing."""
 
         def get_user(user_id: str) -> dict:
-            return {'user_id': user_id, 'name': 'Test User'}
+            return {"user_id": user_id, "name": "Test User"}
 
         def list_users(limit: int = 10) -> list:
-            return [{'user_id': str(i), 'name': f'User {i}'} for i in range(limit)]
+            return [{"user_id": str(i), "name": f"User {i}"} for i in range(limit)]
 
         app = mk_app([get_user, list_users], use_conventions=True)
         client = mk_client_from_app(app)
 
         # Test get_user (path param)
-        result = client.get_user(user_id='123')
-        assert result['user_id'] == '123'
+        result = client.get_user(user_id="123")
+        assert result["user_id"] == "123"
 
         # Test list_users (query param)
         result = client.list_users(limit=5)
@@ -213,7 +228,7 @@ class TestClientGeneration:
 
         # Note: This test requires a running server or TestClient wrapper
         # For now, just verify client creation works
-        assert hasattr(client, 'add')
+        assert hasattr(client, "add")
 
     def test_client_error_handling(self):
         """Test that client properly handles errors."""
@@ -282,9 +297,9 @@ class TestRoundTripWithClient:
         def analyze(numbers: list) -> dict:
             """Analyze a list of numbers."""
             return {
-                'count': len(numbers),
-                'sum': sum(numbers),
-                'mean': sum(numbers) / len(numbers) if numbers else 0,
+                "count": len(numbers),
+                "sum": sum(numbers),
+                "mean": sum(numbers) / len(numbers) if numbers else 0,
             }
 
         original_result = analyze([1, 2, 3, 4, 5])
@@ -306,11 +321,11 @@ class TestRoundTripWithClient:
                 self.y = y
 
             def to_dict(self):
-                return {'x': self.x, 'y': self.y}
+                return {"x": self.x, "y": self.y}
 
             @classmethod
             def from_dict(cls, data):
-                return cls(data['x'], data['y'])
+                return cls(data["x"], data["y"])
 
         def create_point(x: float, y: float) -> Point:
             return Point(x, y)
@@ -319,7 +334,7 @@ class TestRoundTripWithClient:
         client = mk_client_from_app(app)
 
         result = client.create_point(x=3.0, y=4.0)
-        assert result == {'x': 3.0, 'y': 4.0}
+        assert result == {"x": 3.0, "y": 4.0}
 
     def test_signature_preservation(self):
         """Test that client functions preserve function metadata."""
@@ -332,7 +347,7 @@ class TestRoundTripWithClient:
         client = mk_client_from_app(app)
 
         # Check function name
-        assert client.add.__name__ == 'add'
+        assert client.add.__name__ == "add"
 
         # Check docstring
         assert client.add.__doc__ is not None
@@ -357,5 +372,5 @@ class TestRoundTripWithClient:
         assert client.multiply(x=10, y=3) == 30
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

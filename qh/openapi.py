@@ -465,22 +465,43 @@ def build_response_schema(
 # ---------------------------------------------------------------------------
 
 
+def _is_union(origin: Any) -> bool:
+    """Whether ``origin`` is either spelling of a union.
+
+    >>> from typing import Union, get_origin, Optional
+    >>> _is_union(get_origin(Union[int, str])), _is_union(get_origin(int | str))
+    (True, True)
+    >>> _is_union(list)
+    False
+    """
+    import types
+    import typing
+
+    return origin is typing.Union or origin is getattr(types, "UnionType", ())
+
+
 def get_python_type_name(type_hint: Any) -> str:
     """
-    Get a string representation of a Python type.
+    Get a string representation of a Python type, keeping its arguments.
 
-    ``inspect.Parameter.empty`` and ``None`` map to ``"Any"``. Anything else
-    with a ``__name__`` uses that name alone, with no type arguments — on
-    Python 3.10+ this includes builtin generic aliases (``list[int]``) and
-    ``typing`` generics (``Optional[str]``, ``Dict[str, int]``), since they
-    all carry a ``__name__`` now. The bracketed-argument form only appears
-    for the rare origin type that lacks ``__name__``.
+    ``inspect.Parameter.empty`` and ``None`` map to ``"Any"``. A parameterised
+    generic keeps its arguments — ``list[int]`` is ``"list[int]"``, not
+    ``"list"`` — because this string is the only type information the client
+    generators ever see, and a client that types every ``Optional[str]`` as
+    ``any`` is not a typed client.
+
+    This used to check ``__name__`` first. On Python 3.10+ ``typing`` generics
+    carry a ``__name__``, so ``Optional[str]`` and ``Union[int, str]`` returned
+    the bare words ``"Optional"`` and ``"Union"`` with every argument discarded,
+    while the PEP 604 spelling ``str | None`` — which has no ``__name__`` — kept
+    its arguments. Two spellings of one type produced different clients. The
+    ``__name__`` shortcut is now taken only when there is nothing to lose.
 
     Args:
         type_hint: A type or type annotation, or ``inspect.Parameter.empty``.
 
     Returns:
-        The type's bare name, e.g. ``"int"`` or ``"list"``.
+        The type's name, with arguments when it has them.
 
     Examples:
         >>> get_python_type_name(int)
@@ -488,28 +509,43 @@ def get_python_type_name(type_hint: Any) -> str:
         >>> get_python_type_name(str)
         'str'
         >>> get_python_type_name(list[int])
-        'list'
-        >>> from typing import Optional
+        'list[int]'
+        >>> from typing import Optional, Union
         >>> get_python_type_name(Optional[str])
-        'Optional'
+        'Union[str, NoneType]'
+        >>> get_python_type_name(Union[int, str])
+        'Union[int, str]'
+
+        Both spellings of an optional now produce the same string, so the
+        generated client does not depend on which one the author typed:
+
+        >>> get_python_type_name(str | None)
+        'Union[str, NoneType]'
+        >>> get_python_type_name(Optional[str]) == get_python_type_name(str | None)
+        True
     """
     if type_hint is inspect.Parameter.empty or type_hint is None:
         return "Any"
 
-    # Handle basic types
+    # Parameterised generics first: their arguments are the part worth keeping.
+    origin = get_origin(type_hint)
+    args = get_args(type_hint)
+    if origin is not None and args:
+        args_str = ", ".join(get_python_type_name(arg) for arg in args)
+        # `Optional[str]`, `Union[str, None]` and `str | None` are one type wearing
+        # three names; normalise so the emitted client cannot depend on the spelling.
+        # (`Optional[str]` is `Union[str, None]`, so its own `__name__` would produce
+        # the nonsense `Optional[str, NoneType]`.)
+        if _is_union(origin):
+            return f"Union[{args_str}]"
+        return f"{getattr(origin, '__name__', str(origin))}[{args_str}]"
+
+    # Plain classes, and unparameterised generics: the bare name is all there is.
     if hasattr(type_hint, "__name__"):
         return type_hint.__name__
 
-    # Handle typing generics
-    origin = get_origin(type_hint)
-    args = get_args(type_hint)
-
     if origin is not None:
-        origin_name = getattr(origin, "__name__", str(origin))
-        if args:
-            args_str = ", ".join(get_python_type_name(arg) for arg in args)
-            return f"{origin_name}[{args_str}]"
-        return origin_name
+        return getattr(origin, "__name__", str(origin))
 
     return str(type_hint)
 
