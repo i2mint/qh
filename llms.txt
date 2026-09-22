@@ -24,7 +24,8 @@
 - [qh.stores_qh](_autosummary/qh.stores_qh.html.md): FastAPI service for operating on stores objects.
 - [qh.testing](_autosummary/qh.testing.html.md): Run a qh (or any FastAPI) app for a test: in-process, or on a real port.
 - [qh.types](_autosummary/qh.types.html.md): Type registry for qh - automatic serialization/deserialization for custom types.
-- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-09-22 10:16 UTC&#42;&#42; from commit &lt;a href="https://github.com/i2m...
+- [For AI agents](ai-agents.html.md): &#96;qh&#96; ships artifacts for coding agents alongside its code. This page lists
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-09-22 14:42 UTC&#42;&#42; from commit &lt;a href="https://github.com/i2m...
 
 ## Optional
 

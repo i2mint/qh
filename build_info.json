@@ -1,32 +1,32 @@
 {
   "schema_version": 1,
-  "built_at": "2026-09-22T10:16:47Z",
+  "built_at": "2026-09-22T14:42:12Z",
   "package": {
     "name": "qh",
-    "version": "0.0.18",
+    "version": "0.0.19",
     "display_name": "qh",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "33f4ea6269e8051f0ef5489f08959af5b7241e99",
-    "short_commit": "33f4ea6",
+    "commit": "6a79a12a72de6c96eb3a6f547aac9d79976e4b0c",
+    "short_commit": "6a79a12",
     "branch": "master",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/i2mint/qh",
-    "commit_url": "https://github.com/i2mint/qh/commit/33f4ea6269e8051f0ef5489f08959af5b7241e99",
+    "commit_url": "https://github.com/i2mint/qh/commit/6a79a12a72de6c96eb3a6f547aac9d79976e4b0c",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "i2mint/qh",
-    "sha": "33f4ea6269e8051f0ef5489f08959af5b7241e99",
+    "sha": "6a79a12a72de6c96eb3a6f547aac9d79976e4b0c",
     "sha_in_history": true,
     "ref": "refs/heads/master",
     "ref_name": "master",
-    "run_id": "35714923159",
-    "run_url": "https://github.com/i2mint/qh/actions/runs/35714923159",
+    "run_id": "35741925977",
+    "run_url": "https://github.com/i2mint/qh/actions/runs/35741925977",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -60,14 +60,16 @@
   },
   "pypi": {
     "checked": true,
-    "latest": "0.0.18",
-    "relation": "same",
+    "latest": "0.0.20",
+    "relation": "behind",
     "error": null
   },
-  "reproduce": "git clone https://github.com/i2mint/qh && cd qh\ngit checkout 33f4ea6269e8051f0ef5489f08959af5b7241e99\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/i2mint/qh && cd qh\ngit checkout 6a79a12a72de6c96eb3a6f547aac9d79976e4b0c\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
-    "aligned": true,
-    "notes": []
+    "aligned": false,
+    "notes": [
+      "The documented version (0.0.19) is behind the latest release on PyPI (0.0.20): `pip install qh` gives newer code than these docs describe."
+    ]
   }
 }
