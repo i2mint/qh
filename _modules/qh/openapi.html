@@ -654,402 +654,438 @@
 </span><span id="line-465"><span class="c1"># ---------------------------------------------------------------------------</span>
 </span><span id="line-466">
 </span><span id="line-467">
+</span><span id="line-468"><span class="k">def</span><span class="w"> </span><span class="nf">_is_union</span><span class="p">(</span><span class="n">origin</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="line-469"><span class="w">    </span><span class="sd">"""Whether ``origin`` is either spelling of a union.</span>
+</span><span id="line-470">
+</span><span id="line-471"><span class="sd">    &gt;&gt;&gt; from typing import Union, get_origin, Optional</span>
+</span><span id="line-472"><span class="sd">    &gt;&gt;&gt; _is_union(get_origin(Union[int, str])), _is_union(get_origin(int | str))</span>
+</span><span id="line-473"><span class="sd">    (True, True)</span>
+</span><span id="line-474"><span class="sd">    &gt;&gt;&gt; _is_union(list)</span>
+</span><span id="line-475"><span class="sd">    False</span>
+</span><span id="line-476"><span class="sd">    """</span>
+</span><span id="line-477">    <span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
+</span><span id="line-478">    <span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
+</span><span id="line-479">
+</span><span id="line-480">    <span class="k">return</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span> <span class="ow">or</span> <span class="n">origin</span> <span class="ow">is</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s2">"UnionType"</span><span class="p">,</span> <span class="p">())</span>
+</span><span id="line-481">
+</span><span id="line-482">
 <div class="viewcode-block" id="get_python_type_name">
 <a class="viewcode-back" href="../../_autosummary/qh.openapi.html#qh.get_python_type_name">[docs]</a>
-</span><span id="line-468"><span class="k">def</span><span class="w"> </span><span class="nf">get_python_type_name</span><span class="p">(</span><span class="n">type_hint</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-469"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-470"><span class="sd">    Get a string representation of a Python type.</span>
-</span><span id="line-471">
-</span><span id="line-472"><span class="sd">    ``inspect.Parameter.empty`` and ``None`` map to ``"Any"``. Anything else</span>
-</span><span id="line-473"><span class="sd">    with a ``__name__`` uses that name alone, with no type arguments — on</span>
-</span><span id="line-474"><span class="sd">    Python 3.10+ this includes builtin generic aliases (``list[int]``) and</span>
-</span><span id="line-475"><span class="sd">    ``typing`` generics (``Optional[str]``, ``Dict[str, int]``), since they</span>
-</span><span id="line-476"><span class="sd">    all carry a ``__name__`` now. The bracketed-argument form only appears</span>
-</span><span id="line-477"><span class="sd">    for the rare origin type that lacks ``__name__``.</span>
-</span><span id="line-478">
-</span><span id="line-479"><span class="sd">    Args:</span>
-</span><span id="line-480"><span class="sd">        type_hint: A type or type annotation, or ``inspect.Parameter.empty``.</span>
-</span><span id="line-481">
-</span><span id="line-482"><span class="sd">    Returns:</span>
-</span><span id="line-483"><span class="sd">        The type's bare name, e.g. ``"int"`` or ``"list"``.</span>
-</span><span id="line-484">
-</span><span id="line-485"><span class="sd">    Examples:</span>
-</span><span id="line-486"><span class="sd">        &gt;&gt;&gt; get_python_type_name(int)</span>
-</span><span id="line-487"><span class="sd">        'int'</span>
-</span><span id="line-488"><span class="sd">        &gt;&gt;&gt; get_python_type_name(str)</span>
-</span><span id="line-489"><span class="sd">        'str'</span>
-</span><span id="line-490"><span class="sd">        &gt;&gt;&gt; get_python_type_name(list[int])</span>
-</span><span id="line-491"><span class="sd">        'list'</span>
-</span><span id="line-492"><span class="sd">        &gt;&gt;&gt; from typing import Optional</span>
-</span><span id="line-493"><span class="sd">        &gt;&gt;&gt; get_python_type_name(Optional[str])</span>
-</span><span id="line-494"><span class="sd">        'Optional'</span>
-</span><span id="line-495"><span class="sd">    """</span>
-</span><span id="line-496">    <span class="k">if</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-497">        <span class="k">return</span> <span class="s2">"Any"</span>
-</span><span id="line-498">
-</span><span id="line-499">    <span class="c1"># Handle basic types</span>
-</span><span id="line-500">    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">):</span>
-</span><span id="line-501">        <span class="k">return</span> <span class="n">type_hint</span><span class="o">.</span><span class="vm">__name__</span>
+</span><span id="line-483"><span class="k">def</span><span class="w"> </span><span class="nf">get_python_type_name</span><span class="p">(</span><span class="n">type_hint</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-484"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-485"><span class="sd">    Get a string representation of a Python type, keeping its arguments.</span>
+</span><span id="line-486">
+</span><span id="line-487"><span class="sd">    ``inspect.Parameter.empty`` and ``None`` map to ``"Any"``. A parameterised</span>
+</span><span id="line-488"><span class="sd">    generic keeps its arguments — ``list[int]`` is ``"list[int]"``, not</span>
+</span><span id="line-489"><span class="sd">    ``"list"`` — because this string is the only type information the client</span>
+</span><span id="line-490"><span class="sd">    generators ever see, and a client that types every ``Optional[str]`` as</span>
+</span><span id="line-491"><span class="sd">    ``any`` is not a typed client.</span>
+</span><span id="line-492">
+</span><span id="line-493"><span class="sd">    This used to check ``__name__`` first. On Python 3.10+ ``typing`` generics</span>
+</span><span id="line-494"><span class="sd">    carry a ``__name__``, so ``Optional[str]`` and ``Union[int, str]`` returned</span>
+</span><span id="line-495"><span class="sd">    the bare words ``"Optional"`` and ``"Union"`` with every argument discarded,</span>
+</span><span id="line-496"><span class="sd">    while the PEP 604 spelling ``str | None`` — which has no ``__name__`` — kept</span>
+</span><span id="line-497"><span class="sd">    its arguments. Two spellings of one type produced different clients. The</span>
+</span><span id="line-498"><span class="sd">    ``__name__`` shortcut is now taken only when there is nothing to lose.</span>
+</span><span id="line-499">
+</span><span id="line-500"><span class="sd">    Args:</span>
+</span><span id="line-501"><span class="sd">        type_hint: A type or type annotation, or ``inspect.Parameter.empty``.</span>
 </span><span id="line-502">
-</span><span id="line-503">    <span class="c1"># Handle typing generics</span>
-</span><span id="line-504">    <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span>
-</span><span id="line-505">    <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span>
-</span><span id="line-506">
-</span><span id="line-507">    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-508">        <span class="n">origin_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">origin</span><span class="p">))</span>
-</span><span id="line-509">        <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
-</span><span id="line-510">            <span class="n">args_str</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_python_type_name</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
-</span><span id="line-511">            <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">origin_name</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">args_str</span><span class="si">}</span><span class="s2">]"</span>
-</span><span id="line-512">        <span class="k">return</span> <span class="n">origin_name</span>
-</span><span id="line-513">
-</span><span id="line-514">    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span></div>
+</span><span id="line-503"><span class="sd">    Returns:</span>
+</span><span id="line-504"><span class="sd">        The type's name, with arguments when it has them.</span>
+</span><span id="line-505">
+</span><span id="line-506"><span class="sd">    Examples:</span>
+</span><span id="line-507"><span class="sd">        &gt;&gt;&gt; get_python_type_name(int)</span>
+</span><span id="line-508"><span class="sd">        'int'</span>
+</span><span id="line-509"><span class="sd">        &gt;&gt;&gt; get_python_type_name(str)</span>
+</span><span id="line-510"><span class="sd">        'str'</span>
+</span><span id="line-511"><span class="sd">        &gt;&gt;&gt; get_python_type_name(list[int])</span>
+</span><span id="line-512"><span class="sd">        'list[int]'</span>
+</span><span id="line-513"><span class="sd">        &gt;&gt;&gt; from typing import Optional, Union</span>
+</span><span id="line-514"><span class="sd">        &gt;&gt;&gt; get_python_type_name(Optional[str])</span>
+</span><span id="line-515"><span class="sd">        'Union[str, NoneType]'</span>
+</span><span id="line-516"><span class="sd">        &gt;&gt;&gt; get_python_type_name(Union[int, str])</span>
+</span><span id="line-517"><span class="sd">        'Union[int, str]'</span>
+</span><span id="line-518">
+</span><span id="line-519"><span class="sd">        Both spellings of an optional now produce the same string, so the</span>
+</span><span id="line-520"><span class="sd">        generated client does not depend on which one the author typed:</span>
+</span><span id="line-521">
+</span><span id="line-522"><span class="sd">        &gt;&gt;&gt; get_python_type_name(str | None)</span>
+</span><span id="line-523"><span class="sd">        'Union[str, NoneType]'</span>
+</span><span id="line-524"><span class="sd">        &gt;&gt;&gt; get_python_type_name(Optional[str]) == get_python_type_name(str | None)</span>
+</span><span id="line-525"><span class="sd">        True</span>
+</span><span id="line-526"><span class="sd">    """</span>
+</span><span id="line-527">    <span class="k">if</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-528">        <span class="k">return</span> <span class="s2">"Any"</span>
+</span><span id="line-529">
+</span><span id="line-530">    <span class="c1"># Parameterised generics first: their arguments are the part worth keeping.</span>
+</span><span id="line-531">    <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span>
+</span><span id="line-532">    <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span>
+</span><span id="line-533">    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">args</span><span class="p">:</span>
+</span><span id="line-534">        <span class="n">args_str</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_python_type_name</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>
+</span><span id="line-535">        <span class="c1"># `Optional[str]`, `Union[str, None]` and `str | None` are one type wearing</span>
+</span><span id="line-536">        <span class="c1"># three names; normalise so the emitted client cannot depend on the spelling.</span>
+</span><span id="line-537">        <span class="c1"># (`Optional[str]` is `Union[str, None]`, so its own `__name__` would produce</span>
+</span><span id="line-538">        <span class="c1"># the nonsense `Optional[str, NoneType]`.)</span>
+</span><span id="line-539">        <span class="k">if</span> <span class="n">_is_union</span><span class="p">(</span><span class="n">origin</span><span class="p">):</span>
+</span><span id="line-540">            <span class="k">return</span> <span class="sa">f</span><span class="s2">"Union[</span><span class="si">{</span><span class="n">args_str</span><span class="si">}</span><span class="s2">]"</span>
+</span><span id="line-541">        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span><span class="w"> </span><span class="s1">'__name__'</span><span class="p">,</span><span class="w"> </span><span class="nb">str</span><span class="p">(</span><span class="n">origin</span><span class="p">))</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">args_str</span><span class="si">}</span><span class="s2">]"</span>
+</span><span id="line-542">
+</span><span id="line-543">    <span class="c1"># Plain classes, and unparameterised generics: the bare name is all there is.</span>
+</span><span id="line-544">    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">type_hint</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">):</span>
+</span><span id="line-545">        <span class="k">return</span> <span class="n">type_hint</span><span class="o">.</span><span class="vm">__name__</span>
+</span><span id="line-546">
+</span><span id="line-547">    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-548">        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="s2">"__name__"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">origin</span><span class="p">))</span>
+</span><span id="line-549">
+</span><span id="line-550">    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span></div>
 
-</span><span id="line-515">
-</span><span id="line-516">
+</span><span id="line-551">
+</span><span id="line-552">
 <div class="viewcode-block" id="extract_function_signature">
 <a class="viewcode-back" href="../../_autosummary/qh.openapi.html#qh.extract_function_signature">[docs]</a>
-</span><span id="line-517"><span class="k">def</span><span class="w"> </span><span class="nf">extract_function_signature</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-</span><span id="line-518"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-519"><span class="sd">    Extract detailed signature information from a function.</span>
-</span><span id="line-520">
-</span><span id="line-521"><span class="sd">    Args:</span>
-</span><span id="line-522"><span class="sd">        func: The function to inspect.</span>
-</span><span id="line-523">
-</span><span id="line-524"><span class="sd">    Returns:</span>
-</span><span id="line-525"><span class="sd">        Dictionary with signature metadata:</span>
-</span><span id="line-526">
-</span><span id="line-527"><span class="sd">        - name: function name</span>
-</span><span id="line-528"><span class="sd">        - module: module path</span>
-</span><span id="line-529"><span class="sd">        - parameters: list of parameter info</span>
-</span><span id="line-530"><span class="sd">        - return_type: return type annotation</span>
-</span><span id="line-531"><span class="sd">        - docstring: function docstring</span>
-</span><span id="line-532"><span class="sd">    """</span>
-</span><span id="line-533">    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-</span><span id="line-534">    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">_safe_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-</span><span id="line-535">
-</span><span id="line-536">    <span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="line-537">    <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="line-538">        <span class="n">param_type</span> <span class="o">=</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">annotation</span><span class="p">)</span>
-</span><span id="line-539">
-</span><span id="line-540">        <span class="n">param_info</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-541">            <span class="s2">"name"</span><span class="p">:</span> <span class="n">param_name</span><span class="p">,</span>
-</span><span id="line-542">            <span class="s2">"type"</span><span class="p">:</span> <span class="n">get_python_type_name</span><span class="p">(</span><span class="n">param_type</span><span class="p">),</span>
-</span><span id="line-543">            <span class="s2">"required"</span><span class="p">:</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">,</span>
-</span><span id="line-544">        <span class="p">}</span>
-</span><span id="line-545">
-</span><span id="line-546">        <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-</span><span id="line-547">            <span class="c1"># Try to serialize default value</span>
-</span><span id="line-548">            <span class="n">default</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span>
-</span><span id="line-549">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
-</span><span id="line-550">                <span class="n">param_info</span><span class="p">[</span><span class="s2">"default"</span><span class="p">]</span> <span class="o">=</span> <span class="n">default</span>
-</span><span id="line-551">            <span class="k">else</span><span class="p">:</span>
-</span><span id="line-552">                <span class="n">param_info</span><span class="p">[</span><span class="s2">"default"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
-</span><span id="line-553">
-</span><span id="line-554">        <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_info</span><span class="p">)</span>
-</span><span id="line-555">
-</span><span id="line-556">    <span class="n">return_type</span> <span class="o">=</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"return"</span><span class="p">,</span> <span class="n">sig</span><span class="o">.</span><span class="n">return_annotation</span><span class="p">)</span>
-</span><span id="line-557">
-</span><span id="line-558">    <span class="k">return</span> <span class="p">{</span>
-</span><span id="line-559">        <span class="s2">"name"</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
-</span><span id="line-560">        <span class="s2">"module"</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span>
-</span><span id="line-561">        <span class="s2">"parameters"</span><span class="p">:</span> <span class="n">parameters</span><span class="p">,</span>
-</span><span id="line-562">        <span class="s2">"return_type"</span><span class="p">:</span> <span class="n">get_python_type_name</span><span class="p">(</span><span class="n">return_type</span><span class="p">),</span>
-</span><span id="line-563">        <span class="s2">"docstring"</span><span class="p">:</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">func</span><span class="p">),</span>
-</span><span id="line-564">    <span class="p">}</span></div>
+</span><span id="line-553"><span class="k">def</span><span class="w"> </span><span class="nf">extract_function_signature</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="line-554"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-555"><span class="sd">    Extract detailed signature information from a function.</span>
+</span><span id="line-556">
+</span><span id="line-557"><span class="sd">    Args:</span>
+</span><span id="line-558"><span class="sd">        func: The function to inspect.</span>
+</span><span id="line-559">
+</span><span id="line-560"><span class="sd">    Returns:</span>
+</span><span id="line-561"><span class="sd">        Dictionary with signature metadata:</span>
+</span><span id="line-562">
+</span><span id="line-563"><span class="sd">        - name: function name</span>
+</span><span id="line-564"><span class="sd">        - module: module path</span>
+</span><span id="line-565"><span class="sd">        - parameters: list of parameter info</span>
+</span><span id="line-566"><span class="sd">        - return_type: return type annotation</span>
+</span><span id="line-567"><span class="sd">        - docstring: function docstring</span>
+</span><span id="line-568"><span class="sd">    """</span>
+</span><span id="line-569">    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+</span><span id="line-570">    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">_safe_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+</span><span id="line-571">
+</span><span id="line-572">    <span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-573">    <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="line-574">        <span class="n">param_type</span> <span class="o">=</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">annotation</span><span class="p">)</span>
+</span><span id="line-575">
+</span><span id="line-576">        <span class="n">param_info</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-577">            <span class="s2">"name"</span><span class="p">:</span> <span class="n">param_name</span><span class="p">,</span>
+</span><span id="line-578">            <span class="s2">"type"</span><span class="p">:</span> <span class="n">get_python_type_name</span><span class="p">(</span><span class="n">param_type</span><span class="p">),</span>
+</span><span id="line-579">            <span class="s2">"required"</span><span class="p">:</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">,</span>
+</span><span id="line-580">        <span class="p">}</span>
+</span><span id="line-581">
+</span><span id="line-582">        <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+</span><span id="line-583">            <span class="c1"># Try to serialize default value</span>
+</span><span id="line-584">            <span class="n">default</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span>
+</span><span id="line-585">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+</span><span id="line-586">                <span class="n">param_info</span><span class="p">[</span><span class="s2">"default"</span><span class="p">]</span> <span class="o">=</span> <span class="n">default</span>
+</span><span id="line-587">            <span class="k">else</span><span class="p">:</span>
+</span><span id="line-588">                <span class="n">param_info</span><span class="p">[</span><span class="s2">"default"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+</span><span id="line-589">
+</span><span id="line-590">        <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_info</span><span class="p">)</span>
+</span><span id="line-591">
+</span><span id="line-592">    <span class="n">return_type</span> <span class="o">=</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"return"</span><span class="p">,</span> <span class="n">sig</span><span class="o">.</span><span class="n">return_annotation</span><span class="p">)</span>
+</span><span id="line-593">
+</span><span id="line-594">    <span class="k">return</span> <span class="p">{</span>
+</span><span id="line-595">        <span class="s2">"name"</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+</span><span id="line-596">        <span class="s2">"module"</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="vm">__module__</span><span class="p">,</span>
+</span><span id="line-597">        <span class="s2">"parameters"</span><span class="p">:</span> <span class="n">parameters</span><span class="p">,</span>
+</span><span id="line-598">        <span class="s2">"return_type"</span><span class="p">:</span> <span class="n">get_python_type_name</span><span class="p">(</span><span class="n">return_type</span><span class="p">),</span>
+</span><span id="line-599">        <span class="s2">"docstring"</span><span class="p">:</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">func</span><span class="p">),</span>
+</span><span id="line-600">    <span class="p">}</span></div>
 
-</span><span id="line-565">
-</span><span id="line-566">
+</span><span id="line-601">
+</span><span id="line-602">
 <div class="viewcode-block" id="generate_examples_for_function">
 <a class="viewcode-back" href="../../_autosummary/qh.openapi.html#qh.generate_examples_for_function">[docs]</a>
-</span><span id="line-567"><span class="k">def</span><span class="w"> </span><span class="nf">generate_examples_for_function</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
-</span><span id="line-568"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-569"><span class="sd">    Generate example requests/responses for a function.</span>
-</span><span id="line-570">
-</span><span id="line-571"><span class="sd">    Uses type hints to generate sensible example values.</span>
-</span><span id="line-572"><span class="sd">    """</span>
-</span><span id="line-573">    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-</span><span id="line-574">    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">_safe_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-</span><span id="line-575">
-</span><span id="line-576">    <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="line-577">
-</span><span id="line-578">    <span class="c1"># Generate a basic example</span>
-</span><span id="line-579">    <span class="n">example_request</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="line-580">    <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="line-581">        <span class="n">param_type</span> <span class="o">=</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">annotation</span><span class="p">)</span>
-</span><span id="line-582">
-</span><span id="line-583">        <span class="c1"># Use default if available</span>
-</span><span id="line-584">        <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-</span><span id="line-585">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
-</span><span id="line-586">                <span class="k">continue</span>  <span class="c1"># Skip optional params with defaults in minimal example</span>
-</span><span id="line-587">
-</span><span id="line-588">        <span class="c1"># Generate example value based on type</span>
-</span><span id="line-589">        <span class="n">example_value</span> <span class="o">=</span> <span class="n">_generate_example_value</span><span class="p">(</span><span class="n">param_type</span><span class="p">,</span> <span class="n">param_name</span><span class="p">)</span>
-</span><span id="line-590">        <span class="k">if</span> <span class="n">example_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-591">            <span class="n">example_request</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">example_value</span>
-</span><span id="line-592">
-</span><span id="line-593">    <span class="k">if</span> <span class="n">example_request</span><span class="p">:</span>
-</span><span id="line-594">        <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"summary"</span><span class="p">:</span> <span class="s2">"Basic example"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="n">example_request</span><span class="p">})</span>
-</span><span id="line-595">
-</span><span id="line-596">    <span class="k">return</span> <span class="n">examples</span></div>
+</span><span id="line-603"><span class="k">def</span><span class="w"> </span><span class="nf">generate_examples_for_function</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+</span><span id="line-604"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-605"><span class="sd">    Generate example requests/responses for a function.</span>
+</span><span id="line-606">
+</span><span id="line-607"><span class="sd">    Uses type hints to generate sensible example values.</span>
+</span><span id="line-608"><span class="sd">    """</span>
+</span><span id="line-609">    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+</span><span id="line-610">    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">_safe_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+</span><span id="line-611">
+</span><span id="line-612">    <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-613">
+</span><span id="line-614">    <span class="c1"># Generate a basic example</span>
+</span><span id="line-615">    <span class="n">example_request</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="line-616">    <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="line-617">        <span class="n">param_type</span> <span class="o">=</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">annotation</span><span class="p">)</span>
+</span><span id="line-618">
+</span><span id="line-619">        <span class="c1"># Use default if available</span>
+</span><span id="line-620">        <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+</span><span id="line-621">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+</span><span id="line-622">                <span class="k">continue</span>  <span class="c1"># Skip optional params with defaults in minimal example</span>
+</span><span id="line-623">
+</span><span id="line-624">        <span class="c1"># Generate example value based on type</span>
+</span><span id="line-625">        <span class="n">example_value</span> <span class="o">=</span> <span class="n">_generate_example_value</span><span class="p">(</span><span class="n">param_type</span><span class="p">,</span> <span class="n">param_name</span><span class="p">)</span>
+</span><span id="line-626">        <span class="k">if</span> <span class="n">example_value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-627">            <span class="n">example_request</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">example_value</span>
+</span><span id="line-628">
+</span><span id="line-629">    <span class="k">if</span> <span class="n">example_request</span><span class="p">:</span>
+</span><span id="line-630">        <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"summary"</span><span class="p">:</span> <span class="s2">"Basic example"</span><span class="p">,</span> <span class="s2">"value"</span><span class="p">:</span> <span class="n">example_request</span><span class="p">})</span>
+</span><span id="line-631">
+</span><span id="line-632">    <span class="k">return</span> <span class="n">examples</span></div>
 
-</span><span id="line-597">
-</span><span id="line-598">
-</span><span id="line-599"><span class="k">def</span><span class="w"> </span><span class="nf">_generate_example_value</span><span class="p">(</span><span class="n">type_hint</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="line-600"><span class="w">    </span><span class="sd">"""Generate an example value for a given type."""</span>
-</span><span id="line-601">    <span class="k">if</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-602">        <span class="k">return</span> <span class="s2">"example_value"</span>
-</span><span id="line-603">
-</span><span id="line-604">    <span class="c1"># Handle basic types</span>
-</span><span id="line-605">    <span class="k">if</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s2">"int"</span><span class="p">:</span>
-</span><span id="line-606">        <span class="c1"># Use param name hints</span>
-</span><span id="line-607">        <span class="k">if</span> <span class="s2">"id"</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-</span><span id="line-608">            <span class="k">return</span> <span class="mi">123</span>
-</span><span id="line-609">        <span class="k">elif</span> <span class="s2">"count"</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">"num"</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-</span><span id="line-610">            <span class="k">return</span> <span class="mi">10</span>
-</span><span id="line-611">        <span class="k">return</span> <span class="mi">42</span>
-</span><span id="line-612">    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s2">"str"</span><span class="p">:</span>
-</span><span id="line-613">        <span class="k">if</span> <span class="s2">"name"</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-</span><span id="line-614">            <span class="k">return</span> <span class="s2">"example_name"</span>
-</span><span id="line-615">        <span class="k">elif</span> <span class="s2">"id"</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
-</span><span id="line-616">            <span class="k">return</span> <span class="s2">"abc123"</span>
-</span><span id="line-617">        <span class="k">return</span> <span class="s2">"example"</span>
-</span><span id="line-618">    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">float</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s2">"float"</span><span class="p">:</span>
-</span><span id="line-619">        <span class="k">return</span> <span class="mf">3.14</span>
-</span><span id="line-620">    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s2">"bool"</span><span class="p">:</span>
-</span><span id="line-621">        <span class="k">return</span> <span class="kc">True</span>
-</span><span id="line-622">    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">list</span> <span class="ow">or</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
-</span><span id="line-623">        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span>
-</span><span id="line-624">        <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
-</span><span id="line-625">            <span class="n">item_example</span> <span class="o">=</span> <span class="n">_generate_example_value</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"item"</span><span class="p">)</span>
-</span><span id="line-626">            <span class="k">return</span> <span class="p">[</span><span class="n">item_example</span><span class="p">]</span> <span class="k">if</span> <span class="n">item_example</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
-</span><span id="line-627">        <span class="k">return</span> <span class="p">[]</span>
-</span><span id="line-628">    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">or</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span id="line-629">        <span class="k">return</span> <span class="p">{</span><span class="s2">"key"</span><span class="p">:</span> <span class="s2">"value"</span><span class="p">}</span>
-</span><span id="line-630">
-</span><span id="line-631">    <span class="c1"># For custom types, return a placeholder</span>
-</span><span id="line-632">    <span class="k">return</span> <span class="kc">None</span>
 </span><span id="line-633">
 </span><span id="line-634">
-</span><span id="line-635"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span id="line-636"><span class="c1"># Whole-document enhancement</span>
-</span><span id="line-637"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span id="line-638">
+</span><span id="line-635"><span class="k">def</span><span class="w"> </span><span class="nf">_generate_example_value</span><span class="p">(</span><span class="n">type_hint</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">param_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="line-636"><span class="w">    </span><span class="sd">"""Generate an example value for a given type."""</span>
+</span><span id="line-637">    <span class="k">if</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-638">        <span class="k">return</span> <span class="s2">"example_value"</span>
 </span><span id="line-639">
+</span><span id="line-640">    <span class="c1"># Handle basic types</span>
+</span><span id="line-641">    <span class="k">if</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s2">"int"</span><span class="p">:</span>
+</span><span id="line-642">        <span class="c1"># Use param name hints</span>
+</span><span id="line-643">        <span class="k">if</span> <span class="s2">"id"</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+</span><span id="line-644">            <span class="k">return</span> <span class="mi">123</span>
+</span><span id="line-645">        <span class="k">elif</span> <span class="s2">"count"</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">or</span> <span class="s2">"num"</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+</span><span id="line-646">            <span class="k">return</span> <span class="mi">10</span>
+</span><span id="line-647">        <span class="k">return</span> <span class="mi">42</span>
+</span><span id="line-648">    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">str</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s2">"str"</span><span class="p">:</span>
+</span><span id="line-649">        <span class="k">if</span> <span class="s2">"name"</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+</span><span id="line-650">            <span class="k">return</span> <span class="s2">"example_name"</span>
+</span><span id="line-651">        <span class="k">elif</span> <span class="s2">"id"</span> <span class="ow">in</span> <span class="n">param_name</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+</span><span id="line-652">            <span class="k">return</span> <span class="s2">"abc123"</span>
+</span><span id="line-653">        <span class="k">return</span> <span class="s2">"example"</span>
+</span><span id="line-654">    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">float</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s2">"float"</span><span class="p">:</span>
+</span><span id="line-655">        <span class="k">return</span> <span class="mf">3.14</span>
+</span><span id="line-656">    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">bool</span> <span class="ow">or</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="s2">"bool"</span><span class="p">:</span>
+</span><span id="line-657">        <span class="k">return</span> <span class="kc">True</span>
+</span><span id="line-658">    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">list</span> <span class="ow">or</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+</span><span id="line-659">        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span>
+</span><span id="line-660">        <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
+</span><span id="line-661">            <span class="n">item_example</span> <span class="o">=</span> <span class="n">_generate_example_value</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">"item"</span><span class="p">)</span>
+</span><span id="line-662">            <span class="k">return</span> <span class="p">[</span><span class="n">item_example</span><span class="p">]</span> <span class="k">if</span> <span class="n">item_example</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+</span><span id="line-663">        <span class="k">return</span> <span class="p">[]</span>
+</span><span id="line-664">    <span class="k">elif</span> <span class="n">type_hint</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">or</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_hint</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="line-665">        <span class="k">return</span> <span class="p">{</span><span class="s2">"key"</span><span class="p">:</span> <span class="s2">"value"</span><span class="p">}</span>
+</span><span id="line-666">
+</span><span id="line-667">    <span class="c1"># For custom types, return a placeholder</span>
+</span><span id="line-668">    <span class="k">return</span> <span class="kc">None</span>
+</span><span id="line-669">
+</span><span id="line-670">
+</span><span id="line-671"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span id="line-672"><span class="c1"># Whole-document enhancement</span>
+</span><span id="line-673"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span id="line-674">
+</span><span id="line-675">
 <div class="viewcode-block" id="enhance_openapi_schema">
 <a class="viewcode-back" href="../../_autosummary/qh.openapi.html#qh.enhance_openapi_schema">[docs]</a>
-</span><span id="line-640"><span class="k">def</span><span class="w"> </span><span class="nf">enhance_openapi_schema</span><span class="p">(</span>
-</span><span id="line-641">    <span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span>
-</span><span id="line-642">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-643">    <span class="n">include_examples</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-644">    <span class="n">include_python_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-645">    <span class="n">include_schemas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-646">    <span class="n">include_transformers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="line-647"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-</span><span id="line-648"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-649"><span class="sd">    Generate an enhanced OpenAPI schema for a ``qh`` app.</span>
-</span><span id="line-650">
-</span><span id="line-651"><span class="sd">    On top of FastAPI's base document this fills in what ``qh``'s</span>
-</span><span id="line-652"><span class="sd">    ``Request``-based endpoints hide from FastAPI:</span>
-</span><span id="line-653">
-</span><span id="line-654"><span class="sd">    - ``requestBody`` / ``parameters`` / ``responses`` JSON Schema derived from</span>
-</span><span id="line-655"><span class="sd">      each wrapped function's Python type hints (``include_schemas``),</span>
-</span><span id="line-656"><span class="sd">    - ``components.schemas`` for every dataclass / ``TypedDict`` / Pydantic</span>
-</span><span id="line-657"><span class="sd">      model / ``NamedTuple`` / ``Enum`` referenced,</span>
-</span><span id="line-658"><span class="sd">    - ``x-python-signature`` metadata (``include_python_metadata``),</span>
-</span><span id="line-659"><span class="sd">    - request examples (``include_examples``).</span>
-</span><span id="line-660">
-</span><span id="line-661"><span class="sd">    Args:</span>
-</span><span id="line-662"><span class="sd">        app: the FastAPI application.</span>
-</span><span id="line-663"><span class="sd">        include_examples: add example requests.</span>
-</span><span id="line-664"><span class="sd">        include_python_metadata: add ``x-python-*`` extensions.</span>
-</span><span id="line-665"><span class="sd">        include_schemas: derive ``requestBody`` / ``responses`` /</span>
-</span><span id="line-666"><span class="sd">            ``components.schemas`` from the Python type hints.</span>
-</span><span id="line-667"><span class="sd">        include_transformers: add (placeholder) transformation metadata.</span>
-</span><span id="line-668">
-</span><span id="line-669"><span class="sd">    Returns:</span>
-</span><span id="line-670"><span class="sd">        the enhanced OpenAPI schema dictionary.</span>
-</span><span id="line-671"><span class="sd">    """</span>
-</span><span id="line-672">    <span class="n">schema</span> <span class="o">=</span> <span class="n">get_openapi</span><span class="p">(</span>
-</span><span id="line-673">        <span class="n">title</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
-</span><span id="line-674">        <span class="n">version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
-</span><span id="line-675">        <span class="n">openapi_version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">openapi_version</span><span class="p">,</span>
-</span><span id="line-676">        <span class="n">description</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-</span><span id="line-677">        <span class="n">routes</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">routes</span><span class="p">,</span>
-</span><span id="line-678">    <span class="p">)</span>
-</span><span id="line-679">
-</span><span id="line-680">    <span class="kn">from</span><span class="w"> </span><span class="nn">qh.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">inspect_routes</span>
-</span><span id="line-681">
-</span><span id="line-682">    <span class="n">routes</span> <span class="o">=</span> <span class="n">inspect_routes</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
-</span><span id="line-683">    <span class="n">component_schemas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="line-684">
-</span><span id="line-685">    <span class="k">for</span> <span class="n">route_info</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">:</span>
-</span><span id="line-686">        <span class="n">func</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"function"</span><span class="p">)</span>
-</span><span id="line-687">        <span class="k">if</span> <span class="ow">not</span> <span class="n">func</span><span class="p">:</span>
-</span><span id="line-688">            <span class="k">continue</span>
+</span><span id="line-676"><span class="k">def</span><span class="w"> </span><span class="nf">enhance_openapi_schema</span><span class="p">(</span>
+</span><span id="line-677">    <span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span>
+</span><span id="line-678">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-679">    <span class="n">include_examples</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-680">    <span class="n">include_python_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-681">    <span class="n">include_schemas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-682">    <span class="n">include_transformers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="line-683"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="line-684"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-685"><span class="sd">    Generate an enhanced OpenAPI schema for a ``qh`` app.</span>
+</span><span id="line-686">
+</span><span id="line-687"><span class="sd">    On top of FastAPI's base document this fills in what ``qh``'s</span>
+</span><span id="line-688"><span class="sd">    ``Request``-based endpoints hide from FastAPI:</span>
 </span><span id="line-689">
-</span><span id="line-690">        <span class="n">path</span> <span class="o">=</span> <span class="n">route_info</span><span class="p">[</span><span class="s2">"path"</span><span class="p">]</span>
-</span><span id="line-691">        <span class="n">methods</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"methods"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">])</span>
-</span><span id="line-692">        <span class="n">param_specs</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"param_specs"</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{}</span>
-</span><span id="line-693">
-</span><span id="line-694">        <span class="k">if</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"/openapi.json"</span><span class="p">,</span> <span class="s2">"/docs"</span><span class="p">,</span> <span class="s2">"/redoc"</span><span class="p">]:</span>
-</span><span id="line-695">            <span class="k">continue</span>
+</span><span id="line-690"><span class="sd">    - ``requestBody`` / ``parameters`` / ``responses`` JSON Schema derived from</span>
+</span><span id="line-691"><span class="sd">      each wrapped function's Python type hints (``include_schemas``),</span>
+</span><span id="line-692"><span class="sd">    - ``components.schemas`` for every dataclass / ``TypedDict`` / Pydantic</span>
+</span><span id="line-693"><span class="sd">      model / ``NamedTuple`` / ``Enum`` referenced,</span>
+</span><span id="line-694"><span class="sd">    - ``x-python-signature`` metadata (``include_python_metadata``),</span>
+</span><span id="line-695"><span class="sd">    - request examples (``include_examples``).</span>
 </span><span id="line-696">
-</span><span id="line-697">        <span class="n">path_item</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"paths"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">{})</span>
-</span><span id="line-698">
-</span><span id="line-699">        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
-</span><span id="line-700">            <span class="n">method_lower</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-</span><span id="line-701">            <span class="n">operation</span> <span class="o">=</span> <span class="n">path_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">method_lower</span><span class="p">,</span> <span class="p">{})</span>
-</span><span id="line-702">            <span class="k">if</span> <span class="ow">not</span> <span class="n">operation</span><span class="p">:</span>
-</span><span id="line-703">                <span class="k">continue</span>
+</span><span id="line-697"><span class="sd">    Args:</span>
+</span><span id="line-698"><span class="sd">        app: the FastAPI application.</span>
+</span><span id="line-699"><span class="sd">        include_examples: add example requests.</span>
+</span><span id="line-700"><span class="sd">        include_python_metadata: add ``x-python-*`` extensions.</span>
+</span><span id="line-701"><span class="sd">        include_schemas: derive ``requestBody`` / ``responses`` /</span>
+</span><span id="line-702"><span class="sd">            ``components.schemas`` from the Python type hints.</span>
+</span><span id="line-703"><span class="sd">        include_transformers: add (placeholder) transformation metadata.</span>
 </span><span id="line-704">
-</span><span id="line-705">            <span class="k">if</span> <span class="n">include_python_metadata</span><span class="p">:</span>
-</span><span id="line-706">                <span class="n">operation</span><span class="p">[</span><span class="s2">"x-python-signature"</span><span class="p">]</span> <span class="o">=</span> <span class="n">extract_function_signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-</span><span id="line-707">
-</span><span id="line-708">            <span class="k">if</span> <span class="n">include_schemas</span><span class="p">:</span>
-</span><span id="line-709">                <span class="n">_apply_operation_schemas</span><span class="p">(</span>
-</span><span id="line-710">                    <span class="n">operation</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">param_specs</span><span class="p">,</span> <span class="n">method_lower</span><span class="p">,</span> <span class="n">component_schemas</span>
-</span><span id="line-711">                <span class="p">)</span>
-</span><span id="line-712">
-</span><span id="line-713">            <span class="k">if</span> <span class="n">include_examples</span><span class="p">:</span>
-</span><span id="line-714">                <span class="n">examples</span> <span class="o">=</span> <span class="n">generate_examples_for_function</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-</span><span id="line-715">                <span class="k">if</span> <span class="n">examples</span> <span class="ow">and</span> <span class="s2">"requestBody"</span> <span class="ow">in</span> <span class="n">operation</span><span class="p">:</span>
-</span><span id="line-716">                    <span class="n">content</span> <span class="o">=</span> <span class="n">operation</span><span class="p">[</span><span class="s2">"requestBody"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"content"</span><span class="p">,</span> <span class="p">{})</span>
-</span><span id="line-717">                    <span class="n">json_content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"application/json"</span><span class="p">,</span> <span class="p">{})</span>
-</span><span id="line-718">                    <span class="n">json_content</span><span class="p">[</span><span class="s2">"examples"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-719">                        <span class="sa">f</span><span class="s2">"example_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">:</span> <span class="n">ex</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ex</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
-</span><span id="line-720">                    <span class="p">}</span>
-</span><span id="line-721">
-</span><span id="line-722">            <span class="k">if</span> <span class="n">include_transformers</span><span class="p">:</span>
-</span><span id="line-723">                <span class="n">operation</span><span class="p">[</span><span class="s2">"x-python-transformers"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-724">                    <span class="s2">"note"</span><span class="p">:</span> <span class="s2">"Type transformation metadata would go here"</span>
-</span><span id="line-725">                <span class="p">}</span>
-</span><span id="line-726">
-</span><span id="line-727">            <span class="n">path_item</span><span class="p">[</span><span class="n">method_lower</span><span class="p">]</span> <span class="o">=</span> <span class="n">operation</span>
-</span><span id="line-728">
-</span><span id="line-729">        <span class="n">schema</span><span class="p">[</span><span class="s2">"paths"</span><span class="p">][</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="n">path_item</span>
-</span><span id="line-730">
-</span><span id="line-731">    <span class="k">if</span> <span class="n">include_schemas</span> <span class="ow">and</span> <span class="n">component_schemas</span><span class="p">:</span>
-</span><span id="line-732">        <span class="n">components</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"components"</span><span class="p">,</span> <span class="p">{})</span>
-</span><span id="line-733">        <span class="n">components</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"schemas"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">component_schemas</span><span class="p">)</span>
+</span><span id="line-705"><span class="sd">    Returns:</span>
+</span><span id="line-706"><span class="sd">        the enhanced OpenAPI schema dictionary.</span>
+</span><span id="line-707"><span class="sd">    """</span>
+</span><span id="line-708">    <span class="n">schema</span> <span class="o">=</span> <span class="n">get_openapi</span><span class="p">(</span>
+</span><span id="line-709">        <span class="n">title</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+</span><span id="line-710">        <span class="n">version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+</span><span id="line-711">        <span class="n">openapi_version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">openapi_version</span><span class="p">,</span>
+</span><span id="line-712">        <span class="n">description</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+</span><span id="line-713">        <span class="n">routes</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">routes</span><span class="p">,</span>
+</span><span id="line-714">    <span class="p">)</span>
+</span><span id="line-715">
+</span><span id="line-716">    <span class="kn">from</span><span class="w"> </span><span class="nn">qh.app</span><span class="w"> </span><span class="kn">import</span> <span class="n">inspect_routes</span>
+</span><span id="line-717">
+</span><span id="line-718">    <span class="n">routes</span> <span class="o">=</span> <span class="n">inspect_routes</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+</span><span id="line-719">    <span class="n">component_schemas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="line-720">
+</span><span id="line-721">    <span class="k">for</span> <span class="n">route_info</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">:</span>
+</span><span id="line-722">        <span class="n">func</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"function"</span><span class="p">)</span>
+</span><span id="line-723">        <span class="k">if</span> <span class="ow">not</span> <span class="n">func</span><span class="p">:</span>
+</span><span id="line-724">            <span class="k">continue</span>
+</span><span id="line-725">
+</span><span id="line-726">        <span class="n">path</span> <span class="o">=</span> <span class="n">route_info</span><span class="p">[</span><span class="s2">"path"</span><span class="p">]</span>
+</span><span id="line-727">        <span class="n">methods</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"methods"</span><span class="p">,</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">])</span>
+</span><span id="line-728">        <span class="n">param_specs</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"param_specs"</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">or</span> <span class="p">{}</span>
+</span><span id="line-729">
+</span><span id="line-730">        <span class="k">if</span> <span class="n">path</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"/openapi.json"</span><span class="p">,</span> <span class="s2">"/docs"</span><span class="p">,</span> <span class="s2">"/redoc"</span><span class="p">]:</span>
+</span><span id="line-731">            <span class="k">continue</span>
+</span><span id="line-732">
+</span><span id="line-733">        <span class="n">path_item</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"paths"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="p">{})</span>
 </span><span id="line-734">
-</span><span id="line-735">    <span class="k">return</span> <span class="n">schema</span></div>
-
-</span><span id="line-736">
-</span><span id="line-737">
-</span><span id="line-738"><span class="k">def</span><span class="w"> </span><span class="nf">_apply_operation_schemas</span><span class="p">(</span>
-</span><span id="line-739">    <span class="n">operation</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-</span><span id="line-740">    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
-</span><span id="line-741">    <span class="n">param_specs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-</span><span id="line-742">    <span class="n">method_lower</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="line-743">    <span class="n">component_schemas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-</span><span id="line-744"><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-745"><span class="w">    </span><span class="sd">"""Fill an operation's ``requestBody`` / ``parameters`` / ``responses`` in place."""</span>
-</span><span id="line-746">    <span class="n">parameters</span> <span class="o">=</span> <span class="n">build_parameters</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">param_specs</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
-</span><span id="line-747">    <span class="k">if</span> <span class="n">parameters</span><span class="p">:</span>
-</span><span id="line-748">        <span class="n">existing</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"parameters"</span><span class="p">,</span> <span class="p">[])</span>
-</span><span id="line-749">        <span class="n">operation</span><span class="p">[</span><span class="s2">"parameters"</span><span class="p">]</span> <span class="o">=</span> <span class="n">existing</span> <span class="o">+</span> <span class="n">parameters</span>
-</span><span id="line-750">
-</span><span id="line-751">    <span class="k">if</span> <span class="n">method_lower</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"post"</span><span class="p">,</span> <span class="s2">"put"</span><span class="p">,</span> <span class="s2">"patch"</span><span class="p">):</span>
-</span><span id="line-752">        <span class="n">body</span> <span class="o">=</span> <span class="n">build_request_body_schema</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">param_specs</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
-</span><span id="line-753">        <span class="k">if</span> <span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-754">            <span class="n">request_body</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"requestBody"</span><span class="p">,</span> <span class="p">{})</span>
-</span><span id="line-755">            <span class="n">request_body</span><span class="p">[</span><span class="s2">"required"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"required"</span><span class="p">))</span>
-</span><span id="line-756">            <span class="n">content</span> <span class="o">=</span> <span class="n">request_body</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"content"</span><span class="p">,</span> <span class="p">{})</span>
-</span><span id="line-757">            <span class="n">content</span><span class="p">[</span><span class="s2">"application/json"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"schema"</span><span class="p">:</span> <span class="n">body</span><span class="p">}</span>
-</span><span id="line-758">
-</span><span id="line-759">    <span class="n">response</span> <span class="o">=</span> <span class="n">build_response_schema</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
-</span><span id="line-760">    <span class="n">responses</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"responses"</span><span class="p">,</span> <span class="p">{})</span>
-</span><span id="line-761">    <span class="n">ok</span> <span class="o">=</span> <span class="n">responses</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"200"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Successful Response"</span><span class="p">})</span>
-</span><span id="line-762">    <span class="n">ok</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"content"</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">"application/json"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"schema"</span><span class="p">:</span> <span class="n">response</span><span class="p">}</span>
-</span><span id="line-763">
+</span><span id="line-735">        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
+</span><span id="line-736">            <span class="n">method_lower</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span id="line-737">            <span class="n">operation</span> <span class="o">=</span> <span class="n">path_item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">method_lower</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-738">            <span class="k">if</span> <span class="ow">not</span> <span class="n">operation</span><span class="p">:</span>
+</span><span id="line-739">                <span class="k">continue</span>
+</span><span id="line-740">
+</span><span id="line-741">            <span class="k">if</span> <span class="n">include_python_metadata</span><span class="p">:</span>
+</span><span id="line-742">                <span class="n">operation</span><span class="p">[</span><span class="s2">"x-python-signature"</span><span class="p">]</span> <span class="o">=</span> <span class="n">extract_function_signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+</span><span id="line-743">
+</span><span id="line-744">            <span class="k">if</span> <span class="n">include_schemas</span><span class="p">:</span>
+</span><span id="line-745">                <span class="n">_apply_operation_schemas</span><span class="p">(</span>
+</span><span id="line-746">                    <span class="n">operation</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">param_specs</span><span class="p">,</span> <span class="n">method_lower</span><span class="p">,</span> <span class="n">component_schemas</span>
+</span><span id="line-747">                <span class="p">)</span>
+</span><span id="line-748">
+</span><span id="line-749">            <span class="k">if</span> <span class="n">include_examples</span><span class="p">:</span>
+</span><span id="line-750">                <span class="n">examples</span> <span class="o">=</span> <span class="n">generate_examples_for_function</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+</span><span id="line-751">                <span class="k">if</span> <span class="n">examples</span> <span class="ow">and</span> <span class="s2">"requestBody"</span> <span class="ow">in</span> <span class="n">operation</span><span class="p">:</span>
+</span><span id="line-752">                    <span class="n">content</span> <span class="o">=</span> <span class="n">operation</span><span class="p">[</span><span class="s2">"requestBody"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"content"</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-753">                    <span class="n">json_content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"application/json"</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-754">                    <span class="n">json_content</span><span class="p">[</span><span class="s2">"examples"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-755">                        <span class="sa">f</span><span class="s2">"example_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">:</span> <span class="n">ex</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ex</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
+</span><span id="line-756">                    <span class="p">}</span>
+</span><span id="line-757">
+</span><span id="line-758">            <span class="k">if</span> <span class="n">include_transformers</span><span class="p">:</span>
+</span><span id="line-759">                <span class="n">operation</span><span class="p">[</span><span class="s2">"x-python-transformers"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-760">                    <span class="s2">"note"</span><span class="p">:</span> <span class="s2">"Type transformation metadata would go here"</span>
+</span><span id="line-761">                <span class="p">}</span>
+</span><span id="line-762">
+</span><span id="line-763">            <span class="n">path_item</span><span class="p">[</span><span class="n">method_lower</span><span class="p">]</span> <span class="o">=</span> <span class="n">operation</span>
 </span><span id="line-764">
+</span><span id="line-765">        <span class="n">schema</span><span class="p">[</span><span class="s2">"paths"</span><span class="p">][</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="n">path_item</span>
+</span><span id="line-766">
+</span><span id="line-767">    <span class="k">if</span> <span class="n">include_schemas</span> <span class="ow">and</span> <span class="n">component_schemas</span><span class="p">:</span>
+</span><span id="line-768">        <span class="n">components</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"components"</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-769">        <span class="n">components</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"schemas"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">component_schemas</span><span class="p">)</span>
+</span><span id="line-770">
+</span><span id="line-771">    <span class="k">return</span> <span class="n">schema</span></div>
+
+</span><span id="line-772">
+</span><span id="line-773">
+</span><span id="line-774"><span class="k">def</span><span class="w"> </span><span class="nf">_apply_operation_schemas</span><span class="p">(</span>
+</span><span id="line-775">    <span class="n">operation</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+</span><span id="line-776">    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+</span><span id="line-777">    <span class="n">param_specs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+</span><span id="line-778">    <span class="n">method_lower</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-779">    <span class="n">component_schemas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+</span><span id="line-780"><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-781"><span class="w">    </span><span class="sd">"""Fill an operation's ``requestBody`` / ``parameters`` / ``responses`` in place."""</span>
+</span><span id="line-782">    <span class="n">parameters</span> <span class="o">=</span> <span class="n">build_parameters</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">param_specs</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
+</span><span id="line-783">    <span class="k">if</span> <span class="n">parameters</span><span class="p">:</span>
+</span><span id="line-784">        <span class="n">existing</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"parameters"</span><span class="p">,</span> <span class="p">[])</span>
+</span><span id="line-785">        <span class="n">operation</span><span class="p">[</span><span class="s2">"parameters"</span><span class="p">]</span> <span class="o">=</span> <span class="n">existing</span> <span class="o">+</span> <span class="n">parameters</span>
+</span><span id="line-786">
+</span><span id="line-787">    <span class="k">if</span> <span class="n">method_lower</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"post"</span><span class="p">,</span> <span class="s2">"put"</span><span class="p">,</span> <span class="s2">"patch"</span><span class="p">):</span>
+</span><span id="line-788">        <span class="n">body</span> <span class="o">=</span> <span class="n">build_request_body_schema</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">param_specs</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
+</span><span id="line-789">        <span class="k">if</span> <span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-790">            <span class="n">request_body</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"requestBody"</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-791">            <span class="n">request_body</span><span class="p">[</span><span class="s2">"required"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"required"</span><span class="p">))</span>
+</span><span id="line-792">            <span class="n">content</span> <span class="o">=</span> <span class="n">request_body</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"content"</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-793">            <span class="n">content</span><span class="p">[</span><span class="s2">"application/json"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"schema"</span><span class="p">:</span> <span class="n">body</span><span class="p">}</span>
+</span><span id="line-794">
+</span><span id="line-795">    <span class="n">response</span> <span class="o">=</span> <span class="n">build_response_schema</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
+</span><span id="line-796">    <span class="n">responses</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"responses"</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-797">    <span class="n">ok</span> <span class="o">=</span> <span class="n">responses</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"200"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Successful Response"</span><span class="p">})</span>
+</span><span id="line-798">    <span class="n">ok</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"content"</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">"application/json"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"schema"</span><span class="p">:</span> <span class="n">response</span><span class="p">}</span>
+</span><span id="line-799">
+</span><span id="line-800">
 <div class="viewcode-block" id="export_openapi">
 <a class="viewcode-back" href="../../_autosummary/qh.openapi.html#qh.export_openapi">[docs]</a>
-</span><span id="line-765"><span class="k">def</span><span class="w"> </span><span class="nf">export_openapi</span><span class="p">(</span>
-</span><span id="line-766">    <span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span>
-</span><span id="line-767">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-768">    <span class="n">include_examples</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-769">    <span class="n">include_python_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-770">    <span class="n">include_schemas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-771">    <span class="n">include_transformers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="line-772">    <span class="n">output_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-773"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-</span><span id="line-774"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-775"><span class="sd">    Export the enhanced OpenAPI schema, optionally writing it to a file.</span>
-</span><span id="line-776">
-</span><span id="line-777"><span class="sd">    Args:</span>
-</span><span id="line-778"><span class="sd">        app: the FastAPI application.</span>
-</span><span id="line-779"><span class="sd">        include_examples: include example requests.</span>
-</span><span id="line-780"><span class="sd">        include_python_metadata: include ``x-python-*`` extensions.</span>
-</span><span id="line-781"><span class="sd">        include_schemas: derive ``requestBody`` / ``responses`` /</span>
-</span><span id="line-782"><span class="sd">            ``components.schemas`` from the Python type hints.</span>
-</span><span id="line-783"><span class="sd">        include_transformers: include transformation metadata.</span>
-</span><span id="line-784"><span class="sd">        output_file: optional path to write the JSON document to.</span>
-</span><span id="line-785">
-</span><span id="line-786"><span class="sd">    Returns:</span>
-</span><span id="line-787"><span class="sd">        the enhanced OpenAPI schema dictionary.</span>
-</span><span id="line-788">
-</span><span id="line-789"><span class="sd">    Example:</span>
-</span><span id="line-790">
-</span><span id="line-791"><span class="sd">        &gt;&gt;&gt; from qh import mk_app  # doctest: +SKIP</span>
-</span><span id="line-792"><span class="sd">        &gt;&gt;&gt; from qh.openapi import export_openapi  # doctest: +SKIP</span>
-</span><span id="line-793"><span class="sd">        &gt;&gt;&gt; app = mk_app([my_func])  # doctest: +SKIP</span>
-</span><span id="line-794"><span class="sd">        &gt;&gt;&gt; spec = export_openapi(app, include_examples=True)  # doctest: +SKIP</span>
-</span><span id="line-795"><span class="sd">    """</span>
-</span><span id="line-796">    <span class="n">schema</span> <span class="o">=</span> <span class="n">enhance_openapi_schema</span><span class="p">(</span>
-</span><span id="line-797">        <span class="n">app</span><span class="p">,</span>
-</span><span id="line-798">        <span class="n">include_examples</span><span class="o">=</span><span class="n">include_examples</span><span class="p">,</span>
-</span><span id="line-799">        <span class="n">include_python_metadata</span><span class="o">=</span><span class="n">include_python_metadata</span><span class="p">,</span>
-</span><span id="line-800">        <span class="n">include_schemas</span><span class="o">=</span><span class="n">include_schemas</span><span class="p">,</span>
-</span><span id="line-801">        <span class="n">include_transformers</span><span class="o">=</span><span class="n">include_transformers</span><span class="p">,</span>
-</span><span id="line-802">    <span class="p">)</span>
-</span><span id="line-803">
-</span><span id="line-804">    <span class="k">if</span> <span class="n">output_file</span><span class="p">:</span>
-</span><span id="line-805">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span id="line-806">            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-</span><span id="line-807">
-</span><span id="line-808">    <span class="k">return</span> <span class="n">schema</span></div>
+</span><span id="line-801"><span class="k">def</span><span class="w"> </span><span class="nf">export_openapi</span><span class="p">(</span>
+</span><span id="line-802">    <span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span>
+</span><span id="line-803">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-804">    <span class="n">include_examples</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-805">    <span class="n">include_python_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-806">    <span class="n">include_schemas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-807">    <span class="n">include_transformers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="line-808">    <span class="n">output_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-809"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="line-810"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-811"><span class="sd">    Export the enhanced OpenAPI schema, optionally writing it to a file.</span>
+</span><span id="line-812">
+</span><span id="line-813"><span class="sd">    Args:</span>
+</span><span id="line-814"><span class="sd">        app: the FastAPI application.</span>
+</span><span id="line-815"><span class="sd">        include_examples: include example requests.</span>
+</span><span id="line-816"><span class="sd">        include_python_metadata: include ``x-python-*`` extensions.</span>
+</span><span id="line-817"><span class="sd">        include_schemas: derive ``requestBody`` / ``responses`` /</span>
+</span><span id="line-818"><span class="sd">            ``components.schemas`` from the Python type hints.</span>
+</span><span id="line-819"><span class="sd">        include_transformers: include transformation metadata.</span>
+</span><span id="line-820"><span class="sd">        output_file: optional path to write the JSON document to.</span>
+</span><span id="line-821">
+</span><span id="line-822"><span class="sd">    Returns:</span>
+</span><span id="line-823"><span class="sd">        the enhanced OpenAPI schema dictionary.</span>
+</span><span id="line-824">
+</span><span id="line-825"><span class="sd">    Example:</span>
+</span><span id="line-826">
+</span><span id="line-827"><span class="sd">        &gt;&gt;&gt; from qh import mk_app  # doctest: +SKIP</span>
+</span><span id="line-828"><span class="sd">        &gt;&gt;&gt; from qh.openapi import export_openapi  # doctest: +SKIP</span>
+</span><span id="line-829"><span class="sd">        &gt;&gt;&gt; app = mk_app([my_func])  # doctest: +SKIP</span>
+</span><span id="line-830"><span class="sd">        &gt;&gt;&gt; spec = export_openapi(app, include_examples=True)  # doctest: +SKIP</span>
+</span><span id="line-831"><span class="sd">    """</span>
+</span><span id="line-832">    <span class="n">schema</span> <span class="o">=</span> <span class="n">enhance_openapi_schema</span><span class="p">(</span>
+</span><span id="line-833">        <span class="n">app</span><span class="p">,</span>
+</span><span id="line-834">        <span class="n">include_examples</span><span class="o">=</span><span class="n">include_examples</span><span class="p">,</span>
+</span><span id="line-835">        <span class="n">include_python_metadata</span><span class="o">=</span><span class="n">include_python_metadata</span><span class="p">,</span>
+</span><span id="line-836">        <span class="n">include_schemas</span><span class="o">=</span><span class="n">include_schemas</span><span class="p">,</span>
+</span><span id="line-837">        <span class="n">include_transformers</span><span class="o">=</span><span class="n">include_transformers</span><span class="p">,</span>
+</span><span id="line-838">    <span class="p">)</span>
+</span><span id="line-839">
+</span><span id="line-840">    <span class="k">if</span> <span class="n">output_file</span><span class="p">:</span>
+</span><span id="line-841">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="line-842">            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</span><span id="line-843">
+</span><span id="line-844">    <span class="k">return</span> <span class="n">schema</span></div>
 
-</span><span id="line-809">
-</span><span id="line-810">
+</span><span id="line-845">
+</span><span id="line-846">
 <div class="viewcode-block" id="install_enhanced_openapi">
 <a class="viewcode-back" href="../../_autosummary/qh.openapi.html#qh.install_enhanced_openapi">[docs]</a>
-</span><span id="line-811"><span class="k">def</span><span class="w"> </span><span class="nf">install_enhanced_openapi</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="o">**</span><span class="n">enhance_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
-</span><span id="line-812"><span class="w">    </span><span class="sd">"""Make ``app`` serve the enhanced OpenAPI schema at its ``/openapi.json``.</span>
-</span><span id="line-813">
-</span><span id="line-814"><span class="sd">    Overrides ``app.openapi`` so the document returned by FastAPI — and rendered</span>
-</span><span id="line-815"><span class="sd">    by ``/docs`` and ``/redoc`` — carries the request/response JSON Schema and</span>
-</span><span id="line-816"><span class="sd">    ``components.schemas`` derived from the wrapped functions' Python type hints.</span>
-</span><span id="line-817">
-</span><span id="line-818"><span class="sd">    The override is **defensive**: if enhancement raises for any reason, it</span>
-</span><span id="line-819"><span class="sd">    falls back to FastAPI's plain schema, so a converter bug can never turn</span>
-</span><span id="line-820"><span class="sd">    ``/openapi.json`` into a 500.</span>
-</span><span id="line-821">
-</span><span id="line-822"><span class="sd">    Args:</span>
-</span><span id="line-823"><span class="sd">        app: the FastAPI application (typically the result of :func:`qh.mk_app`).</span>
-</span><span id="line-824"><span class="sd">        **enhance_kwargs: forwarded to :func:`enhance_openapi_schema`.</span>
-</span><span id="line-825">
-</span><span id="line-826"><span class="sd">    Returns:</span>
-</span><span id="line-827"><span class="sd">        the same ``app``, for chaining.</span>
-</span><span id="line-828"><span class="sd">    """</span>
-</span><span id="line-829">
-</span><span id="line-830">    <span class="k">def</span><span class="w"> </span><span class="nf">custom_openapi</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-</span><span id="line-831">        <span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span><span class="p">:</span>
-</span><span id="line-832">            <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span>
-</span><span id="line-833">        <span class="k">try</span><span class="p">:</span>
-</span><span id="line-834">            <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span> <span class="o">=</span> <span class="n">enhance_openapi_schema</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="o">**</span><span class="n">enhance_kwargs</span><span class="p">)</span>
-</span><span id="line-835">        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-</span><span id="line-836">            <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span> <span class="o">=</span> <span class="n">get_openapi</span><span class="p">(</span>
-</span><span id="line-837">                <span class="n">title</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
-</span><span id="line-838">                <span class="n">version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
-</span><span id="line-839">                <span class="n">openapi_version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">openapi_version</span><span class="p">,</span>
-</span><span id="line-840">                <span class="n">description</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-</span><span id="line-841">                <span class="n">routes</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">routes</span><span class="p">,</span>
-</span><span id="line-842">            <span class="p">)</span>
-</span><span id="line-843">        <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span>
-</span><span id="line-844">
-</span><span id="line-845">    <span class="n">app</span><span class="o">.</span><span class="n">openapi</span> <span class="o">=</span> <span class="n">custom_openapi</span>  <span class="c1"># type: ignore[method-assign]</span>
-</span><span id="line-846">    <span class="k">return</span> <span class="n">app</span></div>
+</span><span id="line-847"><span class="k">def</span><span class="w"> </span><span class="nf">install_enhanced_openapi</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="o">**</span><span class="n">enhance_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
+</span><span id="line-848"><span class="w">    </span><span class="sd">"""Make ``app`` serve the enhanced OpenAPI schema at its ``/openapi.json``.</span>
+</span><span id="line-849">
+</span><span id="line-850"><span class="sd">    Overrides ``app.openapi`` so the document returned by FastAPI — and rendered</span>
+</span><span id="line-851"><span class="sd">    by ``/docs`` and ``/redoc`` — carries the request/response JSON Schema and</span>
+</span><span id="line-852"><span class="sd">    ``components.schemas`` derived from the wrapped functions' Python type hints.</span>
+</span><span id="line-853">
+</span><span id="line-854"><span class="sd">    The override is **defensive**: if enhancement raises for any reason, it</span>
+</span><span id="line-855"><span class="sd">    falls back to FastAPI's plain schema, so a converter bug can never turn</span>
+</span><span id="line-856"><span class="sd">    ``/openapi.json`` into a 500.</span>
+</span><span id="line-857">
+</span><span id="line-858"><span class="sd">    Args:</span>
+</span><span id="line-859"><span class="sd">        app: the FastAPI application (typically the result of :func:`qh.mk_app`).</span>
+</span><span id="line-860"><span class="sd">        **enhance_kwargs: forwarded to :func:`enhance_openapi_schema`.</span>
+</span><span id="line-861">
+</span><span id="line-862"><span class="sd">    Returns:</span>
+</span><span id="line-863"><span class="sd">        the same ``app``, for chaining.</span>
+</span><span id="line-864"><span class="sd">    """</span>
+</span><span id="line-865">
+</span><span id="line-866">    <span class="k">def</span><span class="w"> </span><span class="nf">custom_openapi</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="line-867">        <span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span><span class="p">:</span>
+</span><span id="line-868">            <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span>
+</span><span id="line-869">        <span class="k">try</span><span class="p">:</span>
+</span><span id="line-870">            <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span> <span class="o">=</span> <span class="n">enhance_openapi_schema</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="o">**</span><span class="n">enhance_kwargs</span><span class="p">)</span>
+</span><span id="line-871">        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+</span><span id="line-872">            <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span> <span class="o">=</span> <span class="n">get_openapi</span><span class="p">(</span>
+</span><span id="line-873">                <span class="n">title</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+</span><span id="line-874">                <span class="n">version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+</span><span id="line-875">                <span class="n">openapi_version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">openapi_version</span><span class="p">,</span>
+</span><span id="line-876">                <span class="n">description</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+</span><span id="line-877">                <span class="n">routes</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">routes</span><span class="p">,</span>
+</span><span id="line-878">            <span class="p">)</span>
+</span><span id="line-879">        <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span>
+</span><span id="line-880">
+</span><span id="line-881">    <span class="n">app</span><span class="o">.</span><span class="n">openapi</span> <span class="o">=</span> <span class="n">custom_openapi</span>  <span class="c1"># type: ignore[method-assign]</span>
+</span><span id="line-882">    <span class="k">return</span> <span class="n">app</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -1064,7 +1100,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=63b572e7"></script>
+    <script src="../../_static/documentation_options.js?v=8bafd125"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

@@ -13,5 +13,6 @@ qh.jsclient
       generate_js_function
       generate_ts_function
       generate_ts_interface
+      generate_ts_method
       python_type_to_ts_type
    

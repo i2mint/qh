@@ -23,6 +23,8 @@
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <link href="qh.jsclient.html.md" rel="alternate" type="text/markdown"/>
 <link href="../llms.txt" rel="describedby" type="text/markdown"/>
+<link href="qh.jsclient.html.md" rel="alternate" type="text/markdown"/>
+<link href="llms.txt" rel="describedby"/>
 <title>qh.jsclient | qh</title>
 <meta content="qh.jsclient | qh" property="og:title"/>
 <meta content="qh.jsclient | qh" name="twitter:title"/>
@@ -142,12 +144,15 @@
 <td><p>Generate JavaScript function for calling an endpoint.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#qh.jsclient.generate_ts_function" title="qh.jsclient.generate_ts_function"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_ts_function</span></code></a>(name, path, method[, ...])</p></td>
-<td><p>Generate TypeScript function for calling an endpoint.</p></td>
+<td><p>Generate TypeScript function with type annotations, preceded by its interface.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#qh.jsclient.generate_ts_interface" title="qh.jsclient.generate_ts_interface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_ts_interface</span></code></a>(name, signature_info)</p></td>
 <td><p>Generate TypeScript interface for function parameters.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#qh.jsclient.python_type_to_ts_type" title="qh.jsclient.python_type_to_ts_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">python_type_to_ts_type</span></code></a>(python_type)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#qh.jsclient.generate_ts_method" title="qh.jsclient.generate_ts_method"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate_ts_method</span></code></a>(name, path, method[, ...])</p></td>
+<td><p>Generate the TypeScript class method for one endpoint -- no interface.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qh.jsclient.python_type_to_ts_type" title="qh.jsclient.python_type_to_ts_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">python_type_to_ts_type</span></code></a>(python_type)</p></td>
 <td><p>Convert Python type annotation to TypeScript type.</p></td>
 </tr>
 </tbody>
@@ -235,7 +240,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="qh.jsclient.generate_ts_function">
 <span class="sig-prename descclassname"><span class="pre">qh.jsclient.</span></span><span class="sig-name descname"><span class="pre">generate_ts_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signature_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_axios</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/jsclient.html#generate_ts_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.jsclient.generate_ts_function" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.jsclient.generate_ts_function'">¶</a></dt>
-<dd><p>Generate TypeScript function for calling an endpoint.</p>
+<dd><p>Generate TypeScript function with type annotations, preceded by its interface.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -250,7 +255,7 @@
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>TypeScript function code with type annotations</p>
+<dd class="field-odd"><p>TypeScript function code</p>
 </dd>
 </dl>
 </dd></dl>
@@ -270,6 +275,37 @@
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypeScript interface definition</p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.jsclient.generate_ts_method">
+<span class="sig-prename descclassname"><span class="pre">qh.jsclient.</span></span><span class="sig-name descname"><span class="pre">generate_ts_method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signature_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_axios</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/jsclient.html#generate_ts_method"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.jsclient.generate_ts_method" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.jsclient.generate_ts_method'">¶</a></dt>
+<dd><p>Generate the TypeScript class method for one endpoint – no interface.</p>
+<blockquote>
+<div><p>Split out from <a class="reference internal" href="#qh.jsclient.generate_ts_function" title="qh.jsclient.generate_ts_function"><code class="xref py py-func docutils literal notranslate"><span class="pre">generate_ts_function()</span></code></a> because the assembler needs the method
+alone. It used to get it by splitting the combined string on its first blank line,
+which silently broke on a zero-parameter function: that interface is
+<a href="#id1"><span class="problematic" id="id2">``</span></a>export interface FooParams {</p>
+</div></blockquote>
+<dl>
+<dt>}``, whose blank line comes first, so the split</dt><dd><p>handed back a stray <code class="docutils literal notranslate"><span class="pre">}</span></code> that closed the client class early. Every method after
+the first no-argument endpoint landed outside the class.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>name: Function name
+path: HTTP path
+method: HTTP method
+signature_info: Optional x-python-signature metadata
+use_axios: Use axios instead of fetch</p>
+</dd>
+<dt>Returns:</dt><dd><p>TypeScript method source, indented for a class body</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -298,6 +334,7 @@
 <li><a :data-current="activeSection === '#qh.jsclient.generate_js_function'" class="reference internal" href="#qh.jsclient.generate_js_function"><code class="docutils literal notranslate"><span class="pre">generate_js_function()</span></code></a></li>
 <li><a :data-current="activeSection === '#qh.jsclient.generate_ts_function'" class="reference internal" href="#qh.jsclient.generate_ts_function"><code class="docutils literal notranslate"><span class="pre">generate_ts_function()</span></code></a></li>
 <li><a :data-current="activeSection === '#qh.jsclient.generate_ts_interface'" class="reference internal" href="#qh.jsclient.generate_ts_interface"><code class="docutils literal notranslate"><span class="pre">generate_ts_interface()</span></code></a></li>
+<li><a :data-current="activeSection === '#qh.jsclient.generate_ts_method'" class="reference internal" href="#qh.jsclient.generate_ts_method"><code class="docutils literal notranslate"><span class="pre">generate_ts_method()</span></code></a></li>
 <li><a :data-current="activeSection === '#qh.jsclient.python_type_to_ts_type'" class="reference internal" href="#qh.jsclient.python_type_to_ts_type"><code class="docutils literal notranslate"><span class="pre">python_type_to_ts_type()</span></code></a></li>
 </ul>
 </div>
@@ -312,7 +349,7 @@
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=63b572e7"></script>
+<script src="../_static/documentation_options.js?v=8bafd125"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

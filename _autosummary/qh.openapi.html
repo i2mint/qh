@@ -23,6 +23,8 @@
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <link href="qh.openapi.html.md" rel="alternate" type="text/markdown"/>
 <link href="../llms.txt" rel="describedby" type="text/markdown"/>
+<link href="qh.openapi.html.md" rel="alternate" type="text/markdown"/>
+<link href="llms.txt" rel="describedby"/>
 <title>qh.openapi | qh</title>
 <meta content="qh.openapi | qh" property="og:title"/>
 <meta content="qh.openapi | qh" name="twitter:title"/>
@@ -181,7 +183,7 @@ enhancement ever raises — so a converter bug can never break <code class="docu
 <td><p>Generate example requests/responses for a function.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#qh.openapi.get_python_type_name" title="qh.openapi.get_python_type_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_python_type_name</span></code></a>(type_hint)</p></td>
-<td><p>Get a string representation of a Python type.</p></td>
+<td><p>Get a string representation of a Python type, keeping its arguments.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#qh.openapi.install_enhanced_openapi" title="qh.openapi.install_enhanced_openapi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install_enhanced_openapi</span></code></a>(app, **enhance_kwargs)</p></td>
 <td><p>Make <code class="docutils literal notranslate"><span class="pre">app</span></code> serve the enhanced OpenAPI schema at its <code class="docutils literal notranslate"><span class="pre">/openapi.json</span></code>.</p></td>
@@ -342,13 +344,18 @@ model / <code class="docutils literal notranslate"><span class="pre">NamedTuple<
 <dl class="py function">
 <dt class="sig sig-object py" id="qh.openapi.get_python_type_name">
 <span class="sig-prename descclassname"><span class="pre">qh.openapi.</span></span><span class="sig-name descname"><span class="pre">get_python_type_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_hint</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/openapi.html#get_python_type_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.openapi.get_python_type_name" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.openapi.get_python_type_name'">¶</a></dt>
-<dd><p>Get a string representation of a Python type.</p>
-<p><code class="docutils literal notranslate"><span class="pre">inspect.Parameter.empty</span></code> and <code class="docutils literal notranslate"><span class="pre">None</span></code> map to <code class="docutils literal notranslate"><span class="pre">"Any"</span></code>. Anything else
-with a <code class="docutils literal notranslate"><span class="pre">__name__</span></code> uses that name alone, with no type arguments — on
-Python 3.10+ this includes builtin generic aliases (<code class="docutils literal notranslate"><span class="pre">list[int]</span></code>) and
-<code class="docutils literal notranslate"><span class="pre">typing</span></code> generics (<code class="docutils literal notranslate"><span class="pre">Optional[str]</span></code>, <code class="docutils literal notranslate"><span class="pre">Dict[str,</span> <span class="pre">int]</span></code>), since they
-all carry a <code class="docutils literal notranslate"><span class="pre">__name__</span></code> now. The bracketed-argument form only appears
-for the rare origin type that lacks <code class="docutils literal notranslate"><span class="pre">__name__</span></code>.</p>
+<dd><p>Get a string representation of a Python type, keeping its arguments.</p>
+<p><code class="docutils literal notranslate"><span class="pre">inspect.Parameter.empty</span></code> and <code class="docutils literal notranslate"><span class="pre">None</span></code> map to <code class="docutils literal notranslate"><span class="pre">"Any"</span></code>. A parameterised
+generic keeps its arguments — <code class="docutils literal notranslate"><span class="pre">list[int]</span></code> is <code class="docutils literal notranslate"><span class="pre">"list[int]"</span></code>, not
+<code class="docutils literal notranslate"><span class="pre">"list"</span></code> — because this string is the only type information the client
+generators ever see, and a client that types every <code class="docutils literal notranslate"><span class="pre">Optional[str]</span></code> as
+<code class="docutils literal notranslate"><span class="pre">any</span></code> is not a typed client.</p>
+<p>This used to check <code class="docutils literal notranslate"><span class="pre">__name__</span></code> first. On Python 3.10+ <code class="docutils literal notranslate"><span class="pre">typing</span></code> generics
+carry a <code class="docutils literal notranslate"><span class="pre">__name__</span></code>, so <code class="docutils literal notranslate"><span class="pre">Optional[str]</span></code> and <code class="docutils literal notranslate"><span class="pre">Union[int,</span> <span class="pre">str]</span></code> returned
+the bare words <code class="docutils literal notranslate"><span class="pre">"Optional"</span></code> and <code class="docutils literal notranslate"><span class="pre">"Union"</span></code> with every argument discarded,
+while the PEP 604 spelling <code class="docutils literal notranslate"><span class="pre">str</span> <span class="pre">|</span> <span class="pre">None</span></code> — which has no <code class="docutils literal notranslate"><span class="pre">__name__</span></code> — kept
+its arguments. Two spellings of one type produced different clients. The
+<code class="docutils literal notranslate"><span class="pre">__name__</span></code> shortcut is now taken only when there is nothing to lose.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>type_hint</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a></span>) – A type or type annotation, or <code class="docutils literal notranslate"><span class="pre">inspect.Parameter.empty</span></code>.</p>
@@ -357,7 +364,7 @@ for the rare origin type that lacks <code class="docutils literal notranslate"><
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The type’s bare name, e.g. <code class="docutils literal notranslate"><span class="pre">"int"</span></code> or <code class="docutils literal notranslate"><span class="pre">"list"</span></code>.</p>
+<dd class="field-odd"><p>The type’s name, with arguments when it has them.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -366,10 +373,20 @@ for the rare origin type that lacks <code class="docutils literal notranslate"><
 </span><span id="line-3"><span class="gp">&gt;&gt;&gt; </span><span class="n">get_python_type_name</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
 </span><span id="line-4"><span class="go">'str'</span>
 </span><span id="line-5"><span class="gp">&gt;&gt;&gt; </span><span class="n">get_python_type_name</span><span class="p">(</span><span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span>
-</span><span id="line-6"><span class="go">'list'</span>
-</span><span id="line-7"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+</span><span id="line-6"><span class="go">'list[int]'</span>
+</span><span id="line-7"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 </span><span id="line-8"><span class="gp">&gt;&gt;&gt; </span><span class="n">get_python_type_name</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span>
-</span><span id="line-9"><span class="go">'Optional'</span>
+</span><span id="line-9"><span class="go">'Union[str, NoneType]'</span>
+</span><span id="line-10"><span class="gp">&gt;&gt;&gt; </span><span class="n">get_python_type_name</span><span class="p">(</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span>
+</span><span id="line-11"><span class="go">'Union[int, str]'</span>
+</span></code></pre></div>
+</div>
+<p>Both spellings of an optional now produce the same string, so the
+generated client does not depend on which one the author typed:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="gp">&gt;&gt;&gt; </span><span class="n">get_python_type_name</span><span class="p">(</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="line-2"><span class="go">'Union[str, NoneType]'</span>
+</span><span id="line-3"><span class="gp">&gt;&gt;&gt; </span><span class="n">get_python_type_name</span><span class="p">(</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">==</span> <span class="n">get_python_type_name</span><span class="p">(</span><span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="line-4"><span class="go">True</span>
 </span></code></pre></div>
 </div>
 </dd></dl>
@@ -464,7 +481,7 @@ named composite type.</p>
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=63b572e7"></script>
+<script src="../_static/documentation_options.js?v=8bafd125"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

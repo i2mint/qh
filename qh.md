@@ -1,4 +1,4 @@
-> built 2026-09-15 12:16 UTC from 789a9ca (master) · qh 0.0.17. Details: build_info.json
+> built 2026-09-22 10:16 UTC from 33f4ea6 (master) · qh 0.0.18. Details: build_info.json
 
 # index.html.md
 
@@ -31,8 +31,10 @@ If you can’t let go of the old ways, the rest of this README is written for yo
 ```python
 from qh import mk_app
 
+
 def add(x: int, y: int) -> int:
     return x + y
+
 
 app = mk_app([add])
 ```
@@ -69,15 +71,14 @@ Handle long-running operations without blocking:
 ```python
 import time
 
+
 def expensive_computation(n: int) -> int:
     time.sleep(5)  # Simulate heavy processing
     return n * 2
 
+
 # Enable async support
-app = mk_app(
-    [expensive_computation],
-    async_funcs=['expensive_computation']
-)
+app = mk_app([expensive_computation], async_funcs=["expensive_computation"])
 ```
 
 Now clients can choose sync or async execution:
@@ -107,16 +108,18 @@ from qh import mk_app, TaskConfig, ProcessPoolTaskExecutor
 
 app = mk_app(
     [cpu_bound_func, io_bound_func],
-    async_funcs=['cpu_bound_func', 'io_bound_func'],
+    async_funcs=["cpu_bound_func", "io_bound_func"],
     async_config={
-        'cpu_bound_func': TaskConfig(
-            executor=ProcessPoolTaskExecutor(max_workers=4),  # Use processes for CPU-bound
+        "cpu_bound_func": TaskConfig(
+            executor=ProcessPoolTaskExecutor(
+                max_workers=4
+            ),  # Use processes for CPU-bound
             ttl=3600,  # Keep results for 1 hour
         ),
-        'io_bound_func': TaskConfig(
-            async_mode='always',  # Always async, no query param needed
+        "io_bound_func": TaskConfig(
+            async_mode="always",  # Always async, no query param needed
         ),
-    }
+    },
 )
 ```
 
@@ -134,16 +137,16 @@ Task management endpoints are automatically created:
 def get_user(user_id: str):
     return {"id": user_id, "name": "Alice"}
 
+
 def list_users():
     return [{"id": "1", "name": "Alice"}]
+
 
 def create_user(name: str, email: str):
     return {"id": "123", "name": name, "email": email}
 
-app = mk_app(
-    [get_user, list_users, create_user],
-    use_conventions=True
-)
+
+app = mk_app([get_user, list_users, create_user], use_conventions=True)
 ```
 
 This automatically creates RESTful routes:
@@ -157,28 +160,34 @@ This automatically creates RESTful routes:
 ```python
 from qh import mk_app, RouteConfig
 
+
 def add(x: int, y: int) -> int:
     return x + y
 
-app = mk_app({
-    add: RouteConfig(
-        path="/calculate/sum",
-        methods=["GET", "POST"],
-        tags=["math"],
-        summary="Add two numbers"
-    )
-})
+
+app = mk_app(
+    {
+        add: RouteConfig(
+            path="/calculate/sum",
+            methods=["GET", "POST"],
+            tags=["math"],
+            summary="Add two numbers",
+        )
+    }
+)
 ```
 
 Or use dictionaries:
 
 ```python
-app = mk_app({
-    add: {
-        "path": "/calculate/sum",
-        "methods": ["GET", "POST"],
+app = mk_app(
+    {
+        add: {
+            "path": "/calculate/sum",
+            "methods": ["GET", "POST"],
+        }
     }
-})
+)
 ```
 
 ### 🔄 Parameter Transformation
@@ -187,23 +196,26 @@ app = mk_app({
 import numpy as np
 from qh import mk_app, RouteConfig, TransformSpec, HttpLocation
 
+
 def add_arrays(a, b):
     return (a + b).tolist()
 
-app = mk_app({
-    add_arrays: RouteConfig(
-        param_overrides={
-            "a": TransformSpec(
-                http_location=HttpLocation.JSON_BODY,
-                ingress=np.array  # Convert JSON array to numpy
-            ),
-            "b": TransformSpec(
-                http_location=HttpLocation.JSON_BODY,
-                ingress=np.array
-            )
-        }
-    )
-})
+
+app = mk_app(
+    {
+        add_arrays: RouteConfig(
+            param_overrides={
+                "a": TransformSpec(
+                    http_location=HttpLocation.JSON_BODY,
+                    ingress=np.array,  # Convert JSON array to numpy
+                ),
+                "b": TransformSpec(
+                    http_location=HttpLocation.JSON_BODY, ingress=np.array
+                ),
+            }
+        )
+    }
+)
 ```
 
 Now you can send:
@@ -219,8 +231,10 @@ POST /add_arrays
 ```python
 from qh import mk_app, export_openapi, mk_client_from_app
 
+
 def greet(name: str) -> str:
     return f"Hello, {name}!"
+
 
 app = mk_app([greet])
 
@@ -233,6 +247,7 @@ result = client.greet(name="World")  # "Hello, World!"
 
 # Generate TypeScript client
 from qh import export_ts_client
+
 export_ts_client(app, "client.ts")
 ```
 
@@ -242,20 +257,21 @@ export_ts_client(app, "client.ts")
 from qh import register_type
 from datetime import datetime
 
+
 def custom_serializer(dt: datetime) -> str:
     return dt.isoformat()
+
 
 def custom_deserializer(s: str) -> datetime:
     return datetime.fromisoformat(s)
 
-register_type(
-    datetime,
-    serialize=custom_serializer,
-    deserialize=custom_deserializer
-)
+
+register_type(datetime, serialize=custom_serializer, deserialize=custom_deserializer)
+
 
 def get_event_time(event_id: str) -> datetime:
     return datetime.now()
+
 
 app = mk_app([get_event_time])
 ```
@@ -272,7 +288,7 @@ app = mk_app(
         default_methods=["POST"],
         title="Math API",
         version="1.0.0",
-    )
+    ),
 )
 ```
 
@@ -289,6 +305,7 @@ with test_app(app) as client:
 # Serve for external testing
 with serve_app(app, port=8001) as url:
     import requests
+
     response = requests.post(f"{url}/add", json={"x": 3, "y": 5})
 
 # Quick smoke test
@@ -328,21 +345,22 @@ from qh import mk_app
 # In-memory database
 users = {}
 
+
 def create_user(name: str, email: str) -> dict:
     user_id = str(len(users) + 1)
     users[user_id] = {"id": user_id, "name": name, "email": email}
     return users[user_id]
 
+
 def get_user(user_id: str) -> dict:
     return users.get(user_id, {})
+
 
 def list_users() -> list:
     return list(users.values())
 
-app = mk_app(
-    [create_user, get_user, list_users],
-    use_conventions=True
-)
+
+app = mk_app([create_user, get_user, list_users], use_conventions=True)
 ```
 
 ### File Processing with Async
@@ -351,17 +369,19 @@ app = mk_app(
 from qh import mk_app, TaskConfig
 import time
 
+
 def process_large_file(file_path: str) -> dict:
     time.sleep(10)  # Simulate heavy processing
     return {"status": "processed", "path": file_path}
 
+
 app = mk_app(
     [process_large_file],
-    async_funcs=['process_large_file'],
+    async_funcs=["process_large_file"],
     async_config=TaskConfig(
-        async_mode='always',  # Always async
+        async_mode="always",  # Always async
         ttl=3600,  # Keep results for 1 hour
-    )
+    ),
 )
 
 # Client usage:
@@ -376,14 +396,16 @@ def quick_lookup(key: str) -> str:
     """Fast operation - always synchronous"""
     return cache.get(key)
 
+
 def expensive_aggregation(days: int) -> dict:
     """Slow operation - supports async"""
     time.sleep(days * 2)
     return {"result": "..."}
 
+
 app = mk_app(
     [quick_lookup, expensive_aggregation],
-    async_funcs=['expensive_aggregation']  # Only expensive_aggregation supports async
+    async_funcs=["expensive_aggregation"],  # Only expensive_aggregation supports async
 )
 
 # quick_lookup is always synchronous
@@ -397,19 +419,18 @@ import numpy as np
 import pandas as pd
 from qh import mk_app, RouteConfig, TransformSpec
 
-def analyze_data(data: pd.DataFrame) -> dict:
-    return {
-        "mean": data.mean().to_dict(),
-        "std": data.std().to_dict()
-    }
 
-app = mk_app({
-    analyze_data: RouteConfig(
-        param_overrides={
-            "data": TransformSpec(ingress=pd.DataFrame)
-        }
-    )
-})
+def analyze_data(data: pd.DataFrame) -> dict:
+    return {"mean": data.mean().to_dict(), "std": data.std().to_dict()}
+
+
+app = mk_app(
+    {
+        analyze_data: RouteConfig(
+            param_overrides={"data": TransformSpec(ingress=pd.DataFrame)}
+        )
+    }
+)
 
 # POST /analyze_data
 # {"data": {"col1": [1,2,3], "col2": [4,5,6]}}
@@ -465,10 +486,12 @@ pip install au
 from au import async_compute, RQBackend
 from qh import mk_app, TaskConfig
 
+
 # Configure au with Redis backend
-@async_compute(backend=RQBackend('redis://localhost:6379'))
+@async_compute(backend=RQBackend("redis://localhost:6379"))
 def heavy_computation(n: int) -> int:
     return n * 2
+
 
 # Use with qh
 app = mk_app([heavy_computation])
@@ -480,6 +503,7 @@ app = mk_app([heavy_computation])
 ```python
 from qh import TaskExecutor, TaskConfig
 from concurrent.futures import ThreadPoolExecutor
+
 
 class MyCustomExecutor(TaskExecutor):
     def __init__(self):
@@ -493,15 +517,17 @@ class MyCustomExecutor(TaskExecutor):
                 callback(task_id, result, None)
             except Exception as e:
                 callback(task_id, None, e)
+
         self.pool.submit(wrapper)
 
     def shutdown(self, wait=True):
         self.pool.shutdown(wait=wait)
 
+
 app = mk_app(
     [my_func],
-    async_funcs=['my_func'],
-    async_config=TaskConfig(executor=MyCustomExecutor())
+    async_funcs=["my_func"],
+    async_config=TaskConfig(executor=MyCustomExecutor()),
 )
 ```
 
@@ -523,6 +549,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Add custom routes
 @app.get("/health")
 async def health():
@@ -542,7 +569,7 @@ To enable async:
 app = mk_app([my_func])
 
 # New (with async support)
-app = mk_app([my_func], async_funcs=['my_func'])
+app = mk_app([my_func], async_funcs=["my_func"])
 ```
 
 ## Contributing
@@ -3816,13 +3843,14 @@ Generates client code for calling qh HTTP services from JavaScript/TypeScript ap
 
 ### Functions
 
-| [`export_js_client`](_autosummary/qh.jsclient.html.md#qh.jsclient.export_js_client)(openapi_spec, \*[, ...])       | Generate JavaScript client class from OpenAPI spec.    |
-|--------------------------------------------------------------------------------------------------|--------------------------------------------------------|
-| [`export_ts_client`](_autosummary/qh.jsclient.html.md#qh.jsclient.export_ts_client)(openapi_spec, \*[, ...])       | Generate TypeScript client class from OpenAPI spec.    |
-| [`generate_js_function`](_autosummary/qh.jsclient.html.md#qh.jsclient.generate_js_function)(name, path, method[, ...]) | Generate JavaScript function for calling an endpoint.  |
-| [`generate_ts_function`](_autosummary/qh.jsclient.html.md#qh.jsclient.generate_ts_function)(name, path, method[, ...]) | Generate TypeScript function for calling an endpoint.  |
-| [`generate_ts_interface`](_autosummary/qh.jsclient.html.md#qh.jsclient.generate_ts_interface)(name, signature_info)     | Generate TypeScript interface for function parameters. |
-| [`python_type_to_ts_type`](_autosummary/qh.jsclient.html.md#qh.jsclient.python_type_to_ts_type)(python_type)             | Convert Python type annotation to TypeScript type.     |
+| [`export_js_client`](_autosummary/qh.jsclient.html.md#qh.jsclient.export_js_client)(openapi_spec, \*[, ...])       | Generate JavaScript client class from OpenAPI spec.                            |
+|--------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| [`export_ts_client`](_autosummary/qh.jsclient.html.md#qh.jsclient.export_ts_client)(openapi_spec, \*[, ...])       | Generate TypeScript client class from OpenAPI spec.                            |
+| [`generate_js_function`](_autosummary/qh.jsclient.html.md#qh.jsclient.generate_js_function)(name, path, method[, ...]) | Generate JavaScript function for calling an endpoint.                          |
+| [`generate_ts_function`](_autosummary/qh.jsclient.html.md#qh.jsclient.generate_ts_function)(name, path, method[, ...]) | Generate TypeScript function with type annotations, preceded by its interface. |
+| [`generate_ts_interface`](_autosummary/qh.jsclient.html.md#qh.jsclient.generate_ts_interface)(name, signature_info)     | Generate TypeScript interface for function parameters.                         |
+| [`generate_ts_method`](_autosummary/qh.jsclient.html.md#qh.jsclient.generate_ts_method)(name, path, method[, ...])   | Generate the TypeScript class method for one endpoint -- no interface.         |
+| [`python_type_to_ts_type`](_autosummary/qh.jsclient.html.md#qh.jsclient.python_type_to_ts_type)(python_type)             | Convert Python type annotation to TypeScript type.                             |
 
 ### qh.jsclient.export_js_client(openapi_spec, , class_name='ApiClient', use_axios=False, base_url='http://localhost:8000')
 
@@ -3889,7 +3917,7 @@ Generate JavaScript function for calling an endpoint.
 
 ### qh.jsclient.generate_ts_function(name, path, method, signature_info=None, use_axios=False)
 
-Generate TypeScript function for calling an endpoint.
+Generate TypeScript function with type annotations, preceded by its interface.
 
 * **Parameters:**
   * **name** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – Function name
@@ -3900,7 +3928,7 @@ Generate TypeScript function for calling an endpoint.
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 * **Returns:**
-  TypeScript function code with type annotations
+  TypeScript function code
 
 ### qh.jsclient.generate_ts_interface(name, signature_info)
 
@@ -3913,6 +3941,37 @@ Generate TypeScript interface for function parameters.
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 * **Returns:**
   TypeScript interface definition
+
+### qh.jsclient.generate_ts_method(name, path, method, signature_info=None, use_axios=False)
+
+Generate the TypeScript class method for one endpoint – no interface.
+
+> Split out from [`generate_ts_function()`](_autosummary/qh.jsclient.html.md#qh.jsclient.generate_ts_function) because the assembler needs the method
+> alone. It used to get it by splitting the combined string on its first blank line,
+> which silently broke on a zero-parameter function: that interface is
+
+> ```
+> ``
+> ```
+
+> export interface FooParams {
+
+}\`\`, whose blank line comes first, so the split
+: handed back a stray `}` that closed the client class early. Every method after
+  the first no-argument endpoint landed outside the class.
+  <br/>
+  Args:
+  : name: Function name
+    path: HTTP path
+    method: HTTP method
+    signature_info: Optional x-python-signature metadata
+    use_axios: Use axios instead of fetch
+  <br/>
+  Returns:
+  : TypeScript method source, indented for a class body
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### qh.jsclient.python_type_to_ts_type(python_type)
 
@@ -3972,7 +4031,7 @@ Public surface:
 | [`export_openapi`](_autosummary/qh.openapi.html.md#qh.openapi.export_openapi)(app, \*[, include_examples, ...])   | Export the enhanced OpenAPI schema, optionally writing it to a file.        |
 | [`extract_function_signature`](_autosummary/qh.openapi.html.md#qh.openapi.extract_function_signature)(func)                   | Extract detailed signature information from a function.                     |
 | [`generate_examples_for_function`](_autosummary/qh.openapi.html.md#qh.openapi.generate_examples_for_function)(func)               | Generate example requests/responses for a function.                         |
-| [`get_python_type_name`](_autosummary/qh.openapi.html.md#qh.openapi.get_python_type_name)(type_hint)                    | Get a string representation of a Python type.                               |
+| [`get_python_type_name`](_autosummary/qh.openapi.html.md#qh.openapi.get_python_type_name)(type_hint)                    | Get a string representation of a Python type, keeping its arguments.        |
 | [`install_enhanced_openapi`](_autosummary/qh.openapi.html.md#qh.openapi.install_enhanced_openapi)(app, \*\*enhance_kwargs)  | Make `app` serve the enhanced OpenAPI schema at its `/openapi.json`.        |
 | [`python_type_to_json_schema`](_autosummary/qh.openapi.html.md#qh.openapi.python_type_to_json_schema)(type_hint, schemas, \*) | Convert a Python type hint to a JSON Schema fragment.                       |
 
@@ -4094,21 +4153,27 @@ Uses type hints to generate sensible example values.
 
 ### qh.openapi.get_python_type_name(type_hint)
 
-Get a string representation of a Python type.
+Get a string representation of a Python type, keeping its arguments.
 
-`inspect.Parameter.empty` and `None` map to `"Any"`. Anything else
-with a `__name__` uses that name alone, with no type arguments — on
-Python 3.10+ this includes builtin generic aliases (`list[int]`) and
-`typing` generics (`Optional[str]`, `Dict[str, int]`), since they
-all carry a `__name__` now. The bracketed-argument form only appears
-for the rare origin type that lacks `__name__`.
+`inspect.Parameter.empty` and `None` map to `"Any"`. A parameterised
+generic keeps its arguments — `list[int]` is `"list[int]"`, not
+`"list"` — because this string is the only type information the client
+generators ever see, and a client that types every `Optional[str]` as
+`any` is not a typed client.
+
+This used to check `__name__` first. On Python 3.10+ `typing` generics
+carry a `__name__`, so `Optional[str]` and `Union[int, str]` returned
+the bare words `"Optional"` and `"Union"` with every argument discarded,
+while the PEP 604 spelling `str | None` — which has no `__name__` — kept
+its arguments. Two spellings of one type produced different clients. The
+`__name__` shortcut is now taken only when there is nothing to lose.
 
 * **Parameters:**
   **type_hint** ([`Any`](https://docs.python.org/3/library/typing.html#typing.Any)) – A type or type annotation, or `inspect.Parameter.empty`.
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 * **Returns:**
-  The type’s bare name, e.g. `"int"` or `"list"`.
+  The type’s name, with arguments when it has them.
 
 ### Examples
 
@@ -4118,10 +4183,22 @@ for the rare origin type that lacks `__name__`.
 >>> get_python_type_name(str)
 'str'
 >>> get_python_type_name(list[int])
-'list'
->>> from typing import Optional
+'list[int]'
+>>> from typing import Optional, Union
 >>> get_python_type_name(Optional[str])
-'Optional'
+'Union[str, NoneType]'
+>>> get_python_type_name(Union[int, str])
+'Union[int, str]'
+```
+
+Both spellings of an optional now produce the same string, so the
+generated client does not depend on which one the author typed:
+
+```pycon
+>>> get_python_type_name(str | None)
+'Union[str, NoneType]'
+>>> get_python_type_name(Optional[str]) == get_python_type_name(str | None)
+True
 ```
 
 ### qh.openapi.install_enhanced_openapi(app, \*\*enhance_kwargs)
@@ -5079,18 +5156,16 @@ Register a type in the global registry.
 
 # About this build
 
-This documentation was built on **2026-09-15 12:16 UTC** from commit <a href="https://github.com/i2mint/qh/commit/789a9cae460b66140a0b74a80fdb23427d4f8b24"><code>789a9ca</code></a> on branch <code>master</code>, for **qh 0.0.17** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-22 10:16 UTC** from commit <a href="https://github.com/i2mint/qh/commit/33f4ea6269e8051f0ef5489f08959af5b7241e99"><code>33f4ea6</code></a> on branch <code>master</code>, for **qh 0.0.18** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.17) is behind the latest release on PyPI (0.0.18): `pip install qh` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/qh/commit/789a9cae460b66140a0b74a80fdb23427d4f8b24"><code>789a9cae460b66140a0b74a80fdb23427d4f8b24</code></a> |
+| Commit              | <a href="https://github.com/i2mint/qh/commit/33f4ea6269e8051f0ef5489f08959af5b7241e99"><code>33f4ea6269e8051f0ef5489f08959af5b7241e99</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
 | Tags at this commit | none                                                                                                                                             |
 | Working tree        | clean                                                                                                                                            |
@@ -5101,15 +5176,15 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/qh</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/qh/actions/runs/34967663191">34967663191</a>            |
+| Run          | <a href="https://github.com/i2mint/qh/actions/runs/35714923159">35714923159</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>789a9cae460b66140a0b74a80fdb23427d4f8b24</code> (in the history of the built commit) |
+| Event commit | <code>33f4ea6269e8051f0ef5489f08959af5b7241e99</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.11  |
+| epythet  | 0.2.12  |
 | Sphinx   | 9.1.0   |
 | docutils | 0.22.4  |
 | Python   | 3.12.14 |
@@ -5128,14 +5203,14 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/qh/0.0.18/">0.0.18</a>, newer than the documented version (0.0.17).
+Latest release: <a href="https://pypi.org/project/qh/0.0.18/">0.0.18</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/qh && cd qh
-git checkout 789a9cae460b66140a0b74a80fdb23427d4f8b24
-pip install "epythet==0.2.11"
+git checkout 33f4ea6269e8051f0ef5489f08959af5b7241e99
+pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 
