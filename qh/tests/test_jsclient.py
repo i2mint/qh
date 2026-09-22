@@ -171,9 +171,12 @@ class TestTypeScriptClientGeneration:
         ts_code = export_ts_client(spec)
 
         # Check optional parameter syntax (? indicates optional)
-        assert "title?:" in ts_code or "title: " in ts_code
-        # Function should have title parameter
-        assert "greet(name: string, title:" in ts_code
+        assert "title?: string | null" in ts_code
+        # ...on the method too, not only in the interface. This assertion used to
+        # read `greet(name: string, title:` -- i.e. it pinned the defect where a
+        # parameter with a Python default was emitted as a REQUIRED TypeScript
+        # argument, forcing every caller to pass it.
+        assert "greet(name: string, title?: string | null)" in ts_code
 
     def test_ts_client_complex_types(self):
         """Test TypeScript client with complex return types."""
@@ -181,8 +184,8 @@ class TestTypeScriptClientGeneration:
         def analyze(numbers: list) -> dict:
             """Analyze a list of numbers."""
             return {
-                'count': len(numbers),
-                'sum': sum(numbers),
+                "count": len(numbers),
+                "sum": sum(numbers),
             }
 
         app = mk_app([analyze])
@@ -198,7 +201,7 @@ class TestTypeScriptClientGeneration:
         """Test TypeScript client with convention-based routing."""
 
         def get_user(user_id: str) -> dict:
-            return {'user_id': user_id, 'name': 'Test User'}
+            return {"user_id": user_id, "name": "Test User"}
 
         app = mk_app([get_user], use_conventions=True)
         spec = export_openapi(app, include_python_metadata=True)
@@ -249,7 +252,7 @@ class TestCodeQuality:
         """Test that generated code has valid syntax structure."""
 
         def test_func(a: int, b: str, c: bool) -> dict:
-            return {'a': a, 'b': b, 'c': c}
+            return {"a": a, "b": b, "c": c}
 
         app = mk_app([test_func])
         spec = export_openapi(app, include_python_metadata=True)
@@ -269,5 +272,5 @@ class TestCodeQuality:
             assert "return " in code
 
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])
