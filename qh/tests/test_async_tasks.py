@@ -22,6 +22,7 @@ def failing_function(x: int) -> int:
 async def async_function(x: int) -> int:
     """An async function."""
     import asyncio
+
     await asyncio.sleep(0.1)
     return x + 10
 
@@ -31,7 +32,7 @@ class TestBasicAsync:
 
     def test_sync_execution(self):
         """Test that functions work normally without async flag."""
-        app = mk_app([slow_function], async_funcs=['slow_function'])
+        app = mk_app([slow_function], async_funcs=["slow_function"])
 
         with test_app(app) as client:
             response = client.post("/slow_function", json={"x": 5})
@@ -40,7 +41,7 @@ class TestBasicAsync:
 
     def test_async_execution(self):
         """Test async execution returns task ID."""
-        app = mk_app([slow_function], async_funcs=['slow_function'])
+        app = mk_app([slow_function], async_funcs=["slow_function"])
 
         with test_app(app) as client:
             # Request async execution
@@ -52,7 +53,7 @@ class TestBasicAsync:
 
     def test_task_status(self):
         """Test checking task status."""
-        app = mk_app([slow_function], async_funcs=['slow_function'])
+        app = mk_app([slow_function], async_funcs=["slow_function"])
 
         with test_app(app) as client:
             # Submit task
@@ -68,7 +69,7 @@ class TestBasicAsync:
 
     def test_task_result_wait(self):
         """Test waiting for task result."""
-        app = mk_app([slow_function], async_funcs=['slow_function'])
+        app = mk_app([slow_function], async_funcs=["slow_function"])
 
         with test_app(app) as client:
             # Submit task
@@ -76,9 +77,7 @@ class TestBasicAsync:
             task_id = response.json()["task_id"]
 
             # Wait for result
-            response = client.get(
-                f"/tasks/{task_id}/result?wait=true&timeout=5"
-            )
+            response = client.get(f"/tasks/{task_id}/result?wait=true&timeout=5")
             assert response.status_code == 200
             result_data = response.json()
             assert result_data["status"] == "completed"
@@ -86,7 +85,7 @@ class TestBasicAsync:
 
     def test_task_not_found(self):
         """Test error when task doesn't exist."""
-        app = mk_app([slow_function], async_funcs=['slow_function'])
+        app = mk_app([slow_function], async_funcs=["slow_function"])
 
         with test_app(app) as client:
             response = client.get("/tasks/nonexistent/status")
@@ -95,14 +94,12 @@ class TestBasicAsync:
     def test_failed_task(self):
         """Test handling of failed tasks (error text exposed on request)."""
         app = mk_app(
-            [failing_function], async_funcs=['failing_function'], expose_errors=True
+            [failing_function], async_funcs=["failing_function"], expose_errors=True
         )
 
         with test_app(app) as client:
             # Submit task that will fail
-            response = client.post(
-                "/failing_function?async=true", json={"x": 5}
-            )
+            response = client.post("/failing_function?async=true", json={"x": 5})
             task_id = response.json()["task_id"]
 
             # Wait for the task to process
@@ -125,10 +122,10 @@ class TestAsyncConfig:
 
     def test_always_async(self):
         """Test always async mode."""
-        config = TaskConfig(async_mode='always')
+        config = TaskConfig(async_mode="always")
         app = mk_app(
             [slow_function],
-            async_funcs=['slow_function'],
+            async_funcs=["slow_function"],
             async_config=config,
         )
 
@@ -140,10 +137,10 @@ class TestAsyncConfig:
 
     def test_header_mode(self):
         """Test header-based async mode."""
-        config = TaskConfig(async_mode='header', async_header='X-Async')
+        config = TaskConfig(async_mode="header", async_header="X-Async")
         app = mk_app(
             [slow_function],
-            async_funcs=['slow_function'],
+            async_funcs=["slow_function"],
             async_config=config,
         )
 
@@ -167,7 +164,7 @@ class TestAsyncConfig:
         config = TaskConfig(ttl=1)  # 1 second TTL
         app = mk_app(
             [slow_function],
-            async_funcs=['slow_function'],
+            async_funcs=["slow_function"],
             async_config=config,
         )
 
@@ -198,7 +195,7 @@ class TestAsyncFunction:
 
     def test_async_function_sync_mode(self):
         """Test async function in sync mode."""
-        app = mk_app([async_function], async_funcs=['async_function'])
+        app = mk_app([async_function], async_funcs=["async_function"])
 
         with test_app(app) as client:
             response = client.post("/async_function", json={"x": 5})
@@ -207,7 +204,7 @@ class TestAsyncFunction:
 
     def test_async_function_async_mode(self):
         """Test async function in async mode."""
-        app = mk_app([async_function], async_funcs=['async_function'])
+        app = mk_app([async_function], async_funcs=["async_function"])
 
         with test_app(app) as client:
             # Submit as task
@@ -215,9 +212,7 @@ class TestAsyncFunction:
             task_id = response.json()["task_id"]
 
             # Wait for result
-            response = client.get(
-                f"/tasks/{task_id}/result?wait=true&timeout=5"
-            )
+            response = client.get(f"/tasks/{task_id}/result?wait=true&timeout=5")
             assert response.status_code == 200
             assert response.json()["result"] == 15
 
@@ -228,16 +223,14 @@ class TestTaskManagement:
     def test_list_tasks(self):
         """Test listing all tasks (the listing is opt-in)."""
         app = mk_app(
-            [slow_function], async_funcs=['slow_function'], global_task_endpoints=True
+            [slow_function], async_funcs=["slow_function"], global_task_endpoints=True
         )
 
         with test_app(app) as client:
             # Create a few tasks
             task_ids = []
             for i in range(3):
-                response = client.post(
-                    "/slow_function?async=true", json={"x": i}
-                )
+                response = client.post("/slow_function?async=true", json={"x": i})
                 task_ids.append(response.json()["task_id"])
 
             # List tasks
@@ -254,7 +247,7 @@ class TestTaskManagement:
 
     def test_delete_task(self):
         """Test deleting a task."""
-        app = mk_app([slow_function], async_funcs=['slow_function'])
+        app = mk_app([slow_function], async_funcs=["slow_function"])
 
         with test_app(app) as client:
             # Create task
@@ -271,7 +264,7 @@ class TestTaskManagement:
 
     def test_get_complete_task_info(self):
         """Test getting complete task information."""
-        app = mk_app([slow_function], async_funcs=['slow_function'])
+        app = mk_app([slow_function], async_funcs=["slow_function"])
 
         with test_app(app) as client:
             # Create and complete task
@@ -297,6 +290,7 @@ class TestMultipleFunctions:
 
     def test_multiple_async_funcs(self):
         """Test multiple functions with async support."""
+
         def func_a(x: int) -> int:
             time.sleep(0.2)
             return x * 2
@@ -307,7 +301,7 @@ class TestMultipleFunctions:
 
         app = mk_app(
             [func_a, func_b],
-            async_funcs=['func_a', 'func_b'],
+            async_funcs=["func_a", "func_b"],
         )
 
         with test_app(app) as client:
@@ -330,6 +324,7 @@ class TestMultipleFunctions:
 
     def test_mixed_sync_async(self):
         """Test mixing sync and async functions."""
+
         def sync_func(x: int) -> int:
             return x + 1
 
@@ -339,7 +334,7 @@ class TestMultipleFunctions:
 
         app = mk_app(
             [sync_func, async_func],
-            async_funcs=['async_func'],  # Only async_func supports async
+            async_funcs=["async_func"],  # Only async_func supports async
         )
 
         with test_app(app) as client:
@@ -357,3 +352,23 @@ class TestMultipleFunctions:
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
+
+
+def test_aget_result_matches_get_result():
+    """``TaskManager.aget_result``: the async twin of ``get_result``."""
+    import asyncio
+
+    from qh.async_tasks import TaskConfig
+
+    manager = TaskConfig().get_manager()
+    ok = manager.create_task(lambda: 1)
+    bad = manager.create_task(lambda: 1 / 0)
+
+    async def go():
+        assert await manager.aget_result(ok, wait=True, timeout=5) == 1
+        with pytest.raises(ValueError, match="failed"):
+            await manager.aget_result(bad, wait=True, timeout=5)
+        with pytest.raises(ValueError, match="not found"):
+            await manager.aget_result("nope", wait=True)
+
+    asyncio.run(go())

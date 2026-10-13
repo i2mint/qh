@@ -18,6 +18,7 @@ Design Philosophy:
 - HTTP-first patterns (query params, standard endpoints)
 """
 
+import asyncio
 import logging
 import uuid
 import time
@@ -31,6 +32,8 @@ from datetime import datetime
 from enum import Enum
 
 logger = logging.getLogger("qh")
+
+DFLT_RESULT_POLL_INTERVAL = 0.1  # seconds between checks while waiting for a result
 
 
 class TaskStatus(str, Enum):
@@ -489,7 +492,7 @@ class TaskManager:
                 if timeout and (time.time() - start_time) > timeout:
                     raise TimeoutError(f"Task did not complete within {timeout}s")
 
-                time.sleep(0.1)  # Poll every 100ms
+                time.sleep(DFLT_RESULT_POLL_INTERVAL)
         else:
             task_info = self.store.get_task(task_id)
             if not task_info:
@@ -501,6 +504,26 @@ class TaskManager:
                 raise ValueError(f"Task failed: {task_info.error}")
             else:
                 raise ValueError(f"Task not yet completed: {task_info.status.value}")
+
+    async def aget_result(
+        self, task_id: str, wait: bool = False, timeout: Optional[float] = None
+    ) -> Any:
+        """``get_result`` for async callers: waiting yields to the event loop
+        (``asyncio.sleep``) instead of blocking it, and holds no thread.
+
+        Raises the same ``ValueError`` / ``TimeoutError`` as ``get_result``.
+        """
+        if wait:
+            start_time = time.time()
+            while True:
+                task_info = self.store.get_task(task_id)
+                done = (TaskStatus.COMPLETED, TaskStatus.FAILED)
+                if not task_info or task_info.status in done:
+                    break
+                if timeout and (time.time() - start_time) > timeout:
+                    raise TimeoutError(f"Task did not complete within {timeout}s")
+                await asyncio.sleep(DFLT_RESULT_POLL_INTERVAL)
+        return self.get_result(task_id)
 
     def cancel_task(self, task_id: str) -> bool:
         """
