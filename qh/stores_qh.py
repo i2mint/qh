@@ -19,6 +19,7 @@ from typing import (
 )
 import inspect
 import logging
+import re
 from collections.abc import ItemsView, KeysView, ValuesView
 
 from fastapi import Body, Depends, FastAPI, HTTPException, Path, Query, Request
@@ -388,19 +389,70 @@ def create_method_endpoint(
         return endpoint
 
     else:
-        # Generic handler for other methods
-        async def endpoint(
-            user_id: str = Path(..., description="User ID"),
-            item_key: Optional[str] = Query(None, description="Item key"),
-        ):
-            obj = get_obj_fn(user_id)
-            args = []
-            if item_key is not None:
-                args.append(item_key)
-            result = _dispatch_mapping_method(obj, method_name, *args)
-            return JSONResponse(content={"value": _serialize_value(result)})
+        return _create_generic_method_endpoint(
+            method_name, config, get_obj_fn, path_params, _failure_detail
+        )
 
-        return endpoint
+
+def _create_generic_method_endpoint(
+    method_name: str,
+    config: Dict,
+    get_obj_fn: Callable,
+    path_params: List[str],
+    failure_detail: Callable[[Exception, str], str],
+):
+    """Endpoint for any mapping method outside the six with a dedicated branch.
+
+    The signature is built from the route: every name in ``path_params`` is a
+    required path parameter (they select the object, as in the other branches),
+    and so is every further ``{name}`` in ``config['path']``; those extra values
+    are passed, in route order, as positional arguments to the method. When
+    ``item_key`` is not among them it is an optional query parameter, passed as
+    the single argument when present.
+    """
+    route_params = re.findall(r"\{(\w+)\}", config.get("path", ""))
+    extra_params = [name for name in route_params if name not in path_params]
+    if len(set(path_params)) != len(path_params):
+        raise ValueError(f"Duplicate path params: {path_params}")
+
+    parameters = [
+        inspect.Parameter(
+            name,
+            inspect.Parameter.KEYWORD_ONLY,
+            annotation=str,
+            default=Path(..., description=name.replace("_", " ").capitalize()),
+        )
+        for name in [*path_params, *extra_params]
+    ]
+    has_item_key_query = "item_key" not in [*path_params, *extra_params]
+    if has_item_key_query:
+        parameters.append(
+            inspect.Parameter(
+                "item_key",
+                inspect.Parameter.KEYWORD_ONLY,
+                annotation=Optional[str],
+                default=Query(None, description="Item key"),
+            )
+        )
+
+    async def endpoint(**kwargs):
+        obj = get_obj_fn(*(kwargs[name] for name in path_params))
+        args = [kwargs[name] for name in extra_params]
+        if has_item_key_query and kwargs["item_key"] is not None:
+            args.append(kwargs["item_key"])
+        try:
+            result = _dispatch_mapping_method(obj, method_name, *args)
+        except KeyError:
+            raise HTTPException(status_code=404, detail="Item not found")
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=failure_detail(e, f"Failed to run {method_name}"),
+            )
+        return JSONResponse(content={"value": _serialize_value(result)})
+
+    endpoint.__signature__ = inspect.Signature(parameters)
+    return endpoint
 
 
 def add_store_access(
@@ -458,8 +510,6 @@ def add_store_access(
     methods = methods or DEFAULT_METHODS.copy()
 
     # Extract path parameters from base_path or get_obj_dispatch
-    import re
-
     if "path_params" in get_obj_dispatch:
         path_params = get_obj_dispatch["path_params"]
     else:
