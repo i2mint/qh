@@ -16,6 +16,7 @@ from i2.wrapper import Wrap
 
 from qh.rules import RuleChain, TransformSpec, HttpLocation, resolve_transform
 from qh.config import RouteConfig
+from qh.errors import DFLT_EXPOSE_ERRORS, error_detail
 
 
 async def extract_http_params(
@@ -129,6 +130,8 @@ def apply_egress_transform(
 def make_endpoint(
     func: Callable,
     route_config: RouteConfig,
+    *,
+    expose_errors: bool = DFLT_EXPOSE_ERRORS,
 ) -> Callable:
     """
     Create FastAPI endpoint from a function using i2.Wrap.
@@ -136,6 +139,10 @@ def make_endpoint(
     Args:
         func: The Python function to wrap
         route_config: Configuration for this route
+        expose_errors: If True, an exception raised by ``func`` is sent to the
+            client as ``"Error in <func>: <exception>"``. By default the client
+            gets a generic message with an error id, and the exception is logged
+            (see ``qh.errors``).
 
     Returns:
         Async endpoint function compatible with FastAPI
@@ -209,9 +216,11 @@ def make_endpoint(
         handler = get_type_handler(type(obj))
         if handler is not None:
             return handler.to_json(obj)
-        # Try to convert to dict if it has __dict__
+        # Fall back to the object's public attributes (never ``_private`` ones,
+        # which routinely hold tokens, hashes, connections...). Register a type
+        # handler (qh.types.register_type) to serialize a type differently.
         if hasattr(obj, "__dict__"):
-            return obj.__dict__
+            return {k: v for k, v in vars(obj).items() if not k.startswith("_")}
         # Otherwise convert to string
         return str(obj)
 
@@ -262,8 +271,11 @@ def make_endpoint(
                         else:
                             return func(**kwargs)
 
+                    task_owner = route_config.async_config.task_owner
                     task_id = task_manager.create_task(
-                        task_wrapper, kwargs=transformed_params
+                        task_wrapper,
+                        kwargs=transformed_params,
+                        owner=task_owner(request) if task_owner else None,
                     )
 
                     return JSONResponse(
@@ -301,10 +313,13 @@ def make_endpoint(
             raise
 
         except Exception as e:
-            # Wrap other exceptions
+            # Wrap other exceptions; the client only sees the exception text if
+            # expose_errors (it is always logged server-side)
             raise HTTPException(
                 status_code=500,
-                detail=f"Error in {func.__name__}: {str(e)}",
+                detail=error_detail(
+                    e, context=func.__name__, expose_errors=expose_errors
+                ),
             )
 
     # Set endpoint metadata

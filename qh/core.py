@@ -10,6 +10,9 @@ Main entry points:
 
 - ``mk_fastapi_app``: callables in, FastAPI app out
 - ``default_configs``: the mutable process-wide defaults (path, method, mappers)
+- ``safe_error_handler`` (the default) / ``exposing_error_handler``: what a client
+  sees when a function raises; set ``configs={'error_handler': exposing_error_handler}``
+  to send it the exception text (see ``qh.errors``)
 """
 
 from fastapi import FastAPI, Request, Response
@@ -19,13 +22,29 @@ from collections.abc import Iterable, Callable
 from i2.wrapper import Wrap
 import inspect
 
+from qh.errors import error_detail
+
+
+def safe_error_handler(exc: Exception) -> Response:
+    """Answer 500 with a generic message and an error id; the exception is logged."""
+    return Response(content=error_detail(exc, context="request"), status_code=500)
+
+
+def exposing_error_handler(exc: Exception) -> Response:
+    """Answer 500 with the exception text (the pre-``qh.errors`` behaviour)."""
+    detail = error_detail(
+        exc, context="request", expose_errors=True, exposed_text=str(exc)
+    )
+    return Response(content=detail, status_code=500)
+
+
 # Default configuration
 default_configs = {
     "http_method": "post",
     "path": lambda func: f"/{func.__name__}",
     "input_mapper": None,  # To be set below
     "output_mapper": None,  # To be set below
-    "error_handler": lambda exc: Response(content=str(exc), status_code=500),
+    "error_handler": safe_error_handler,
 }
 
 

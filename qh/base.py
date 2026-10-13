@@ -4,7 +4,8 @@ A lighter predecessor of ``qh.app.mk_app`` with a dict-based route config
 (``path``, ``methods``, ``input_trans``, ``output_trans``, ``defaults``,
 ``summary``, ``tags``). Every endpoint reads its arguments from the JSON body
 merged with path parameters, and answers ``422`` for a missing required
-argument and ``500`` for an exception raised by the function. Importing this
+argument and ``500`` for an exception raised by the function (whose text only
+reaches the client with ``expose_errors=True``; see ``qh.errors``). Importing this
 module also patches ``fastapi.testclient.TestClient.get`` to accept a ``json``
 body. Not used by ``qh.app``; kept for its tests and for ``mk_store_dispatcher``.
 
@@ -22,6 +23,8 @@ from fastapi.responses import JSONResponse
 from fastapi.testclient import TestClient as _TestClient
 import inspect
 import fastapi.testclient
+
+from qh.errors import DFLT_EXPOSE_ERRORS, error_detail
 
 # Export RouteConfig and AppConfig as dict aliases for test imports
 RouteConfig = dict[str, Any]
@@ -66,6 +69,8 @@ def _mk_endpoint(
     defaults: dict[str, Any],
     input_trans: Callable[[dict[str, Any]], dict[str, Any]] | None,
     output_trans: Callable[[Any], Any] | None,
+    *,
+    expose_errors: bool = DFLT_EXPOSE_ERRORS,
 ) -> Callable:
     """Create a FastAPI endpoint function for a given callable with its configuration."""
 
@@ -104,7 +109,15 @@ def _mk_endpoint(
         except HTTPException:
             raise
         except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
+            raise HTTPException(
+                status_code=500,
+                detail=error_detail(
+                    e,
+                    context=func.__name__,
+                    expose_errors=expose_errors,
+                    exposed_text=str(e),
+                ),
+            )
         # Output transformation
         if output_trans:
             result = output_trans(result)
@@ -120,9 +133,14 @@ def mk_fastapi_app(
     path_prefix: str = "",
     default_methods: list[str] | None = None,
     path_template: str = "/{func_name}",
+    expose_errors: bool = DFLT_EXPOSE_ERRORS,
 ) -> FastAPI:
     """
     Expose Python callables as FastAPI routes.
+
+    ``expose_errors=True`` sends the text of an exception raised by a function to
+    the client; by default it gets a generic message with an error id (see
+    ``qh.errors``).
 
     funcs can be:
 
@@ -172,7 +190,9 @@ def mk_fastapi_app(
         output_trans = conf.get("output_trans")
 
         # Create endpoint using the factory function
-        endpoint = _mk_endpoint(func, defaults, input_trans, output_trans)
+        endpoint = _mk_endpoint(
+            func, defaults, input_trans, output_trans, expose_errors=expose_errors
+        )
 
         route_params: dict[str, Any] = {
             "path": path,

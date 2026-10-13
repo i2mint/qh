@@ -18,6 +18,7 @@ Design Philosophy:
 - HTTP-first patterns (query params, standard endpoints)
 """
 
+import logging
 import uuid
 import time
 import threading
@@ -28,6 +29,8 @@ from dataclasses import dataclass, field, asdict
 from typing import Any, Callable, Dict, Optional, Protocol, Union
 from datetime import datetime
 from enum import Enum
+
+logger = logging.getLogger("qh")
 
 
 class TaskStatus(str, Enum):
@@ -51,7 +54,10 @@ class TaskInfo:
     completed_at: Optional[float] = None
     result: Any = None
     error: Optional[str] = None
+    # Server-side only: the task endpoints never send it to clients
     traceback: Optional[str] = None
+    # Who created the task, as returned by ``TaskConfig.task_owner`` (if set)
+    owner: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
@@ -316,6 +322,15 @@ class TaskConfig:
     # Default executor type if not specified: 'thread' or 'process'
     default_executor: str = "thread"
 
+    # Optional ``task_owner(request) -> str`` identifying the caller (e.g. from an
+    # auth header or session). When set, each task records its creator and the
+    # task endpoints answer 404 to anyone else (and the global task listing, if
+    # enabled, only shows the caller's own tasks). It may raise
+    # ``HTTPException(401)`` for unauthenticated requests. The task store must keep
+    # ``TaskInfo.owner`` (``InMemoryTaskStore`` does); if it does not, every
+    # ownership check fails closed.
+    task_owner: Optional[Callable[[Any], str]] = None
+
     def get_store(self) -> TaskStore:
         """Get or create the task store."""
         if self.store is None:
@@ -355,6 +370,8 @@ class TaskManager:
         func: Callable,
         args: tuple = (),
         kwargs: Optional[dict] = None,
+        *,
+        owner: Optional[str] = None,
     ) -> str:
         """
         Create and submit a new task.
@@ -363,6 +380,7 @@ class TaskManager:
             func: Function to execute asynchronously
             args: Positional arguments
             kwargs: Keyword arguments
+            owner: Who created the task (see ``TaskConfig.task_owner``)
 
         Returns:
             Task ID
@@ -377,6 +395,7 @@ class TaskManager:
         task_info = self.store.get_task(task_id)  # Get fresh copy
         task_info.status = TaskStatus.RUNNING
         task_info.started_at = time.time()
+        task_info.owner = owner
         self.store.update_task(task_info)
 
         # Submit for execution (after status is set to running)
@@ -406,6 +425,7 @@ class TaskManager:
             task_info.traceback = "".join(
                 traceback.format_exception(type(error), error, error.__traceback__)
             )
+            logger.error("Task %s failed", task_id, exc_info=error)
         else:
             task_info.status = TaskStatus.COMPLETED
             task_info.result = result

@@ -125,7 +125,17 @@ def test_error_handling(client_error):
     """Test that errors are handled correctly."""
     response = client_error.post("/error_prone_func", json={})
     assert response.status_code == 500
-    assert "Something went wrong" in response.text
+    # the exception text stays server-side by default
+    assert "Something went wrong" not in response.text
+    assert "error id" in response.text
+
+
+def test_exposing_error_handler_opt_in():
+    from qh.core import exposing_error_handler
+
+    response = exposing_error_handler(ValueError("Something went wrong"))
+    assert response.status_code == 500
+    assert b"Something went wrong" in response.body
 
 
 def test_no_args_function(client_no_args):
