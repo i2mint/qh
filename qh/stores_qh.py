@@ -150,6 +150,7 @@ def create_method_endpoint(
     path_params: Optional[List[str]] = None,
     *,
     expose_errors: bool = DFLT_EXPOSE_ERRORS,
+    base_path: str = "",
 ):
     """
     Create an endpoint function for a specific mapping method.
@@ -162,6 +163,9 @@ def create_method_endpoint(
         expose_errors: If True, a failing store operation sends its exception
             text to the client; by default the client gets a generic message
             with an error id (see ``qh.errors``).
+        base_path: The route the method's ``config['path']`` is appended to; only
+            read by the generic branch, to tell whether ``item_key`` is already a
+            path parameter.
 
     Returns:
         An async endpoint function compatible with FastAPI
@@ -390,7 +394,7 @@ def create_method_endpoint(
 
     else:
         return _create_generic_method_endpoint(
-            method_name, config, get_obj_fn, path_params, _failure_detail
+            method_name, config, get_obj_fn, path_params, _failure_detail, base_path
         )
 
 
@@ -400,6 +404,7 @@ def _create_generic_method_endpoint(
     get_obj_fn: Callable,
     path_params: List[str],
     failure_detail: Callable[[Exception, str], str],
+    base_path: str = "",
 ):
     """Endpoint for any mapping method outside the six with a dedicated branch.
 
@@ -410,7 +415,8 @@ def _create_generic_method_endpoint(
     ``item_key`` is not among them it is an optional query parameter, passed as
     the single argument when present.
     """
-    route_params = re.findall(r"\{(\w+)\}", config.get("path", ""))
+    _params = lambda text: re.findall(r"\{(\w+)(?::\w+)?\}", text)  # noqa: E731
+    route_params = _params(config.get("path", ""))
     extra_params = [name for name in route_params if name not in path_params]
     if len(set(path_params)) != len(path_params):
         raise ValueError(f"Duplicate path params: {path_params}")
@@ -424,7 +430,11 @@ def _create_generic_method_endpoint(
         )
         for name in [*path_params, *extra_params]
     ]
-    has_item_key_query = "item_key" not in [*path_params, *extra_params]
+    has_item_key_query = "item_key" not in [
+        *path_params,
+        *extra_params,
+        *_params(base_path),
+    ]
     if has_item_key_query:
         parameters.append(
             inspect.Parameter(
@@ -514,7 +524,7 @@ def add_store_access(
         path_params = get_obj_dispatch["path_params"]
     else:
         # Extract from base_path
-        path_params = re.findall(r"\{(\w+)\}", base_path)
+        path_params = re.findall(r"\{(\w+)(?::\w+)?\}", base_path)
 
     # Process methods dict to apply defaults
     for method_name, config in list(methods.items()):
@@ -561,14 +571,26 @@ def add_store_access(
             raise HTTPException(status_code=error_code, detail=_not_found_detail(args))
         return obj
 
-    # Reorder endpoints to prioritize static routes over dynamic ones
-    ordered_methods = [
+    # Register static routes before dynamic ones (``/{item_key}`` would otherwise
+    # shadow a custom method at a fixed path such as ``/search``)
+    dunders = [
         "__iter__",
         "__len__",
         "__contains__",
         "__getitem__",
         "__setitem__",
         "__delitem__",
+    ]
+    custom = [name for name in methods if name not in dunders]
+
+    def _is_static(name):
+        return "{" not in ((methods.get(name) or {}).get("path", ""))
+
+    ordered_methods = [
+        *dunders[:3],
+        *(name for name in custom if _is_static(name)),
+        *dunders[3:],
+        *(name for name in custom if not _is_static(name)),
     ]
     for method_name in ordered_methods:
         config = methods.get(method_name)
@@ -583,27 +605,7 @@ def add_store_access(
             _get_obj_or_error,
             path_params,
             expose_errors=expose_errors,
-        )
-        getattr(app, http_method)(
-            path,
-            response_model=config.get("response_model", None),
-            description=description,
-            dependencies=list(dependencies or []),
-        )(endpoint)
-
-    # Register any additional methods not in the ordered list
-    for method_name, config in methods.items():
-        if method_name in ordered_methods or not config:
-            continue
-        path = base_path + config.get("path", "")
-        http_method = config.get("method", "get")
-        description = config.get("description", f"Execute {method_name} on the store")
-        endpoint = create_method_endpoint(
-            method_name,
-            config,
-            _get_obj_or_error,
-            path_params,
-            expose_errors=expose_errors,
+            base_path=base_path,
         )
         getattr(app, http_method)(
             path,

@@ -57,3 +57,28 @@ def test_custom_method_failures_use_the_error_policy():
     r = c.get("/users/u/s/boom")
     assert r.status_code == 400 and SECRET not in r.text
     assert c.get("/users/u/s/get", params={"item_key": "zz"}).status_code == 404
+
+
+def test_custom_static_route_is_not_shadowed_by_getitem():
+    c = _client(
+        "/users/{user_id}/s",
+        __getitem__=None,
+        get=dict(path="/get"),
+    )
+    assert c.get("/users/u/s/get").json() == {"value": "no key"}
+    assert c.get("/users/u/s/a").json() == {"value": 1}
+
+
+def test_route_converter_still_names_the_argument():
+    c = _client("/users/{user_id}/s", pair=dict(path="/pair/{k:path}"))
+    assert c.get("/users/u/s/pair/x").json() == {"value": ["x"]}
+
+
+def test_item_key_in_base_path_is_not_also_a_query_parameter():
+    stores = {("u",): _Store(a=1)}
+    app = add_store_access(
+        lambda *ids: stores[tuple(ids)],
+        methods=dict(get=dict(path="")),
+        base_path="/users/{user_id}/s/{item_key}",
+    )
+    assert TestClient(app).get("/users/u/s/a").status_code == 200
