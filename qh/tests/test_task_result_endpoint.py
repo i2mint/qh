@@ -100,9 +100,12 @@ def test_delete_task():
     }
 
 
-def test_legacy_name_keyed_task_routes():
+def test_legacy_name_keyed_task_routes(monkeypatch):
     """``add_task_endpoints`` / ``add_global_task_endpoints`` without configs use the
-    process-wide registry (``get_task_manager``)."""
+    process-wide registry (``get_task_manager``), here emptied of other tests' tasks."""
+    import qh.async_tasks
+
+    monkeypatch.setattr(qh.async_tasks, "_task_managers", {})
     func_name = "legacy_registry_work"
     manager = get_task_manager(func_name)
     task_id = manager.create_task(work, kwargs={"x": 4})
@@ -114,3 +117,36 @@ def test_legacy_name_keyed_task_routes():
     assert client.get(f"/tasks/{task_id}/result").json()["result"] == 8
     listed = {t["task_id"]: t for t in client.get("/tasks/").json()["tasks"]}
     assert listed[task_id]["function"] == func_name
+
+
+def test_waiting_for_a_result_does_not_stall_other_requests():
+    """``?wait=true`` used to poll with ``time.sleep`` on the event loop, so every
+    other request waited as long as the task did."""
+    import asyncio
+
+    import httpx
+
+    _release.clear()
+    app = mk_app([gated_work, work], async_funcs=["gated_work"])
+
+    async def go():
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://t") as c:
+            r = await c.post("/gated_work?async=true", json={"x": 1})
+            task_id = r.json()["task_id"]
+            started = time.monotonic()
+            waiting = asyncio.create_task(
+                c.get(f"/tasks/{task_id}/result", params={"wait": True, "timeout": 5})
+            )
+            await asyncio.sleep(0.2)  # the waiter is now waiting
+            other = await c.post("/work", json={"x": 3})
+            other_took = time.monotonic() - started
+            _release.set()
+            return other.json(), other_took, (await waiting).json()
+
+    try:
+        other, other_took, waited = asyncio.run(go())
+    finally:
+        _release.set()
+    assert other == 6 and other_took < 2  # the gate would hold it 5s
+    assert waited["result"] == 1
