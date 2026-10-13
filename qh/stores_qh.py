@@ -490,7 +490,7 @@ def add_store_access(
         error_params = {param: arg for param, arg in zip(path_params, args)}
         try:
             return get_obj_dispatch["error_message"].format(**error_params)
-        except (KeyError, IndexError):  # no template, or one naming other params
+        except (KeyError, IndexError, AttributeError, ValueError):  # no or bad template
             return "Object not found"
 
     def _get_obj_or_error(*args) -> Mapping:
