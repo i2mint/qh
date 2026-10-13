@@ -177,3 +177,4 @@ def test_starlette_http_exception_from_get_mall_passes_through():
 
     r = TestClient(add_mall_access(get_mall)).get("/users/u/mall")
     assert r.status_code == 418 and r.json()["detail"] == "teapot"
+
