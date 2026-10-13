@@ -149,7 +149,9 @@ def _add_task_routes(
         task_manager, _ = _find_visible_task(task_id, request, sources)
 
         try:
-            result = task_manager.get_result(task_id, wait=wait, timeout=timeout)
+            # never the blocking ``get_result`` here: it would stall every other
+            # request on the event loop for as long as it waits
+            result = await task_manager.aget_result(task_id, wait=wait, timeout=timeout)
             return {
                 "task_id": task_id,
                 "status": "completed",
