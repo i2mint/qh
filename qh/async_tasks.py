@@ -351,6 +351,7 @@ class TaskConfig:
         Each config has its own manager (``qh.mk_app`` uses it rather than the
         process-wide, name-keyed ``get_task_manager`` registry, so two apps
         exposing functions with the same name never see each other's tasks).
+        Apps built with the same ``TaskConfig`` object do share its tasks.
         """
         if self._manager is None:
             self._manager = TaskManager(self)

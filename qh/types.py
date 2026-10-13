@@ -211,6 +211,14 @@ def _is_pydantic_model(obj) -> bool:
     return isinstance(obj, BaseModel)
 
 
+def _walk_container(obj, walk):
+    from collections.abc import Mapping
+
+    if isinstance(obj, Mapping):
+        return {k: walk(v) for k, v in obj.items()}
+    return [walk(v) for v in obj]
+
+
 def public_jsonable(obj: Any, *, _path: tuple = ()) -> Any:
     """Prepare a value for JSON encoding (``fastapi.encoders.jsonable_encoder``)
     without ever exposing ``_private`` attributes of the objects inside it.
@@ -226,6 +234,7 @@ def public_jsonable(obj: Any, *, _path: tuple = ()) -> Any:
     >>> public_jsonable({'_id': 1, 'items': [Inner()]})
     {'_id': 1, 'items': [{'name': 'x'}]}
     """
+    from collections.abc import Iterable
     from enum import Enum
     import dataclasses
     from fastapi.encoders import ENCODERS_BY_TYPE
@@ -239,14 +248,20 @@ def public_jsonable(obj: Any, *, _path: tuple = ()) -> Any:
     def walk(value):
         return public_jsonable(value, _path=path)
 
-    if isinstance(obj, dict):
-        return {k: walk(v) for k, v in obj.items()}
-    if isinstance(obj, (list, tuple, set, frozenset)):
-        return [walk(v) for v in obj]
+    # plain containers are walked first (the registry has identity handlers for
+    # them, which would skip the objects inside)
+    if isinstance(obj, (dict, list, tuple, set, frozenset)):
+        return _walk_container(obj, walk)
     handler = get_type_handler(type(obj))
     if handler is not None:
         return handler.to_json(obj)
-    if _is_pydantic_model(obj) or isinstance(obj, tuple(ENCODERS_BY_TYPE)):
+    if _is_pydantic_model(obj):
+        return obj
+    # any other mapping or iterable (deque, generator, custom Mapping...) is walked
+    # too, so that the objects inside it go through this filter
+    if isinstance(obj, Iterable) and not isinstance(obj, (bytes, bytearray)):
+        return _walk_container(obj, walk)
+    if isinstance(obj, tuple(ENCODERS_BY_TYPE)):
         return obj
     if dataclasses.is_dataclass(obj) and not isinstance(obj, type):
         return {

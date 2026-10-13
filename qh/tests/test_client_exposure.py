@@ -284,3 +284,29 @@ def test_empty_owner_fails_closed():
     task_id = client.post("/work?async=true", json={"x": 1}).json()["task_id"]
     time.sleep(POLL_INTERVAL)
     assert client.get(f"/tasks/{task_id}/status").status_code == 404
+
+
+def other_containers_output():
+    from collections import deque
+    from types import MappingProxyType
+
+    return {
+        "d": deque([Inner()]),
+        "m": MappingProxyType({"k": Inner()}),
+        "g": (Inner() for _ in range(1)),
+        "s": frozenset([1]),
+        "raw": b"ok",
+    }
+
+
+def test_private_attributes_never_leak_through_other_containers():
+    client = TestClient(mk_app([other_containers_output]))
+    response = client.post("/other_containers_output", json={})
+    assert "SECRET" not in response.text
+    assert response.json() == {
+        "d": [{"label": "in"}],
+        "m": {"k": {"label": "in"}},
+        "g": [{"label": "in"}],
+        "s": [1],
+        "raw": "ok",
+    }
