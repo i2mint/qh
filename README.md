@@ -546,6 +546,8 @@ Clients now see less by default; each old behaviour is one keyword away:
 | Task endpoints never send a task's traceback, and send a failed task's error text only with `expose_errors=True`. | `expose_errors=True` (tracebacks stay server-side) |
 | Objects without a registered type handler (and dataclasses), at any depth and in task results, are serialized from their public attributes only (no `_private` ones; dict keys are kept). | Register a type handler for that type (`qh.types.register_type`) |
 
+`qh.core` is removed: its `mk_fastapi_app` answered 500 on every call since it was added. Use `qh.mk_app` (or `qh.base.mk_fastapi_app`).
+
 To restrict tasks to the caller that created them, give the `TaskConfig` a `task_owner(request) -> str`; anyone else gets a 404 from the task endpoints:
 
 ```python

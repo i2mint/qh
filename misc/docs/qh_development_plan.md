@@ -18,7 +18,7 @@ Transform `qh` into a clean, robust, and boilerplate-free tool for bidirectional
 **Current Problem**: qh has multiple entry points with inconsistent patterns:
 - `qh/main.py`: Uses py2http's `mk_app`
 - `qh/base.py`: Has `mk_fastapi_app` with `_mk_endpoint`
-- `qh/core.py`: Has another `mk_fastapi_app` with Wrap pattern
+- `qh/core.py`: Has another `mk_fastapi_app` with Wrap pattern (removed in i2mint/qh#17: it never worked)
 - `qh/stores_qh.py`: Specialized store dispatching
 
 **Solution**: Create a single, unified API in `qh/app.py`:
