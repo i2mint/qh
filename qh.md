@@ -1,4 +1,4 @@
-> built 2026-10-13 02:39 UTC from 77f3981 (master) · qh 0.0.21. Details: build_info.json
+> built 2026-10-13 05:19 UTC from 94d182c (master) · qh 0.0.22. Details: build_info.json
 
 # index.html.md
 
@@ -562,12 +562,14 @@ async def health():
 
 Clients now see less by default; each old behaviour is one keyword away:
 
-| Default now                                                                                                                                                                               | Old behaviour                                                                                                                                                                             |
-|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| An exception raised by a function gives the client a generic 500 with an error id; the exception (with traceback) is logged server-side under that id (`qh.errors`).                      | `mk_app(..., expose_errors=True)` (or `AppConfig(expose_errors=True)`; `qh.base.mk_fastapi_app(..., expose_errors=True)`; `qh.core`: `configs={'error_handler': exposing_error_handler}`) |
-| `GET /tasks/` (all tasks of all callers) is not added.                                                                                                                                    | `mk_app(..., global_task_endpoints=True)`                                                                                                                                                 |
-| Task endpoints never send a task’s traceback, and send a failed task’s error text only with `expose_errors=True`.                                                                         | `expose_errors=True` (tracebacks stay server-side)                                                                                                                                        |
-| Objects without a registered type handler (and dataclasses), at any depth and in task results, are serialized from their public attributes only (no `_private` ones; dict keys are kept). | Register a type handler for that type (`qh.types.register_type`)                                                                                                                          |
+| Default now                                                                                                                                                                               | Old behaviour                                                                                                             |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| An exception raised by a function gives the client a generic 500 with an error id; the exception (with traceback) is logged server-side under that id (`qh.errors`).                      | `mk_app(..., expose_errors=True)` (or `AppConfig(expose_errors=True)`; `qh.base.mk_fastapi_app(..., expose_errors=True)`) |
+| `GET /tasks/` (all tasks of all callers) is not added.                                                                                                                                    | `mk_app(..., global_task_endpoints=True)`                                                                                 |
+| Task endpoints never send a task’s traceback, and send a failed task’s error text only with `expose_errors=True`.                                                                         | `expose_errors=True` (tracebacks stay server-side)                                                                        |
+| Objects without a registered type handler (and dataclasses), at any depth and in task results, are serialized from their public attributes only (no `_private` ones; dict keys are kept). | Register a type handler for that type (`qh.types.register_type`)                                                          |
+
+`qh.core` is removed: its `mk_fastapi_app` answered 500 on every call since it was added. Use `qh.mk_app` (or `qh.base.mk_fastapi_app`).
 
 To restrict tasks to the caller that created them, give the `TaskConfig` a `task_owner(request) -> str`; anyone else gets a 404 from the task endpoints:
 
@@ -2327,91 +2329,6 @@ More sophisticated rules can be added later.
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 
-# _autosummary/qh.core.html.md
-
-# qh.core
-
-Minimal function-to-route dispatch built on `i2.wrapper.Wrap`.
-
-An early, self-contained take on the qh idea: `mk_fastapi_app` turns a
-collection of callables into `POST` routes that read a JSON body as keyword
-arguments and return the JSON-encoded result. It is not used by `qh.app.mk_app`,
-the maintained entry point; prefer `qh.app` for new code. `mk_fastapi_app`’s
-`configs` and `func_configs` override the process-wide `default_configs`
-for that app only.
-
-Main entry points:
-
-- `mk_fastapi_app`: callables in, FastAPI app out
-- `default_configs`: the process-wide defaults (path, method, mappers)
-- `safe_error_handler` (the default) / `exposing_error_handler`: what a client
-  sees when a function raises; set `configs={'error_handler': exposing_error_handler}`
-  to send it the exception text (see `qh.errors`)
-
-### Functions
-
-| [`default_input_mapper`](_autosummary/qh.core.html.md#qh.core.default_input_mapper)(request)                   | Extract function arguments from request JSON body.                          |
-|--------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
-| [`default_output_mapper`](_autosummary/qh.core.html.md#qh.core.default_output_mapper)(output)                   | Serialize function output to JSON response.                                 |
-| [`exposing_error_handler`](_autosummary/qh.core.html.md#qh.core.exposing_error_handler)(exc)                     | Answer 500 with the exception text (the pre-`qh.errors` behaviour).         |
-| [`get_config_for_func`](_autosummary/qh.core.html.md#qh.core.get_config_for_func)(func, default_configs, ...) | Merge default and per-function configurations.                              |
-| [`mk_fastapi_app`](_autosummary/qh.core.html.md#qh.core.mk_fastapi_app)(funcs[, configs, func_configs])  | Create a FastAPI app from a collection of functions.                        |
-| [`mk_wrapped_func`](_autosummary/qh.core.html.md#qh.core.mk_wrapped_func)(func, input_mapper, ...[, ...]) | Wrap a function with ingress and egress transformations.                    |
-| [`safe_error_handler`](_autosummary/qh.core.html.md#qh.core.safe_error_handler)(exc)                         | Answer 500 with a generic message and an error id; the exception is logged. |
-
-### *async* qh.core.default_input_mapper(request)
-
-Extract function arguments from request JSON body.
-
-* **Return type:**
-  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple), [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)]
-
-### qh.core.default_output_mapper(output)
-
-Serialize function output to JSON response.
-
-* **Return type:**
-  `Response`
-
-### qh.core.exposing_error_handler(exc)
-
-Answer 500 with the exception text (the pre-`qh.errors` behaviour).
-
-* **Return type:**
-  `Response`
-
-### qh.core.get_config_for_func(func, default_configs, func_configs)
-
-Merge default and per-function configurations.
-
-* **Return type:**
-  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
-
-### qh.core.mk_fastapi_app(funcs, configs=None, func_configs=None)
-
-Create a FastAPI app from a collection of functions.
-
-* **Return type:**
-  `FastAPI`
-
-### qh.core.mk_wrapped_func(func, input_mapper, output_mapper, , error_handler=None)
-
-Wrap a function with ingress and egress transformations.
-
-`error_handler` turns an exception into the response; it defaults to
-`default_configs['error_handler']` (`safe_error_handler`).
-
-* **Return type:**
-  [`Callable`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)
-
-### qh.core.safe_error_handler(exc)
-
-Answer 500 with a generic message and an error id; the exception is logged.
-
-* **Return type:**
-  `Response`
-
-
 # _autosummary/qh.endpoint.html.md
 
 # qh.endpoint
@@ -4071,7 +3988,6 @@ Use au’s ThreadBackend with filesystem storage.
 | [`client`](_autosummary/qh.client.html.md#module-qh.client)                   | Python client generation from OpenAPI specs.                                         |
 | [`config`](_autosummary/qh.config.html.md#module-qh.config)                   | Configuration system for qh with layered defaults.                                   |
 | [`conventions`](_autosummary/qh.conventions.html.md#module-qh.conventions)         | Convention-based routing for qh.                                                     |
-| [`core`](_autosummary/qh.core.html.md#module-qh.core)                       | Minimal function-to-route dispatch built on `i2.wrapper.Wrap`.                       |
 | [`endpoint`](_autosummary/qh.endpoint.html.md#module-qh.endpoint)               | Endpoint creation using i2.Wrap to transform functions into FastAPI routes.          |
 | [`errors`](_autosummary/qh.errors.html.md#module-qh.errors)                   | What HTTP clients learn about server-side exceptions.                                |
 | [`jsclient`](_autosummary/qh.jsclient.html.md#module-qh.jsclient)               | JavaScript and TypeScript client generation from OpenAPI specs.                      |
@@ -5477,18 +5393,16 @@ Register a type in the global registry.
 
 # About this build
 
-This documentation was built on **2026-10-13 02:39 UTC** from commit <a href="https://github.com/i2mint/qh/commit/77f3981f73ced8618da867043ac71b93ab5792ea"><code>77f3981</code></a> on branch <code>master</code>, for **qh 0.0.21** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-13 05:19 UTC** from commit <a href="https://github.com/i2mint/qh/commit/94d182ca63a246016fe036a8d57ac4beb6a92a40"><code>94d182c</code></a> on branch <code>master</code>, for **qh 0.0.22** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.21) is behind the latest release on PyPI (0.0.22): `pip install qh` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/qh/commit/77f3981f73ced8618da867043ac71b93ab5792ea"><code>77f3981f73ced8618da867043ac71b93ab5792ea</code></a> |
+| Commit              | <a href="https://github.com/i2mint/qh/commit/94d182ca63a246016fe036a8d57ac4beb6a92a40"><code>94d182ca63a246016fe036a8d57ac4beb6a92a40</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
 | Tags at this commit | none                                                                                                                                             |
 | Working tree        | clean                                                                                                                                            |
@@ -5499,15 +5413,15 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/qh</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/qh/actions/runs/38337787495">38337787495</a>            |
+| Run          | <a href="https://github.com/i2mint/qh/actions/runs/38350628443">38350628443</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>77f3981f73ced8618da867043ac71b93ab5792ea</code> (in the history of the built commit) |
+| Event commit | <code>94d182ca63a246016fe036a8d57ac4beb6a92a40</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.12  |
+| epythet  | 0.2.13  |
 | Sphinx   | 9.1.0   |
 | docutils | 0.22.4  |
 | Python   | 3.12.15 |
@@ -5526,14 +5440,14 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/qh/0.0.22/">0.0.22</a>, newer than the documented version (0.0.21).
+Latest release: <a href="https://pypi.org/project/qh/0.0.22/">0.0.22</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/qh && cd qh
-git checkout 77f3981f73ced8618da867043ac71b93ab5792ea
-pip install "epythet==0.2.12"
+git checkout 94d182ca63a246016fe036a8d57ac4beb6a92a40
+pip install "epythet==0.2.13"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

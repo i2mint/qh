@@ -90,7 +90,6 @@
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.client.html">qh.client</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.config.html">qh.config</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.conventions.html">qh.conventions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.core.html">qh.core</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.endpoint.html">qh.endpoint</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.errors.html">qh.errors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.jsclient.html">qh.jsclient</a></li>
@@ -712,7 +711,7 @@
 </thead>
 <tbody>
 <tr class="row-even"><td><p>An exception raised by a function gives the client a generic 500 with an error id; the exception (with traceback) is logged server-side under that id (<code class="docutils literal notranslate"><span class="pre">qh.errors</span></code>).</p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">mk_app(...,</span> <span class="pre">expose_errors=True)</span></code> (or <code class="docutils literal notranslate"><span class="pre">AppConfig(expose_errors=True)</span></code>; <code class="docutils literal notranslate"><span class="pre">qh.base.mk_fastapi_app(...,</span> <span class="pre">expose_errors=True)</span></code>; <code class="docutils literal notranslate"><span class="pre">qh.core</span></code>: <code class="docutils literal notranslate"><span class="pre">configs={'error_handler':</span> <span class="pre">exposing_error_handler}</span></code>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mk_app(...,</span> <span class="pre">expose_errors=True)</span></code> (or <code class="docutils literal notranslate"><span class="pre">AppConfig(expose_errors=True)</span></code>; <code class="docutils literal notranslate"><span class="pre">qh.base.mk_fastapi_app(...,</span> <span class="pre">expose_errors=True)</span></code>)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/tasks/</span></code> (all tasks of all callers) is not added.</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">mk_app(...,</span> <span class="pre">global_task_endpoints=True)</span></code></p></td>
@@ -725,6 +724,7 @@
 </tr>
 </tbody>
 </table>
+<p><code class="docutils literal notranslate"><span class="pre">qh.core</span></code> is removed: its <code class="docutils literal notranslate"><span class="pre">mk_fastapi_app</span></code> answered 500 on every call since it was added. Use <code class="docutils literal notranslate"><span class="pre">qh.mk_app</span></code> (or <code class="docutils literal notranslate"><span class="pre">qh.base.mk_fastapi_app</span></code>).</p>
 <p>To restrict tasks to the caller that created them, give the <code class="docutils literal notranslate"><span class="pre">TaskConfig</span></code> a <code class="docutils literal notranslate"><span class="pre">task_owner(request)</span> <span class="pre">-&gt;</span> <span class="pre">str</span></code>; anyone else gets a 404 from the task endpoints:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPException</span>
 </span><span id="line-2">
@@ -785,7 +785,7 @@
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-13 02:39 UTC from <a href="https://github.com/i2mint/qh/commit/77f3981f73ced8618da867043ac71b93ab5792ea">77f3981</a> (master) · qh 0.0.21 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-13 05:19 UTC from <a href="https://github.com/i2mint/qh/commit/94d182ca63a246016fe036a8d57ac4beb6a92a40">94d182c</a> (master) · qh 0.0.22 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
@@ -844,7 +844,7 @@
 </div>
 </footer>
 </div>
-<script src="_static/documentation_options.js?v=a11416ff"></script>
+<script src="_static/documentation_options.js?v=96ec9c95"></script>
 <script src="_static/doctools.js?v=fd6eb6e6"></script>
 <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="_static/clipboard.min.js?v=a7894cd8"></script>

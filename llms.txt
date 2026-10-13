@@ -16,7 +16,6 @@
 - [qh.client](_autosummary/qh.client.html.md): Python client generation from OpenAPI specs.
 - [qh.config](_autosummary/qh.config.html.md): Configuration system for qh with layered defaults.
 - [qh.conventions](_autosummary/qh.conventions.html.md): Convention-based routing for qh.
-- [qh.core](_autosummary/qh.core.html.md): Minimal function-to-route dispatch built on &#96;i2.wrapper.Wrap&#96;.
 - [qh.endpoint](_autosummary/qh.endpoint.html.md): Endpoint creation using i2.Wrap to transform functions into FastAPI routes.
 - [qh.errors](_autosummary/qh.errors.html.md): What HTTP clients learn about server-side exceptions.
 - [qh.jsclient](_autosummary/qh.jsclient.html.md): JavaScript and TypeScript client generation from OpenAPI specs.
@@ -26,7 +25,7 @@
 - [qh.testing](_autosummary/qh.testing.html.md): Run a qh (or any FastAPI) app for a test: in-process, or on a real port.
 - [qh.types](_autosummary/qh.types.html.md): Type registry for qh - automatic serialization/deserialization for custom types.
 - [For AI agents](ai-agents.html.md): &#96;qh&#96; ships artifacts for coding agents alongside its code. This page lists
-- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-13 02:39 UTC&#42;&#42; from commit &lt;a href="https://github.com/i2m...
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-13 05:19 UTC&#42;&#42; from commit &lt;a href="https://github.com/i2m...
 
 ## Optional
 

@@ -14,7 +14,6 @@
 - [qh.client](qh.client.html.md): Python client generation from OpenAPI specs.
 - [qh.config](qh.config.html.md): Configuration system for qh with layered defaults.
 - [qh.conventions](qh.conventions.html.md): Convention-based routing for qh.
-- [qh.core](qh.core.html.md): Minimal function-to-route dispatch built on &#96;i2.wrapper.Wrap&#96;.
 - [qh.endpoint](qh.endpoint.html.md): Endpoint creation using i2.Wrap to transform functions into FastAPI routes.
 - [qh.errors](qh.errors.html.md): What HTTP clients learn about server-side exceptions.
 - [qh.jsclient](qh.jsclient.html.md): JavaScript and TypeScript client generation from OpenAPI specs.

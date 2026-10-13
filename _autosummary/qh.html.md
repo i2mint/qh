@@ -1540,7 +1540,6 @@ Use au’s ThreadBackend with filesystem storage.
 | [`client`](qh.client.html.md#module-qh.client)                   | Python client generation from OpenAPI specs.                                         |
 | [`config`](qh.config.html.md#module-qh.config)                   | Configuration system for qh with layered defaults.                                   |
 | [`conventions`](qh.conventions.html.md#module-qh.conventions)         | Convention-based routing for qh.                                                     |
-| [`core`](qh.core.html.md#module-qh.core)                       | Minimal function-to-route dispatch built on `i2.wrapper.Wrap`.                       |
 | [`endpoint`](qh.endpoint.html.md#module-qh.endpoint)               | Endpoint creation using i2.Wrap to transform functions into FastAPI routes.          |
 | [`errors`](qh.errors.html.md#module-qh.errors)                   | What HTTP clients learn about server-side exceptions.                                |
 | [`jsclient`](qh.jsclient.html.md#module-qh.jsclient)               | JavaScript and TypeScript client generation from OpenAPI specs.                      |

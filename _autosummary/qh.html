@@ -91,7 +91,6 @@
 <li class="toctree-l3"><a class="reference internal" href="qh.client.html">qh.client</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qh.config.html">qh.config</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qh.conventions.html">qh.conventions</a></li>
-<li class="toctree-l3"><a class="reference internal" href="qh.core.html">qh.core</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qh.endpoint.html">qh.endpoint</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qh.errors.html">qh.errors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qh.jsclient.html">qh.jsclient</a></li>
@@ -2076,31 +2075,28 @@ If None, uses au’s default from config</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="qh.conventions.html#module-qh.conventions" title="qh.conventions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">conventions</span></code></a></p></td>
 <td><p>Convention-based routing for qh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="qh.core.html#module-qh.core" title="qh.core"><code class="xref py py-obj docutils literal notranslate"><span class="pre">core</span></code></a></p></td>
-<td><p>Minimal function-to-route dispatch built on <code class="docutils literal notranslate"><span class="pre">i2.wrapper.Wrap</span></code>.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="qh.endpoint.html#module-qh.endpoint" title="qh.endpoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">endpoint</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="qh.endpoint.html#module-qh.endpoint" title="qh.endpoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">endpoint</span></code></a></p></td>
 <td><p>Endpoint creation using i2.Wrap to transform functions into FastAPI routes.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="qh.errors.html#module-qh.errors" title="qh.errors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">errors</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="qh.errors.html#module-qh.errors" title="qh.errors"><code class="xref py py-obj docutils literal notranslate"><span class="pre">errors</span></code></a></p></td>
 <td><p>What HTTP clients learn about server-side exceptions.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="qh.jsclient.html#module-qh.jsclient" title="qh.jsclient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jsclient</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="qh.jsclient.html#module-qh.jsclient" title="qh.jsclient"><code class="xref py py-obj docutils literal notranslate"><span class="pre">jsclient</span></code></a></p></td>
 <td><p>JavaScript and TypeScript client generation from OpenAPI specs.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="qh.openapi.html#module-qh.openapi" title="qh.openapi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openapi</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="qh.openapi.html#module-qh.openapi" title="qh.openapi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openapi</span></code></a></p></td>
 <td><p>OpenAPI generation for qh — including JSON Schema derived from Python type hints.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="qh.rules.html#module-qh.rules" title="qh.rules"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rules</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="qh.rules.html#module-qh.rules" title="qh.rules"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rules</span></code></a></p></td>
 <td><p>Transformation rule system for qh.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="qh.stores_qh.html#module-qh.stores_qh" title="qh.stores_qh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stores_qh</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="qh.stores_qh.html#module-qh.stores_qh" title="qh.stores_qh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stores_qh</span></code></a></p></td>
 <td><p>FastAPI service for operating on stores objects.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="qh.testing.html#module-qh.testing" title="qh.testing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">testing</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="qh.testing.html#module-qh.testing" title="qh.testing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">testing</span></code></a></p></td>
 <td><p>Run a qh (or any FastAPI) app for a test: in-process, or on a real port.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="qh.types.html#module-qh.types" title="qh.types"><code class="xref py py-obj docutils literal notranslate"><span class="pre">types</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="qh.types.html#module-qh.types" title="qh.types"><code class="xref py py-obj docutils literal notranslate"><span class="pre">types</span></code></a></p></td>
 <td><p>Type registry for qh - automatic serialization/deserialization for custom types.</p></td>
 </tr>
 </tbody>
@@ -2268,7 +2264,7 @@ If None, uses au’s default from config</p></li>
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=a11416ff"></script>
+<script src="../_static/documentation_options.js?v=96ec9c95"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
