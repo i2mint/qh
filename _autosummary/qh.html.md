@@ -565,6 +565,16 @@ Manages async task execution and state.
 
 This is the main coordinator between stores, executors, and HTTP handlers.
 
+#### *async* aget_result(task_id, wait=False, timeout=None)
+
+`get_result` for async callers: waiting yields to the event loop
+(`asyncio.sleep`) instead of blocking it, and holds no thread.
+
+Raises the same `ValueError` / `TimeoutError` as `get_result`.
+
+* **Return type:**
+  [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)
+
 #### cancel_task(task_id)
 
 Cancel a task (if possible).

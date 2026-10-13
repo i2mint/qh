@@ -391,6 +391,18 @@ Apps built with the same <code class="docutils literal notranslate"><span class=
 <dl class="field-list simple">
 </dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="qh.async_tasks.TaskManager.aget_result">
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">aget_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wait</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/async_tasks.html#TaskManager.aget_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.async_tasks.TaskManager.aget_result" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.async_tasks.TaskManager.aget_result'">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">get_result</span></code> for async callers: waiting yields to the event loop
+(<code class="docutils literal notranslate"><span class="pre">asyncio.sleep</span></code>) instead of blocking it, and holds no thread.</p>
+<p>Raises the same <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> / <code class="docutils literal notranslate"><span class="pre">TimeoutError</span></code> as <code class="docutils literal notranslate"><span class="pre">get_result</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py method">
 <dt class="sig sig-object py" id="qh.async_tasks.TaskManager.cancel_task">
 <span class="sig-name descname"><span class="pre">cancel_task</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/async_tasks.html#TaskManager.cancel_task"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.async_tasks.TaskManager.cancel_task" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.async_tasks.TaskManager.cancel_task'">¶</a></dt>
 <dd><p>Cancel a task (if possible).</p>
@@ -660,6 +672,7 @@ compatibility; prefer <code class="docutils literal notranslate"><span class="pr
 </ul>
 </li>
 <li><a :data-current="activeSection === '#qh.async_tasks.TaskManager'" class="reference internal" href="#qh.async_tasks.TaskManager"><code class="docutils literal notranslate"><span class="pre">TaskManager</span></code></a><ul>
+<li><a :data-current="activeSection === '#qh.async_tasks.TaskManager.aget_result'" class="reference internal" href="#qh.async_tasks.TaskManager.aget_result"><code class="docutils literal notranslate"><span class="pre">TaskManager.aget_result()</span></code></a></li>
 <li><a :data-current="activeSection === '#qh.async_tasks.TaskManager.cancel_task'" class="reference internal" href="#qh.async_tasks.TaskManager.cancel_task"><code class="docutils literal notranslate"><span class="pre">TaskManager.cancel_task()</span></code></a></li>
 <li><a :data-current="activeSection === '#qh.async_tasks.TaskManager.create_task'" class="reference internal" href="#qh.async_tasks.TaskManager.create_task"><code class="docutils literal notranslate"><span class="pre">TaskManager.create_task()</span></code></a></li>
 <li><a :data-current="activeSection === '#qh.async_tasks.TaskManager.get_result'" class="reference internal" href="#qh.async_tasks.TaskManager.get_result"><code class="docutils literal notranslate"><span class="pre">TaskManager.get_result()</span></code></a></li>
@@ -697,7 +710,7 @@ compatibility; prefer <code class="docutils literal notranslate"><span class="pr
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=96ec9c95"></script>
+<script src="../_static/documentation_options.js?v=3294188c"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

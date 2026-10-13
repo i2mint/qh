@@ -1,4 +1,4 @@
-> built 2026-10-13 05:19 UTC from 94d182c (master) · qh 0.0.22. Details: build_info.json
+> built 2026-10-13 06:46 UTC from afbcf41 (master) · qh 0.0.23. Details: build_info.json
 
 # index.html.md
 
@@ -1391,6 +1391,16 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 Manages async task execution and state.
 
 This is the main coordinator between stores, executors, and HTTP handlers.
+
+#### *async* aget_result(task_id, wait=False, timeout=None)
+
+`get_result` for async callers: waiting yields to the event loop
+(`asyncio.sleep`) instead of blocking it, and holds no thread.
+
+Raises the same `ValueError` / `TimeoutError` as `get_result`.
+
+* **Return type:**
+  [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)
 
 #### cancel_task(task_id)
 
@@ -3012,6 +3022,16 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 Manages async task execution and state.
 
 This is the main coordinator between stores, executors, and HTTP handlers.
+
+#### *async* aget_result(task_id, wait=False, timeout=None)
+
+`get_result` for async callers: waiting yields to the event loop
+(`asyncio.sleep`) instead of blocking it, and holds no thread.
+
+Raises the same `ValueError` / `TimeoutError` as `get_result`.
+
+* **Return type:**
+  [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)
 
 #### cancel_task(task_id)
 
@@ -5393,7 +5413,7 @@ Register a type in the global registry.
 
 # About this build
 
-This documentation was built on **2026-10-13 05:19 UTC** from commit <a href="https://github.com/i2mint/qh/commit/94d182ca63a246016fe036a8d57ac4beb6a92a40"><code>94d182c</code></a> on branch <code>master</code>, for **qh 0.0.22** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-13 06:46 UTC** from commit <a href="https://github.com/i2mint/qh/commit/afbcf415cfcaa143166d1370b1b8fe1010e5c6da"><code>afbcf41</code></a> on branch <code>master</code>, for **qh 0.0.23** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -5402,7 +5422,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/qh/commit/94d182ca63a246016fe036a8d57ac4beb6a92a40"><code>94d182ca63a246016fe036a8d57ac4beb6a92a40</code></a> |
+| Commit              | <a href="https://github.com/i2mint/qh/commit/afbcf415cfcaa143166d1370b1b8fe1010e5c6da"><code>afbcf415cfcaa143166d1370b1b8fe1010e5c6da</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
 | Tags at this commit | none                                                                                                                                             |
 | Working tree        | clean                                                                                                                                            |
@@ -5413,15 +5433,15 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/qh</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/qh/actions/runs/38350628443">38350628443</a>            |
+| Run          | <a href="https://github.com/i2mint/qh/actions/runs/38358430456">38358430456</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>94d182ca63a246016fe036a8d57ac4beb6a92a40</code> (in the history of the built commit) |
+| Event commit | <code>afbcf415cfcaa143166d1370b1b8fe1010e5c6da</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.13  |
+| epythet  | 0.2.14  |
 | Sphinx   | 9.1.0   |
 | docutils | 0.22.4  |
 | Python   | 3.12.15 |
@@ -5440,14 +5460,14 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/qh/0.0.22/">0.0.22</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/qh/0.0.23/">0.0.23</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/qh && cd qh
-git checkout 94d182ca63a246016fe036a8d57ac4beb6a92a40
-pip install "epythet==0.2.13"
+git checkout afbcf415cfcaa143166d1370b1b8fe1010e5c6da
+pip install "epythet==0.2.14"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 
