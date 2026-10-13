@@ -13,17 +13,23 @@ from typing import (
     Mapping,
     MutableMapping,
     Optional,
+    Sequence,
     Union,
     Dict,
 )
-from functools import wraps, partial
+import inspect
+import logging
 from collections.abc import ItemsView, KeysView, ValuesView
 
-from fastapi import FastAPI, HTTPException, Path, Body
+from fastapi import Body, Depends, FastAPI, HTTPException, Path, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from starlette.concurrency import run_in_threadpool
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from i2 import Pipe
+from qh.errors import DFLT_EXPOSE_ERRORS, error_detail
+
+logger = logging.getLogger("qh")
 
 
 class StoreValue(BaseModel):
@@ -111,7 +117,9 @@ def _serialize_value(value: Any) -> Any:
     elif isinstance(value, (str, int, float, bool, type(None))):
         return value
     else:
-        # For complex objects, convert to string representation
+        # For complex objects, convert to string representation (sent to the
+        # client as is: a store holding objects whose str() carries secrets
+        # should serialize them itself)
         return str(value)
 
 
@@ -139,6 +147,8 @@ def create_method_endpoint(
     config: Dict,
     get_obj_fn: Callable,
     path_params: Optional[List[str]] = None,
+    *,
+    expose_errors: bool = DFLT_EXPOSE_ERRORS,
 ):
     """
     Create an endpoint function for a specific mapping method.
@@ -148,6 +158,9 @@ def create_method_endpoint(
         config: Configuration for the endpoint
         get_obj_fn: Function to retrieve the object to operate on
         path_params: List of path parameter names (e.g., ['user_id', 'store_key'])
+        expose_errors: If True, a failing store operation sends its exception
+            text to the client; by default the client gets a generic message
+            with an error id (see ``qh.errors``).
 
     Returns:
         An async endpoint function compatible with FastAPI
@@ -156,8 +169,15 @@ def create_method_endpoint(
         ValueError: If ``path_params`` has a length this method's branch does
             not implement (currently 1 or 2 are supported).
     """
-    http_method = config.get("method", "get")
     path_params = path_params or ["user_id"]
+
+    def _failure_detail(exc: Exception, what: str) -> str:
+        return error_detail(
+            exc,
+            context=method_name,
+            expose_errors=expose_errors,
+            exposed_text=f"{what}: {exc}",
+        )
 
     if method_name == "__iter__":
         # Generate endpoint dynamically based on path_params
@@ -229,7 +249,7 @@ def create_method_endpoint(
                     return {"message": "Item set successfully", "key": item_key}
                 except Exception as e:
                     raise HTTPException(
-                        status_code=400, detail=f"Failed to set item: {str(e)}"
+                        status_code=400, detail=_failure_detail(e, "Failed to set item")
                     )
         elif len(path_params) == 2:
 
@@ -245,7 +265,7 @@ def create_method_endpoint(
                     return {"message": "Item set successfully", "key": item_key}
                 except Exception as e:
                     raise HTTPException(
-                        status_code=400, detail=f"Failed to set item: {str(e)}"
+                        status_code=400, detail=_failure_detail(e, "Failed to set item")
                     )
         else:
             raise ValueError(f"Unsupported number of path params: {len(path_params)}")
@@ -269,7 +289,8 @@ def create_method_endpoint(
                     )
                 except Exception as e:
                     raise HTTPException(
-                        status_code=400, detail=f"Failed to delete item: {str(e)}"
+                        status_code=400,
+                        detail=_failure_detail(e, "Failed to delete item"),
                     )
         elif len(path_params) == 2:
 
@@ -288,7 +309,8 @@ def create_method_endpoint(
                     )
                 except Exception as e:
                     raise HTTPException(
-                        status_code=400, detail=f"Failed to delete item: {str(e)}"
+                        status_code=400,
+                        detail=_failure_detail(e, "Failed to delete item"),
                     )
         else:
             raise ValueError(f"Unsupported number of path params: {len(path_params)}")
@@ -309,7 +331,7 @@ def create_method_endpoint(
                 except Exception as e:
                     raise HTTPException(
                         status_code=400,
-                        detail=f"Failed to check if item exists: {str(e)}",
+                        detail=_failure_detail(e, "Failed to check if item exists"),
                     )
         elif len(path_params) == 2:
 
@@ -325,7 +347,7 @@ def create_method_endpoint(
                 except Exception as e:
                     raise HTTPException(
                         status_code=400,
-                        detail=f"Failed to check if item exists: {str(e)}",
+                        detail=_failure_detail(e, "Failed to check if item exists"),
                     )
         else:
             raise ValueError(f"Unsupported number of path params: {len(path_params)}")
@@ -342,7 +364,8 @@ def create_method_endpoint(
                     return count
                 except Exception as e:
                     raise HTTPException(
-                        status_code=400, detail=f"Failed to get item count: {str(e)}"
+                        status_code=400,
+                        detail=_failure_detail(e, "Failed to get item count"),
                     )
         elif len(path_params) == 2:
 
@@ -356,7 +379,8 @@ def create_method_endpoint(
                     return count
                 except Exception as e:
                     raise HTTPException(
-                        status_code=400, detail=f"Failed to get item count: {str(e)}"
+                        status_code=400,
+                        detail=_failure_detail(e, "Failed to get item count"),
                     )
         else:
             raise ValueError(f"Unsupported number of path params: {len(path_params)}")
@@ -386,6 +410,8 @@ def add_store_access(
     methods: Optional[Dict[str, Optional[Dict]]] = None,
     get_obj_dispatch: Optional[Dict] = None,
     base_path: str = "/users/{user_id}/mall/{store_key}",
+    dependencies: Optional[Sequence] = None,
+    expose_errors: bool = DFLT_EXPOSE_ERRORS,
 ) -> FastAPI:
     """
     Add store access endpoints to a FastAPI application.
@@ -406,6 +432,14 @@ def add_store_access(
 
         get_obj_dispatch: Configuration for how to dispatch the get_obj function
         base_path: Base path for all endpoints
+        dependencies: FastAPI dependencies (e.g. ``[Depends(check_caller)]``)
+            added to every route this function registers; the place for an
+            authentication or authorization check.
+        expose_errors: If True, exceptions raised by ``get_obj`` or by a store
+            operation are sent to the client as text. By default the client
+            gets ``get_obj_dispatch['error_message']`` (which only echoes the
+            path parameters) or a generic message with an error id, and the
+            exception is logged server-side (see ``qh.errors``).
 
     Returns:
         FastAPI application instance with store endpoints added
@@ -452,24 +486,30 @@ def add_store_access(
                 # No default available for this method
                 continue
 
+    def _not_found_detail(args) -> str:
+        error_params = {param: arg for param, arg in zip(path_params, args)}
+        try:
+            return get_obj_dispatch["error_message"].format(**error_params)
+        except (KeyError, IndexError, AttributeError, ValueError):  # no or bad template
+            return "Object not found"
+
     def _get_obj_or_error(*args) -> Mapping:
         """Get object or raise HTTP exception."""
+        error_code = get_obj_dispatch.get("error_code", 404)
         try:
             obj = get_obj(*args)
-            if obj is None:
-                # Format error message with all path params
-                error_params = {param: arg for param, arg in zip(path_params, args)}
-                error_message = get_obj_dispatch["error_message"].format(**error_params)
-                raise HTTPException(
-                    status_code=get_obj_dispatch["error_code"], detail=error_message
-                )
-            return obj
+        except StarletteHTTPException:
+            raise
         except Exception as e:
-            if isinstance(e, HTTPException):
-                raise
-            raise HTTPException(
-                status_code=get_obj_dispatch["error_code"], detail=str(e)
-            )
+            if expose_errors:
+                detail = str(e)
+            else:
+                logger.info("get_obj failed for %s", args, exc_info=e)
+                detail = _not_found_detail(args)
+            raise HTTPException(status_code=error_code, detail=detail)
+        if obj is None:
+            raise HTTPException(status_code=error_code, detail=_not_found_detail(args))
+        return obj
 
     # Reorder endpoints to prioritize static routes over dynamic ones
     ordered_methods = [
@@ -488,12 +528,17 @@ def add_store_access(
         http_method = config.get("method", "get")
         description = config.get("description", f"Execute {method_name} on the store")
         endpoint = create_method_endpoint(
-            method_name, config, _get_obj_or_error, path_params
+            method_name,
+            config,
+            _get_obj_or_error,
+            path_params,
+            expose_errors=expose_errors,
         )
         getattr(app, http_method)(
             path,
             response_model=config.get("response_model", None),
             description=description,
+            dependencies=list(dependencies or []),
         )(endpoint)
 
     # Register any additional methods not in the ordered list
@@ -504,12 +549,17 @@ def add_store_access(
         http_method = config.get("method", "get")
         description = config.get("description", f"Execute {method_name} on the store")
         endpoint = create_method_endpoint(
-            method_name, config, _get_obj_or_error, path_params
+            method_name,
+            config,
+            _get_obj_or_error,
+            path_params,
+            expose_errors=expose_errors,
         )
         getattr(app, http_method)(
             path,
             response_model=config.get("response_model", None),
             description=description,
+            dependencies=list(dependencies or []),
         )(endpoint)
 
     return app
@@ -521,8 +571,49 @@ def add_mall_access(
     *,
     write: bool = False,
     delete: bool = False,
+    caller: Optional[Callable[[Request], Any]] = None,
+    expose_errors: bool = DFLT_EXPOSE_ERRORS,
 ) -> FastAPI:
-    """Add mall/store access endpoints to a FastAPI application."""
+    """Add mall/store access endpoints to a FastAPI application.
+
+    Routes live under ``/users/{user_id}/mall``, so without an access check any
+    client can address any user's mall. ``caller`` is that check.
+
+    Args:
+        get_mall: Function that takes a ``user_id`` and returns that user's mall
+            (a mapping of store keys to stores).
+        app: ``None``, a ``FastAPI`` instance, a title string, or a dict of
+            ``FastAPI`` kwargs (as in ``add_store_access``).
+        write: If True, add a ``PUT`` route to set store items.
+        delete: If True, add a ``DELETE`` route to delete store items.
+        caller: ``caller(request) -> user id`` (sync or async) identifying the
+            authenticated client, e.g. from a session or a verified token. When
+            given, every route checks that it equals the ``user_id`` in the URL
+            before the mall is looked up: an unknown caller (``None``, ``""`` or
+            a bool) gets 401, a different user 403. To reject a request with
+            another status (e.g. a bad token), raise ``HTTPException`` from
+            ``caller``; any other exception becomes a 500. A sync ``caller``
+            runs in a thread pool, so it may block. The comparison is exact, so
+            ``get_mall`` should not normalise ids (case, whitespace) that
+            ``caller`` returns un-normalised. When ``None`` (the default),
+            no check is made, which is only appropriate when every client may
+            read (and, with ``write``/``delete``, change) every user's mall.
+        expose_errors: If True, exceptions raised by ``get_mall`` or by a store
+            operation are sent to the client as text (see ``add_store_access``).
+
+    >>> from fastapi.testclient import TestClient
+    >>> malls = {'alice': {'notes': {'a': 1}}, 'bob': {'notes': {'b': 2}}}
+    >>> app = add_mall_access(
+    ...     malls.get, caller=lambda request: request.headers.get('x-user')
+    ... )
+    >>> client = TestClient(app)
+    >>> client.get('/users/alice/mall', headers={'x-user': 'alice'}).json()
+    ['notes']
+    >>> client.get('/users/bob/mall/notes', headers={'x-user': 'alice'}).status_code
+    403
+    >>> client.get('/users/bob/mall').status_code
+    401
+    """
     # Create or use app based on the input type
     if app is None:
         app = FastAPI(title="Mall API", version="1.0.0")
@@ -531,21 +622,27 @@ def add_mall_access(
     elif isinstance(app, dict):
         app = FastAPI(**app)
 
+    dependencies = [] if caller is None else [Depends(_caller_check(caller))]
+
     def _get_mall_or_404(user_id: str) -> Mapping[str, MutableMapping]:
         """Get mall for user or raise 404."""
+        not_found = f"Mall not found for user: {user_id}"
         try:
             mall = get_mall(user_id)
-            if mall is None:
-                raise HTTPException(
-                    status_code=404, detail=f"Mall not found for user: {user_id}"
-                )
-            return mall
+        except StarletteHTTPException:
+            raise
         except Exception as e:
             # If get_mall raises an exception, treat as 404
-            raise HTTPException(status_code=404, detail=str(e))
+            if expose_errors:
+                raise HTTPException(status_code=404, detail=str(e))
+            logger.info("get_mall failed for user %r", user_id, exc_info=e)
+            raise HTTPException(status_code=404, detail=not_found)
+        if mall is None:
+            raise HTTPException(status_code=404, detail=not_found)
+        return mall
 
     # Add mall-level endpoint to list all store keys
-    @app.get("/users/{user_id}/mall")
+    @app.get("/users/{user_id}/mall", dependencies=dependencies)
     def list_user_mall_stores(
         user_id: str = Path(..., description="User ID"),
     ) -> list[str]:
@@ -567,12 +664,6 @@ def add_mall_access(
     # Function to get a specific store from a mall (refactored: use user_id and store_key separately)
     def get_store(user_id: str, store_key: str) -> MutableMapping:
         mall = _get_mall_or_404(user_id)
-        import logging
-
-        logging.basicConfig(level=logging.INFO)
-        logging.info(
-            f"get_store: mall keys for user {user_id}: {list(mall.keys())}, requested store_key: {store_key}"
-        )
         try:
             return mall[store_key]
         except KeyError:
@@ -595,9 +686,34 @@ def add_mall_access(
             "error_code": 404,
         },
         base_path="/users/{user_id}/mall/{store_key}",
+        dependencies=dependencies,
+        expose_errors=expose_errors,
     )
 
     return app
+
+
+def _caller_check(caller: Callable[[Request], Any]) -> Callable:
+    """Make a FastAPI dependency that requires ``caller(request)`` to be the
+    ``user_id`` path parameter: 401 if the caller is unknown (``None``, ``""``,
+    or a bool, a common "no user" sentinel that would otherwise match a user
+    called ``False``), 403 if it is someone else."""
+
+    async def check_caller(
+        request: Request, user_id: str = Path(..., description="User ID")
+    ) -> None:
+        if inspect.iscoroutinefunction(caller):
+            who = await caller(request)
+        else:
+            who = await run_in_threadpool(caller, request)
+            if inspect.isawaitable(who):
+                who = await who
+        if who is None or isinstance(who, bool) or who == "":
+            raise HTTPException(status_code=401, detail="Not authenticated")
+        if str(who) != user_id:
+            raise HTTPException(status_code=403, detail="Not allowed")
+
+    return check_caller
 
 
 # Example usage and runner
