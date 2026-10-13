@@ -1,0 +1,12 @@
+qh.errors
+=========
+
+.. automodule:: qh.errors
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      error_detail
+   

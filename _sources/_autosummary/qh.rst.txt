@@ -78,6 +78,7 @@
    conventions
    core
    endpoint
+   errors
    jsclient
    openapi
    rules

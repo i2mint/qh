@@ -85,7 +85,7 @@ Main entry points:
 | [`AuTaskStore`](#qh.AuTaskStore)(au_store)                              | Adapter to use au's ComputationStore as qh's TaskStore.                       |
 | [`AuTaskExecutor`](#qh.AuTaskExecutor)(au_backend, au_store)               | Adapter to use au's ComputationBackend as qh's TaskExecutor.                  |
 
-### *class* qh.AppConfig(default_methods=<factory>, path_template='/{func_name}', path_prefix='', rule_chain=<factory>, title='qh API', version='0.1.0', docs_url='/docs', redoc_url='/redoc', openapi_url='/openapi.json', fastapi_kwargs=<factory>)
+### *class* qh.AppConfig(default_methods=<factory>, path_template='/{func_name}', path_prefix='', rule_chain=<factory>, expose_errors=False, title='qh API', version='0.1.0', docs_url='/docs', redoc_url='/redoc', openapi_url='/openapi.json', fastapi_kwargs=<factory>)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -473,7 +473,7 @@ Thread object if service was launched in thread, None otherwise
 
 The FastAPI app if one was provided, None otherwise
 
-### *class* qh.TaskConfig(store=None, executor=None, ttl=3600, async_mode='query', async_param='async', async_header='X-Async', create_task_endpoints=True, default_executor='thread')
+### *class* qh.TaskConfig(store=None, executor=None, ttl=3600, async_mode='query', async_param='async', async_header='X-Async', create_task_endpoints=True, default_executor='thread', task_owner=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -498,6 +498,18 @@ Get or create the task executor.
 
 * **Return type:**
   [`TaskExecutor`](qh.async_tasks.md#qh.async_tasks.TaskExecutor)
+
+#### get_manager()
+
+The task manager of this config, created on first use.
+
+Each config has its own manager (`qh.mk_app` uses it rather than the
+process-wide, name-keyed `get_task_manager` registry, so two apps
+exposing functions with the same name never see each other’s tasks).
+Apps built with the same `TaskConfig` object do share its tasks.
+
+* **Return type:**
+  [`TaskManager`](qh.async_tasks.md#qh.async_tasks.TaskManager)
 
 #### get_store()
 
@@ -532,7 +544,7 @@ Submit a task for execution.
 * **Return type:**
   [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
-### *class* qh.TaskInfo(task_id, status, created_at, started_at=None, completed_at=None, result=None, error=None, traceback=None)
+### *class* qh.TaskInfo(task_id, status, created_at, started_at=None, completed_at=None, result=None, error=None, traceback=None, owner=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -570,7 +582,7 @@ Cancellation is best-effort and may not work for all executors.
 * **Returns:**
   True if task was cancelled or deleted
 
-#### create_task(func, args=(), kwargs=None)
+#### create_task(func, args=(), kwargs=None, , owner=None)
 
 Create and submit a new task.
 
@@ -578,6 +590,7 @@ Create and submit a new task.
   * **func** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)) – Function to execute asynchronously
   * **args** ([`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)) – Positional arguments
   * **kwargs** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)]) – Keyword arguments
+  * **owner** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]) – Who created the task (see `TaskConfig.task_owner`)
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 * **Returns:**
@@ -918,7 +931,7 @@ falls back to FastAPI’s plain schema, so a converter bug can never turn
 * **Returns:**
   the same `app`, for chaining.
 
-### qh.mk_app(funcs, , app=None, config=None, use_conventions=False, async_funcs=None, async_config=None, enhanced_openapi=True, \*\*kwargs)
+### qh.mk_app(funcs, , app=None, config=None, use_conventions=False, async_funcs=None, async_config=None, enhanced_openapi=True, expose_errors=None, global_task_endpoints=False, \*\*kwargs)
 
 Create a FastAPI application whose routes call the given Python functions.
 
@@ -959,6 +972,17 @@ what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
     - None (uses default TaskConfig for functions in async_funcs)
     - TaskConfig object (applies to all async_funcs)
     - Dict mapping function names to TaskConfig objects
+  * **expose_errors** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`bool`](https://docs.python.org/3/builtins/functions.html#bool)]) – Whether the text of an exception raised by a function
+    (or by a background task) is sent to the client. Defaults to the
+    `config`’s `expose_errors`, which defaults to False: the client
+    gets a generic 500 message with an error id, and the exception is
+    logged server-side under that id (see [`qh.errors`](qh.errors.md#module-qh.errors)). Pass True
+    to send it (development, trusted clients). Tracebacks
+    of background tasks are never sent.
+  * **global_task_endpoints** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to add `GET /tasks/`, listing the tasks of
+    all `async_funcs` (of every caller, unless their `TaskConfig` has
+    a `task_owner`). Off by default; per-task endpoints
+    (`/tasks/{task_id}...`) are unaffected.
   * **enhanced_openapi** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to serve an enhanced OpenAPI document at
     `/openapi.json` — one with `requestBody` / `responses` /
     `components.schemas` derived from each function’s Python type
@@ -1518,6 +1542,7 @@ Use au’s ThreadBackend with filesystem storage.
 | [`conventions`](qh.conventions.md#module-qh.conventions)         | Convention-based routing for qh.                                                     |
 | [`core`](qh.core.md#module-qh.core)                       | Minimal function-to-route dispatch built on `i2.wrapper.Wrap`.                       |
 | [`endpoint`](qh.endpoint.md#module-qh.endpoint)               | Endpoint creation using i2.Wrap to transform functions into FastAPI routes.          |
+| [`errors`](qh.errors.md#module-qh.errors)                   | What HTTP clients learn about server-side exceptions.                                |
 | [`jsclient`](qh.jsclient.md#module-qh.jsclient)               | JavaScript and TypeScript client generation from OpenAPI specs.                      |
 | [`openapi`](qh.openapi.md#module-qh.openapi)                 | OpenAPI generation for qh — including JSON Schema derived from Python type hints.    |
 | [`rules`](qh.rules.md#module-qh.rules)                     | Transformation rule system for qh.                                                   |

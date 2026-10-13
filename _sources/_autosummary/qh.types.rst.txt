@@ -10,6 +10,7 @@ qh.types
    
       get_transform_spec_for_type
       get_type_handler
+      public_jsonable
       register_json_type
       register_type
    

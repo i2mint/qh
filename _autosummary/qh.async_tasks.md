@@ -99,7 +99,7 @@ Execute tasks using a process pool (good for CPU-bound tasks).
 * **Return type:**
   [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
-### *class* qh.async_tasks.TaskConfig(store=None, executor=None, ttl=3600, async_mode='query', async_param='async', async_header='X-Async', create_task_endpoints=True, default_executor='thread')
+### *class* qh.async_tasks.TaskConfig(store=None, executor=None, ttl=3600, async_mode='query', async_param='async', async_header='X-Async', create_task_endpoints=True, default_executor='thread', task_owner=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -124,6 +124,18 @@ Get or create the task executor.
 
 * **Return type:**
   [`TaskExecutor`](#qh.async_tasks.TaskExecutor)
+
+#### get_manager()
+
+The task manager of this config, created on first use.
+
+Each config has its own manager (`qh.mk_app` uses it rather than the
+process-wide, name-keyed `get_task_manager` registry, so two apps
+exposing functions with the same name never see each other’s tasks).
+Apps built with the same `TaskConfig` object do share its tasks.
+
+* **Return type:**
+  [`TaskManager`](#qh.async_tasks.TaskManager)
 
 #### get_store()
 
@@ -158,7 +170,7 @@ Submit a task for execution.
 * **Return type:**
   [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
-### *class* qh.async_tasks.TaskInfo(task_id, status, created_at, started_at=None, completed_at=None, result=None, error=None, traceback=None)
+### *class* qh.async_tasks.TaskInfo(task_id, status, created_at, started_at=None, completed_at=None, result=None, error=None, traceback=None, owner=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -196,7 +208,7 @@ Cancellation is best-effort and may not work for all executors.
 * **Returns:**
   True if task was cancelled or deleted
 
-#### create_task(func, args=(), kwargs=None)
+#### create_task(func, args=(), kwargs=None, , owner=None)
 
 Create and submit a new task.
 
@@ -204,6 +216,7 @@ Create and submit a new task.
   * **func** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)) – Function to execute asynchronously
   * **args** ([`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)) – Positional arguments
   * **kwargs** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)]) – Keyword arguments
+  * **owner** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]) – Who created the task (see `TaskConfig.task_owner`)
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 * **Returns:**
@@ -318,9 +331,15 @@ Execute tasks using a thread pool (good for I/O-bound tasks).
 
 Get or create a task manager for a function.
 
+With a `config`, this is `config.get_manager()` (registered under
+`func_name` if that name has no manager yet). Without one, it is the
+manager registered under `func_name` (created with a default config if
+there is none): a process-wide lookup by name, kept for backward
+compatibility; prefer `TaskConfig.get_manager`.
+
 * **Parameters:**
   * **func_name** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – Name of the function
-  * **config** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`TaskConfig`](#qh.async_tasks.TaskConfig)]) – Task configuration (only used when creating new manager)
+  * **config** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`TaskConfig`](#qh.async_tasks.TaskConfig)]) – Task configuration
 * **Return type:**
   [`TaskManager`](#qh.async_tasks.TaskManager)
 * **Returns:**

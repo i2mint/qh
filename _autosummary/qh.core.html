@@ -93,6 +93,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qh.conventions.html">qh.conventions</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">qh.core</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qh.endpoint.html">qh.endpoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qh.errors.html">qh.errors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qh.jsclient.html">qh.jsclient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qh.openapi.html">qh.openapi</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qh.rules.html">qh.rules</a></li>
@@ -134,12 +135,16 @@
 <p>An early, self-contained take on the qh idea: <code class="docutils literal notranslate"><span class="pre">mk_fastapi_app</span></code> turns a
 collection of callables into <code class="docutils literal notranslate"><span class="pre">POST</span></code> routes that read a JSON body as keyword
 arguments and return the JSON-encoded result. It is not used by <code class="docutils literal notranslate"><span class="pre">qh.app.mk_app</span></code>,
-the maintained entry point, and it keeps a process-wide <code class="docutils literal notranslate"><span class="pre">default_configs</span></code>
-dict that <code class="docutils literal notranslate"><span class="pre">mk_fastapi_app</span></code> mutates; prefer <code class="docutils literal notranslate"><span class="pre">qh.app</span></code> for new code.</p>
+the maintained entry point; prefer <code class="docutils literal notranslate"><span class="pre">qh.app</span></code> for new code. <code class="docutils literal notranslate"><span class="pre">mk_fastapi_app</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">configs</span></code> and <code class="docutils literal notranslate"><span class="pre">func_configs</span></code> override the process-wide <code class="docutils literal notranslate"><span class="pre">default_configs</span></code>
+for that app only.</p>
 <p>Main entry points:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">mk_fastapi_app</span></code>: callables in, FastAPI app out</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">default_configs</span></code>: the mutable process-wide defaults (path, method, mappers)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">default_configs</span></code>: the process-wide defaults (path, method, mappers)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">safe_error_handler</span></code> (the default) / <code class="docutils literal notranslate"><span class="pre">exposing_error_handler</span></code>: what a client
+sees when a function raises; set <code class="docutils literal notranslate"><span class="pre">configs={'error_handler':</span> <span class="pre">exposing_error_handler}</span></code>
+to send it the exception text (see <code class="docutils literal notranslate"><span class="pre">qh.errors</span></code>)</p></li>
 </ul>
 <p class="rubric">Functions</p>
 <table class="autosummary longtable docutils align-default">
@@ -150,14 +155,20 @@ dict that <code class="docutils literal notranslate"><span class="pre">mk_fastap
 <tr class="row-even"><td><p><a class="reference internal" href="#qh.core.default_output_mapper" title="qh.core.default_output_mapper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">default_output_mapper</span></code></a>(output)</p></td>
 <td><p>Serialize function output to JSON response.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#qh.core.get_config_for_func" title="qh.core.get_config_for_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_config_for_func</span></code></a>(func, default_configs, ...)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qh.core.exposing_error_handler" title="qh.core.exposing_error_handler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">exposing_error_handler</span></code></a>(exc)</p></td>
+<td><p>Answer 500 with the exception text (the pre-<code class="docutils literal notranslate"><span class="pre">qh.errors</span></code> behaviour).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#qh.core.get_config_for_func" title="qh.core.get_config_for_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_config_for_func</span></code></a>(func, default_configs, ...)</p></td>
 <td><p>Merge default and per-function configurations.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#qh.core.mk_fastapi_app" title="qh.core.mk_fastapi_app"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mk_fastapi_app</span></code></a>(funcs[, configs, func_configs])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qh.core.mk_fastapi_app" title="qh.core.mk_fastapi_app"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mk_fastapi_app</span></code></a>(funcs[, configs, func_configs])</p></td>
 <td><p>Create a FastAPI app from a collection of functions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#qh.core.mk_wrapped_func" title="qh.core.mk_wrapped_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mk_wrapped_func</span></code></a>(func, input_mapper, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#qh.core.mk_wrapped_func" title="qh.core.mk_wrapped_func"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mk_wrapped_func</span></code></a>(func, input_mapper, ...[, ...])</p></td>
 <td><p>Wrap a function with ingress and egress transformations.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qh.core.safe_error_handler" title="qh.core.safe_error_handler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">safe_error_handler</span></code></a>(exc)</p></td>
+<td><p>Answer 500 with a generic message and an error id; the exception is logged.</p></td>
 </tr>
 </tbody>
 </table>
@@ -167,7 +178,7 @@ dict that <code class="docutils literal notranslate"><span class="pre">mk_fastap
 <dd><p>Extract function arguments from request JSON body.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -182,12 +193,22 @@ dict that <code class="docutils literal notranslate"><span class="pre">mk_fastap
 </dl>
 </dd></dl>
 <dl class="py function">
+<dt class="sig sig-object py" id="qh.core.exposing_error_handler">
+<span class="sig-prename descclassname"><span class="pre">qh.core.</span></span><span class="sig-name descname"><span class="pre">exposing_error_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/core.html#exposing_error_handler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.core.exposing_error_handler" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.core.exposing_error_handler'">¶</a></dt>
+<dd><p>Answer 500 with the exception text (the pre-<code class="docutils literal notranslate"><span class="pre">qh.errors</span></code> behaviour).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
 <dt class="sig sig-object py" id="qh.core.get_config_for_func">
 <span class="sig-prename descclassname"><span class="pre">qh.core.</span></span><span class="sig-name descname"><span class="pre">get_config_for_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_configs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func_configs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/core.html#get_config_for_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.core.get_config_for_func" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.core.get_config_for_func'">¶</a></dt>
 <dd><p>Merge default and per-function configurations.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>]</span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -203,11 +224,23 @@ dict that <code class="docutils literal notranslate"><span class="pre">mk_fastap
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="qh.core.mk_wrapped_func">
-<span class="sig-prename descclassname"><span class="pre">qh.core.</span></span><span class="sig-name descname"><span class="pre">mk_wrapped_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_mapper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_mapper</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/core.html#mk_wrapped_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.core.mk_wrapped_func" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.core.mk_wrapped_func'">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">qh.core.</span></span><span class="sig-name descname"><span class="pre">mk_wrapped_func</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_mapper</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_mapper</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_handler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/core.html#mk_wrapped_func"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.core.mk_wrapped_func" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.core.mk_wrapped_func'">¶</a></dt>
 <dd><p>Wrap a function with ingress and egress transformations.</p>
+<p><code class="docutils literal notranslate"><span class="pre">error_handler</span></code> turns an exception into the response; it defaults to
+<code class="docutils literal notranslate"><span class="pre">default_configs['error_handler']</span></code> (<code class="docutils literal notranslate"><span class="pre">safe_error_handler</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" rel="nofollow noopener" title="(in Python v3.14)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
+<dt class="sig sig-object py" id="qh.core.safe_error_handler">
+<span class="sig-prename descclassname"><span class="pre">qh.core.</span></span><span class="sig-name descname"><span class="pre">safe_error_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/core.html#safe_error_handler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.core.safe_error_handler" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.core.safe_error_handler'">¶</a></dt>
+<dd><p>Answer 500 with a generic message and an error id; the exception is logged.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Response</span></code></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -217,9 +250,11 @@ dict that <code class="docutils literal notranslate"><span class="pre">mk_fastap
 <ul>
 <li><a :data-current="activeSection === '#qh.core.default_input_mapper'" class="reference internal" href="#qh.core.default_input_mapper"><code class="docutils literal notranslate"><span class="pre">default_input_mapper()</span></code></a></li>
 <li><a :data-current="activeSection === '#qh.core.default_output_mapper'" class="reference internal" href="#qh.core.default_output_mapper"><code class="docutils literal notranslate"><span class="pre">default_output_mapper()</span></code></a></li>
+<li><a :data-current="activeSection === '#qh.core.exposing_error_handler'" class="reference internal" href="#qh.core.exposing_error_handler"><code class="docutils literal notranslate"><span class="pre">exposing_error_handler()</span></code></a></li>
 <li><a :data-current="activeSection === '#qh.core.get_config_for_func'" class="reference internal" href="#qh.core.get_config_for_func"><code class="docutils literal notranslate"><span class="pre">get_config_for_func()</span></code></a></li>
 <li><a :data-current="activeSection === '#qh.core.mk_fastapi_app'" class="reference internal" href="#qh.core.mk_fastapi_app"><code class="docutils literal notranslate"><span class="pre">mk_fastapi_app()</span></code></a></li>
 <li><a :data-current="activeSection === '#qh.core.mk_wrapped_func'" class="reference internal" href="#qh.core.mk_wrapped_func"><code class="docutils literal notranslate"><span class="pre">mk_wrapped_func()</span></code></a></li>
+<li><a :data-current="activeSection === '#qh.core.safe_error_handler'" class="reference internal" href="#qh.core.safe_error_handler"><code class="docutils literal notranslate"><span class="pre">safe_error_handler()</span></code></a></li>
 </ul>
 </div>
 </aside>
@@ -233,7 +268,7 @@ dict that <code class="docutils literal notranslate"><span class="pre">mk_fastap
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=2fd7553c"></script>
+<script src="../_static/documentation_options.js?v=056c92e6"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

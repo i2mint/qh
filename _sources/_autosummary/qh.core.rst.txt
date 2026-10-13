@@ -10,7 +10,9 @@ qh.core
    
       default_input_mapper
       default_output_mapper
+      exposing_error_handler
       get_config_for_func
       mk_fastapi_app
       mk_wrapped_func
+      safe_error_handler
    

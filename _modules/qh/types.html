@@ -123,6 +123,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.conventions.html">qh.conventions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.core.html">qh.core</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.endpoint.html">qh.endpoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.errors.html">qh.errors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.jsclient.html">qh.jsclient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.openapi.html">qh.openapi</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.rules.html">qh.rules</a></li>
@@ -408,183 +409,262 @@
 
 </span><span id="line-204">
 </span><span id="line-205">
+</span><span id="line-206"><span class="k">def</span><span class="w"> </span><span class="nf">_is_pydantic_model</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="line-207">    <span class="k">try</span><span class="p">:</span>
+</span><span id="line-208">        <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span>
+</span><span id="line-209">    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+</span><span id="line-210">        <span class="k">return</span> <span class="kc">False</span>
+</span><span id="line-211">    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">)</span>
+</span><span id="line-212">
+</span><span id="line-213">
+</span><span id="line-214"><span class="k">def</span><span class="w"> </span><span class="nf">_walk_container</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">walk</span><span class="p">):</span>
+</span><span id="line-215">    <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mapping</span>
+</span><span id="line-216">
+</span><span id="line-217">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+</span><span id="line-218">        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">walk</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</span><span id="line-219">    <span class="k">return</span> <span class="p">[</span><span class="n">walk</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">]</span>
+</span><span id="line-220">
+</span><span id="line-221">
+<div class="viewcode-block" id="public_jsonable">
+<a class="viewcode-back" href="../../_autosummary/qh.types.html#qh.public_jsonable">[docs]</a>
+</span><span id="line-222"><span class="k">def</span><span class="w"> </span><span class="nf">public_jsonable</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">_path</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="line-223"><span class="w">    </span><span class="sd">"""Prepare a value for JSON encoding (``fastapi.encoders.jsonable_encoder``)</span>
+</span><span id="line-224"><span class="sd">    without ever exposing ``_private`` attributes of the objects inside it.</span>
+</span><span id="line-225">
+</span><span id="line-226"><span class="sd">    Containers are walked; registered types use their handler; dataclasses and</span>
+</span><span id="line-227"><span class="sd">    plain objects become dicts of their public fields/attributes (recursively);</span>
+</span><span id="line-228"><span class="sd">    values FastAPI already knows how to encode (datetime, UUID, Enum, pydantic</span>
+</span><span id="line-229"><span class="sd">    models, whose private attributes it already leaves out, ...) are kept as they</span>
+</span><span id="line-230"><span class="sd">    are. Dict keys are data, not attributes, so they are never filtered.</span>
+</span><span id="line-231">
+</span><span id="line-232"><span class="sd">    &gt;&gt;&gt; class Inner:</span>
+</span><span id="line-233"><span class="sd">    ...     def __init__(self): self.name, self._token = 'x', 'SECRET'</span>
+</span><span id="line-234"><span class="sd">    &gt;&gt;&gt; public_jsonable({'_id': 1, 'items': [Inner()]})</span>
+</span><span id="line-235"><span class="sd">    {'_id': 1, 'items': [{'name': 'x'}]}</span>
+</span><span id="line-236"><span class="sd">    """</span>
+</span><span id="line-237">    <span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
+</span><span id="line-238">    <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+</span><span id="line-239">    <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">Enum</span>
+</span><span id="line-240">    <span class="kn">from</span><span class="w"> </span><span class="nn">types</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneratorType</span>
+</span><span id="line-241">    <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+</span><span id="line-242">    <span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.encoders</span><span class="w"> </span><span class="kn">import</span> <span class="n">ENCODERS_BY_TYPE</span>
+</span><span id="line-243">
+</span><span id="line-244">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span> <span class="n">Enum</span><span class="p">)):</span>
+</span><span id="line-245">        <span class="k">return</span> <span class="n">obj</span>
+</span><span id="line-246">    <span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_path</span><span class="p">:</span>
+</span><span id="line-247">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Circular reference in output: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="line-248">    <span class="n">path</span> <span class="o">=</span> <span class="n">_path</span> <span class="o">+</span> <span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">obj</span><span class="p">),)</span>
+</span><span id="line-249">
+</span><span id="line-250">    <span class="k">def</span><span class="w"> </span><span class="nf">walk</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+</span><span id="line-251">        <span class="k">return</span> <span class="n">public_jsonable</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">_path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+</span><span id="line-252">
+</span><span id="line-253">    <span class="c1"># plain containers are walked first (the registry has identity handlers for</span>
+</span><span id="line-254">    <span class="c1"># them, which would skip the objects inside)</span>
+</span><span id="line-255">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">)):</span>
+</span><span id="line-256">        <span class="k">return</span> <span class="n">_walk_container</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">walk</span><span class="p">)</span>
+</span><span id="line-257">    <span class="n">handler</span> <span class="o">=</span> <span class="n">get_type_handler</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+</span><span id="line-258">    <span class="k">if</span> <span class="n">handler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-259">        <span class="k">return</span> <span class="n">handler</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+</span><span id="line-260">    <span class="k">if</span> <span class="n">_is_pydantic_model</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+</span><span id="line-261">        <span class="k">return</span> <span class="n">obj</span>
+</span><span id="line-262">    <span class="c1"># values FastAPI encodes as a whole (datetime, UUID, ip networks...) are kept;</span>
+</span><span id="line-263">    <span class="c1"># its containers (deque, generator) are walked, like any other mapping or</span>
+</span><span id="line-264">    <span class="c1"># iterable, so that the objects inside go through this filter</span>
+</span><span id="line-265">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ENCODERS_BY_TYPE</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+</span><span id="line-266">        <span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="n">deque</span><span class="p">,</span> <span class="n">GeneratorType</span><span class="p">)</span>
+</span><span id="line-267">    <span class="p">):</span>
+</span><span id="line-268">        <span class="k">return</span> <span class="n">obj</span>
+</span><span id="line-269">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+</span><span id="line-270">        <span class="k">return</span> <span class="n">_walk_container</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">walk</span><span class="p">)</span>
+</span><span id="line-271">    <span class="k">if</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+</span><span id="line-272">        <span class="k">return</span> <span class="p">{</span>
+</span><span id="line-273">            <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">walk</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+</span><span id="line-274">            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+</span><span id="line-275">            <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)</span>
+</span><span id="line-276">        <span class="p">}</span>
+</span><span id="line-277">    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__dict__"</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+</span><span id="line-278">        <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">walk</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)}</span>
+</span><span id="line-279">    <span class="k">return</span> <span class="n">obj</span></div>
+
+</span><span id="line-280">
+</span><span id="line-281">
 <div class="viewcode-block" id="get_transform_spec_for_type">
 <a class="viewcode-back" href="../../_autosummary/qh.types.html#qh.get_transform_spec_for_type">[docs]</a>
-</span><span id="line-206"><span class="k">def</span><span class="w"> </span><span class="nf">get_transform_spec_for_type</span><span class="p">(</span><span class="n">python_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TransformSpec</span><span class="p">]:</span>
-</span><span id="line-207"><span class="w">    </span><span class="sd">"""Get TransformSpec for a type from global registry."""</span>
-</span><span id="line-208">    <span class="k">return</span> <span class="n">_global_registry</span><span class="o">.</span><span class="n">get_transform_spec</span><span class="p">(</span><span class="n">python_type</span><span class="p">)</span></div>
+</span><span id="line-282"><span class="k">def</span><span class="w"> </span><span class="nf">get_transform_spec_for_type</span><span class="p">(</span><span class="n">python_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TransformSpec</span><span class="p">]:</span>
+</span><span id="line-283"><span class="w">    </span><span class="sd">"""Get TransformSpec for a type from global registry."""</span>
+</span><span id="line-284">    <span class="k">return</span> <span class="n">_global_registry</span><span class="o">.</span><span class="n">get_transform_spec</span><span class="p">(</span><span class="n">python_type</span><span class="p">)</span></div>
 
-</span><span id="line-209">
-</span><span id="line-210">
-</span><span id="line-211"><span class="c1"># NumPy support (if available)</span>
-</span><span id="line-212"><span class="k">try</span><span class="p">:</span>
-</span><span id="line-213">    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-</span><span id="line-214">
-</span><span id="line-215">    <span class="k">def</span><span class="w"> </span><span class="nf">numpy_array_to_json</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="line-216"><span class="w">        </span><span class="sd">"""Convert NumPy array to JSON-compatible format."""</span>
-</span><span id="line-217">        <span class="c1"># Handle different dtypes</span>
-</span><span id="line-218">        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
-</span><span id="line-219">            <span class="k">return</span> <span class="n">arr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-</span><span id="line-220">        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
-</span><span id="line-221">            <span class="k">return</span> <span class="n">arr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-</span><span id="line-222">        <span class="k">elif</span> <span class="n">arr</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">:</span>
-</span><span id="line-223">            <span class="k">return</span> <span class="n">arr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-</span><span id="line-224">        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-225">            <span class="c1"># Generic fallback</span>
-</span><span id="line-226">            <span class="k">return</span> <span class="n">arr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-</span><span id="line-227">
-</span><span id="line-228">    <span class="k">def</span><span class="w"> </span><span class="nf">numpy_array_from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="line-229"><span class="w">        </span><span class="sd">"""Convert JSON data to NumPy array."""</span>
-</span><span id="line-230">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-</span><span id="line-231">
-</span><span id="line-232">    <span class="c1"># Register NumPy array</span>
-</span><span id="line-233">    <span class="n">register_type</span><span class="p">(</span>
-</span><span id="line-234">        <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-</span><span id="line-235">        <span class="n">to_json</span><span class="o">=</span><span class="n">numpy_array_to_json</span><span class="p">,</span>
-</span><span id="line-236">        <span class="n">from_json</span><span class="o">=</span><span class="n">numpy_array_from_json</span><span class="p">,</span>
-</span><span id="line-237">    <span class="p">)</span>
-</span><span id="line-238">
-</span><span id="line-239"><span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-</span><span id="line-240">    <span class="c1"># NumPy not available</span>
-</span><span id="line-241">    <span class="k">pass</span>
-</span><span id="line-242">
-</span><span id="line-243">
-</span><span id="line-244"><span class="c1"># Pandas support (if available)</span>
-</span><span id="line-245"><span class="k">try</span><span class="p">:</span>
-</span><span id="line-246">    <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-</span><span id="line-247">
-</span><span id="line-248">    <span class="k">def</span><span class="w"> </span><span class="nf">dataframe_to_json</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="line-249"><span class="w">        </span><span class="sd">"""Convert DataFrame to JSON-compatible format."""</span>
-</span><span id="line-250">        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">"records"</span><span class="p">)</span>
-</span><span id="line-251">
-</span><span id="line-252">    <span class="k">def</span><span class="w"> </span><span class="nf">dataframe_from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-</span><span id="line-253"><span class="w">        </span><span class="sd">"""Convert JSON data to DataFrame."""</span>
-</span><span id="line-254">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-</span><span id="line-255">            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-</span><span id="line-256">        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-</span><span id="line-257">            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-</span><span id="line-258">        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-259">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Cannot convert </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2"> to DataFrame"</span><span class="p">)</span>
-</span><span id="line-260">
-</span><span id="line-261">    <span class="k">def</span><span class="w"> </span><span class="nf">series_to_json</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="line-262"><span class="w">        </span><span class="sd">"""Convert Series to JSON-compatible format."""</span>
-</span><span id="line-263">        <span class="k">return</span> <span class="n">series</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
-</span><span id="line-264">
-</span><span id="line-265">    <span class="k">def</span><span class="w"> </span><span class="nf">series_from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
-</span><span id="line-266"><span class="w">        </span><span class="sd">"""Convert JSON data to Series."""</span>
-</span><span id="line-267">        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-</span><span id="line-268">
-</span><span id="line-269">    <span class="c1"># Register Pandas types</span>
-</span><span id="line-270">    <span class="n">register_type</span><span class="p">(</span>
-</span><span id="line-271">        <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
-</span><span id="line-272">        <span class="n">to_json</span><span class="o">=</span><span class="n">dataframe_to_json</span><span class="p">,</span>
-</span><span id="line-273">        <span class="n">from_json</span><span class="o">=</span><span class="n">dataframe_from_json</span><span class="p">,</span>
-</span><span id="line-274">    <span class="p">)</span>
-</span><span id="line-275">
-</span><span id="line-276">    <span class="n">register_type</span><span class="p">(</span>
-</span><span id="line-277">        <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
-</span><span id="line-278">        <span class="n">to_json</span><span class="o">=</span><span class="n">series_to_json</span><span class="p">,</span>
-</span><span id="line-279">        <span class="n">from_json</span><span class="o">=</span><span class="n">series_from_json</span><span class="p">,</span>
-</span><span id="line-280">    <span class="p">)</span>
-</span><span id="line-281">
-</span><span id="line-282"><span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-</span><span id="line-283">    <span class="c1"># Pandas not available</span>
-</span><span id="line-284">    <span class="k">pass</span>
 </span><span id="line-285">
 </span><span id="line-286">
-</span><span id="line-287"><span class="c1"># Decorator for easy registration</span>
+</span><span id="line-287"><span class="c1"># NumPy support (if available)</span>
+</span><span id="line-288"><span class="k">try</span><span class="p">:</span>
+</span><span id="line-289">    <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="line-290">
+</span><span id="line-291">    <span class="k">def</span><span class="w"> </span><span class="nf">numpy_array_to_json</span><span class="p">(</span><span class="n">arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="line-292"><span class="w">        </span><span class="sd">"""Convert NumPy array to JSON-compatible format."""</span>
+</span><span id="line-293">        <span class="c1"># Handle different dtypes</span>
+</span><span id="line-294">        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">):</span>
+</span><span id="line-295">            <span class="k">return</span> <span class="n">arr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-296">        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">issubdtype</span><span class="p">(</span><span class="n">arr</span><span class="o">.</span><span class="n">dtype</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">):</span>
+</span><span id="line-297">            <span class="k">return</span> <span class="n">arr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-298">        <span class="k">elif</span> <span class="n">arr</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">bool_</span><span class="p">:</span>
+</span><span id="line-299">            <span class="k">return</span> <span class="n">arr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-300">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-301">            <span class="c1"># Generic fallback</span>
+</span><span id="line-302">            <span class="k">return</span> <span class="n">arr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-303">
+</span><span id="line-304">    <span class="k">def</span><span class="w"> </span><span class="nf">numpy_array_from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span id="line-305"><span class="w">        </span><span class="sd">"""Convert JSON data to NumPy array."""</span>
+</span><span id="line-306">        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span id="line-307">
+</span><span id="line-308">    <span class="c1"># Register NumPy array</span>
+</span><span id="line-309">    <span class="n">register_type</span><span class="p">(</span>
+</span><span id="line-310">        <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+</span><span id="line-311">        <span class="n">to_json</span><span class="o">=</span><span class="n">numpy_array_to_json</span><span class="p">,</span>
+</span><span id="line-312">        <span class="n">from_json</span><span class="o">=</span><span class="n">numpy_array_from_json</span><span class="p">,</span>
+</span><span id="line-313">    <span class="p">)</span>
+</span><span id="line-314">
+</span><span id="line-315"><span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+</span><span id="line-316">    <span class="c1"># NumPy not available</span>
+</span><span id="line-317">    <span class="k">pass</span>
+</span><span id="line-318">
+</span><span id="line-319">
+</span><span id="line-320"><span class="c1"># Pandas support (if available)</span>
+</span><span id="line-321"><span class="k">try</span><span class="p">:</span>
+</span><span id="line-322">    <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+</span><span id="line-323">
+</span><span id="line-324">    <span class="k">def</span><span class="w"> </span><span class="nf">dataframe_to_json</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="line-325"><span class="w">        </span><span class="sd">"""Convert DataFrame to JSON-compatible format."""</span>
+</span><span id="line-326">        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">"records"</span><span class="p">)</span>
+</span><span id="line-327">
+</span><span id="line-328">    <span class="k">def</span><span class="w"> </span><span class="nf">dataframe_from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+</span><span id="line-329"><span class="w">        </span><span class="sd">"""Convert JSON data to DataFrame."""</span>
+</span><span id="line-330">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+</span><span id="line-331">            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span id="line-332">        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+</span><span id="line-333">            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span id="line-334">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-335">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Cannot convert </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="si">}</span><span class="s2"> to DataFrame"</span><span class="p">)</span>
+</span><span id="line-336">
+</span><span id="line-337">    <span class="k">def</span><span class="w"> </span><span class="nf">series_to_json</span><span class="p">(</span><span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="line-338"><span class="w">        </span><span class="sd">"""Convert Series to JSON-compatible format."""</span>
+</span><span id="line-339">        <span class="k">return</span> <span class="n">series</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</span><span id="line-340">
+</span><span id="line-341">    <span class="k">def</span><span class="w"> </span><span class="nf">series_from_json</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+</span><span id="line-342"><span class="w">        </span><span class="sd">"""Convert JSON data to Series."""</span>
+</span><span id="line-343">        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span id="line-344">
+</span><span id="line-345">    <span class="c1"># Register Pandas types</span>
+</span><span id="line-346">    <span class="n">register_type</span><span class="p">(</span>
+</span><span id="line-347">        <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+</span><span id="line-348">        <span class="n">to_json</span><span class="o">=</span><span class="n">dataframe_to_json</span><span class="p">,</span>
+</span><span id="line-349">        <span class="n">from_json</span><span class="o">=</span><span class="n">dataframe_from_json</span><span class="p">,</span>
+</span><span id="line-350">    <span class="p">)</span>
+</span><span id="line-351">
+</span><span id="line-352">    <span class="n">register_type</span><span class="p">(</span>
+</span><span id="line-353">        <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+</span><span id="line-354">        <span class="n">to_json</span><span class="o">=</span><span class="n">series_to_json</span><span class="p">,</span>
+</span><span id="line-355">        <span class="n">from_json</span><span class="o">=</span><span class="n">series_from_json</span><span class="p">,</span>
+</span><span id="line-356">    <span class="p">)</span>
+</span><span id="line-357">
+</span><span id="line-358"><span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+</span><span id="line-359">    <span class="c1"># Pandas not available</span>
+</span><span id="line-360">    <span class="k">pass</span>
+</span><span id="line-361">
+</span><span id="line-362">
+</span><span id="line-363"><span class="c1"># Decorator for easy registration</span>
 <div class="viewcode-block" id="register_json_type">
 <a class="viewcode-back" href="../../_autosummary/qh.types.html#qh.register_json_type">[docs]</a>
-</span><span id="line-288"><span class="k">def</span><span class="w"> </span><span class="nf">register_json_type</span><span class="p">(</span>
-</span><span id="line-289">    <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-290">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-291">    <span class="n">to_json</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-292">    <span class="n">from_json</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">T</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-293"><span class="p">):</span>
-</span><span id="line-294"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-295"><span class="sd">    Decorator to register a custom type.</span>
-</span><span id="line-296">
-</span><span id="line-297"><span class="sd">    Can be used as:</span>
-</span><span id="line-298">
-</span><span id="line-299"><span class="sd">    1. Class decorator (auto-detect to_dict/from_dict methods)</span>
-</span><span id="line-300"><span class="sd">    2. With explicit serializers</span>
-</span><span id="line-301">
-</span><span id="line-302"><span class="sd">    Args:</span>
-</span><span id="line-303"><span class="sd">        cls: The class being decorated, when used as ``@register_json_type``</span>
-</span><span id="line-304"><span class="sd">            with no arguments; ``None`` when called as</span>
-</span><span id="line-305"><span class="sd">            ``@register_json_type(to_json=..., from_json=...)``.</span>
-</span><span id="line-306"><span class="sd">        to_json: Serializer; when omitted, falls back to ``cls.to_dict()``,</span>
-</span><span id="line-307"><span class="sd">            then ``obj.__dict__``.</span>
-</span><span id="line-308"><span class="sd">        from_json: Deserializer; when omitted, falls back to</span>
-</span><span id="line-309"><span class="sd">            ``cls.from_dict``, then ``cls(**data)``.</span>
-</span><span id="line-310">
-</span><span id="line-311"><span class="sd">    Examples:</span>
-</span><span id="line-312">
-</span><span id="line-313"><span class="sd">        &gt;&gt;&gt; @register_json_type</span>
-</span><span id="line-314"><span class="sd">        ... class Point:</span>
-</span><span id="line-315"><span class="sd">        ...     def __init__(self, x, y):</span>
-</span><span id="line-316"><span class="sd">        ...         self.x = x</span>
-</span><span id="line-317"><span class="sd">        ...         self.y = y</span>
-</span><span id="line-318"><span class="sd">        ...     def to_dict(self):</span>
-</span><span id="line-319"><span class="sd">        ...         return {'x': self.x, 'y': self.y}</span>
-</span><span id="line-320"><span class="sd">        ...     @classmethod</span>
-</span><span id="line-321"><span class="sd">        ...     def from_dict(cls, data):</span>
-</span><span id="line-322"><span class="sd">        ...         return cls(data['x'], data['y'])</span>
-</span><span id="line-323">
-</span><span id="line-324"><span class="sd">        &gt;&gt;&gt; @register_json_type(</span>
-</span><span id="line-325"><span class="sd">        ...     to_json=lambda p: [p.x, p.y],</span>
-</span><span id="line-326"><span class="sd">        ...     from_json=lambda data: Point(data[0], data[1])</span>
-</span><span id="line-327"><span class="sd">        ... )</span>
-</span><span id="line-328"><span class="sd">        ... class Point:</span>
-</span><span id="line-329"><span class="sd">        ...     def __init__(self, x, y):</span>
-</span><span id="line-330"><span class="sd">        ...         self.x = x</span>
-</span><span id="line-331"><span class="sd">        ...         self.y = y</span>
-</span><span id="line-332"><span class="sd">    """</span>
-</span><span id="line-333">
-</span><span id="line-334">    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
-</span><span id="line-335">        <span class="c1"># Determine serializers</span>
-</span><span id="line-336">        <span class="n">_to_json</span> <span class="o">=</span> <span class="n">to_json</span>
-</span><span id="line-337">        <span class="n">_from_json</span> <span class="o">=</span> <span class="n">from_json</span>
-</span><span id="line-338">
-</span><span id="line-339">        <span class="c1"># Auto-detect serialization methods if not provided</span>
-</span><span id="line-340">        <span class="k">if</span> <span class="n">_to_json</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-341">            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">,</span> <span class="s2">"to_dict"</span><span class="p">):</span>
-</span><span id="line-342">                <span class="n">_to_json</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">obj</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-</span><span id="line-343">            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">,</span> <span class="s2">"__dict__"</span><span class="p">):</span>
-</span><span id="line-344">                <span class="n">_to_json</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">obj</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span>
-</span><span id="line-345">            <span class="k">else</span><span class="p">:</span>
-</span><span id="line-346">                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span id="line-347">                    <span class="sa">f</span><span class="s2">"Cannot auto-detect serialization for </span><span class="si">{</span><span class="n">cls_to_register</span><span class="si">}</span><span class="s2">"</span>
-</span><span id="line-348">                <span class="p">)</span>
-</span><span id="line-349">
-</span><span id="line-350">        <span class="k">if</span> <span class="n">_from_json</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-351">            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">,</span> <span class="s2">"from_dict"</span><span class="p">):</span>
-</span><span id="line-352">                <span class="n">_from_json</span> <span class="o">=</span> <span class="n">cls_to_register</span><span class="o">.</span><span class="n">from_dict</span>
-</span><span id="line-353">            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">,</span> <span class="s2">"__init__"</span><span class="p">):</span>
-</span><span id="line-354">                <span class="c1"># Try to call constructor with dict unpacking</span>
-</span><span id="line-355">                <span class="n">_from_json</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">:</span> <span class="n">cls_to_register</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
-</span><span id="line-356">            <span class="k">else</span><span class="p">:</span>
-</span><span id="line-357">                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span id="line-358">                    <span class="sa">f</span><span class="s2">"Cannot auto-detect deserialization for </span><span class="si">{</span><span class="n">cls_to_register</span><span class="si">}</span><span class="s2">"</span>
-</span><span id="line-359">                <span class="p">)</span>
-</span><span id="line-360">
-</span><span id="line-361">        <span class="c1"># Register the type</span>
-</span><span id="line-362">        <span class="n">register_type</span><span class="p">(</span>
-</span><span id="line-363">            <span class="n">cls_to_register</span><span class="p">,</span>
-</span><span id="line-364">            <span class="n">to_json</span><span class="o">=</span><span class="n">_to_json</span><span class="p">,</span>
-</span><span id="line-365">            <span class="n">from_json</span><span class="o">=</span><span class="n">_from_json</span><span class="p">,</span>
-</span><span id="line-366">        <span class="p">)</span>
-</span><span id="line-367">
-</span><span id="line-368">        <span class="k">return</span> <span class="n">cls_to_register</span>
-</span><span id="line-369">
-</span><span id="line-370">    <span class="c1"># Support both @register_json_type and @register_json_type(...)</span>
-</span><span id="line-371">    <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-372">        <span class="c1"># Called as @register_json_type (no parens) - cls is the class being decorated</span>
-</span><span id="line-373">        <span class="k">return</span> <span class="n">decorator</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-</span><span id="line-374">    <span class="k">else</span><span class="p">:</span>
-</span><span id="line-375">        <span class="c1"># Called as @register_json_type(...) (with keyword params)</span>
-</span><span id="line-376">        <span class="c1"># Return the decorator to be applied</span>
-</span><span id="line-377">        <span class="k">return</span> <span class="n">decorator</span></div>
+</span><span id="line-364"><span class="k">def</span><span class="w"> </span><span class="nf">register_json_type</span><span class="p">(</span>
+</span><span id="line-365">    <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-366">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-367">    <span class="n">to_json</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-368">    <span class="n">from_json</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="n">T</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-369"><span class="p">):</span>
+</span><span id="line-370"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-371"><span class="sd">    Decorator to register a custom type.</span>
+</span><span id="line-372">
+</span><span id="line-373"><span class="sd">    Can be used as:</span>
+</span><span id="line-374">
+</span><span id="line-375"><span class="sd">    1. Class decorator (auto-detect to_dict/from_dict methods)</span>
+</span><span id="line-376"><span class="sd">    2. With explicit serializers</span>
+</span><span id="line-377">
+</span><span id="line-378"><span class="sd">    Args:</span>
+</span><span id="line-379"><span class="sd">        cls: The class being decorated, when used as ``@register_json_type``</span>
+</span><span id="line-380"><span class="sd">            with no arguments; ``None`` when called as</span>
+</span><span id="line-381"><span class="sd">            ``@register_json_type(to_json=..., from_json=...)``.</span>
+</span><span id="line-382"><span class="sd">        to_json: Serializer; when omitted, falls back to ``cls.to_dict()``,</span>
+</span><span id="line-383"><span class="sd">            then ``obj.__dict__``.</span>
+</span><span id="line-384"><span class="sd">        from_json: Deserializer; when omitted, falls back to</span>
+</span><span id="line-385"><span class="sd">            ``cls.from_dict``, then ``cls(**data)``.</span>
+</span><span id="line-386">
+</span><span id="line-387"><span class="sd">    Examples:</span>
+</span><span id="line-388">
+</span><span id="line-389"><span class="sd">        &gt;&gt;&gt; @register_json_type</span>
+</span><span id="line-390"><span class="sd">        ... class Point:</span>
+</span><span id="line-391"><span class="sd">        ...     def __init__(self, x, y):</span>
+</span><span id="line-392"><span class="sd">        ...         self.x = x</span>
+</span><span id="line-393"><span class="sd">        ...         self.y = y</span>
+</span><span id="line-394"><span class="sd">        ...     def to_dict(self):</span>
+</span><span id="line-395"><span class="sd">        ...         return {'x': self.x, 'y': self.y}</span>
+</span><span id="line-396"><span class="sd">        ...     @classmethod</span>
+</span><span id="line-397"><span class="sd">        ...     def from_dict(cls, data):</span>
+</span><span id="line-398"><span class="sd">        ...         return cls(data['x'], data['y'])</span>
+</span><span id="line-399">
+</span><span id="line-400"><span class="sd">        &gt;&gt;&gt; @register_json_type(</span>
+</span><span id="line-401"><span class="sd">        ...     to_json=lambda p: [p.x, p.y],</span>
+</span><span id="line-402"><span class="sd">        ...     from_json=lambda data: Point(data[0], data[1])</span>
+</span><span id="line-403"><span class="sd">        ... )</span>
+</span><span id="line-404"><span class="sd">        ... class Point:</span>
+</span><span id="line-405"><span class="sd">        ...     def __init__(self, x, y):</span>
+</span><span id="line-406"><span class="sd">        ...         self.x = x</span>
+</span><span id="line-407"><span class="sd">        ...         self.y = y</span>
+</span><span id="line-408"><span class="sd">    """</span>
+</span><span id="line-409">
+</span><span id="line-410">    <span class="k">def</span><span class="w"> </span><span class="nf">decorator</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+</span><span id="line-411">        <span class="c1"># Determine serializers</span>
+</span><span id="line-412">        <span class="n">_to_json</span> <span class="o">=</span> <span class="n">to_json</span>
+</span><span id="line-413">        <span class="n">_from_json</span> <span class="o">=</span> <span class="n">from_json</span>
+</span><span id="line-414">
+</span><span id="line-415">        <span class="c1"># Auto-detect serialization methods if not provided</span>
+</span><span id="line-416">        <span class="k">if</span> <span class="n">_to_json</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-417">            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">,</span> <span class="s2">"to_dict"</span><span class="p">):</span>
+</span><span id="line-418">                <span class="n">_to_json</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">obj</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+</span><span id="line-419">            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">,</span> <span class="s2">"__dict__"</span><span class="p">):</span>
+</span><span id="line-420">                <span class="n">_to_json</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">obj</span><span class="p">:</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span>
+</span><span id="line-421">            <span class="k">else</span><span class="p">:</span>
+</span><span id="line-422">                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span id="line-423">                    <span class="sa">f</span><span class="s2">"Cannot auto-detect serialization for </span><span class="si">{</span><span class="n">cls_to_register</span><span class="si">}</span><span class="s2">"</span>
+</span><span id="line-424">                <span class="p">)</span>
+</span><span id="line-425">
+</span><span id="line-426">        <span class="k">if</span> <span class="n">_from_json</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-427">            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">,</span> <span class="s2">"from_dict"</span><span class="p">):</span>
+</span><span id="line-428">                <span class="n">_from_json</span> <span class="o">=</span> <span class="n">cls_to_register</span><span class="o">.</span><span class="n">from_dict</span>
+</span><span id="line-429">            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls_to_register</span><span class="p">,</span> <span class="s2">"__init__"</span><span class="p">):</span>
+</span><span id="line-430">                <span class="c1"># Try to call constructor with dict unpacking</span>
+</span><span id="line-431">                <span class="n">_from_json</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">:</span> <span class="n">cls_to_register</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+</span><span id="line-432">            <span class="k">else</span><span class="p">:</span>
+</span><span id="line-433">                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span id="line-434">                    <span class="sa">f</span><span class="s2">"Cannot auto-detect deserialization for </span><span class="si">{</span><span class="n">cls_to_register</span><span class="si">}</span><span class="s2">"</span>
+</span><span id="line-435">                <span class="p">)</span>
+</span><span id="line-436">
+</span><span id="line-437">        <span class="c1"># Register the type</span>
+</span><span id="line-438">        <span class="n">register_type</span><span class="p">(</span>
+</span><span id="line-439">            <span class="n">cls_to_register</span><span class="p">,</span>
+</span><span id="line-440">            <span class="n">to_json</span><span class="o">=</span><span class="n">_to_json</span><span class="p">,</span>
+</span><span id="line-441">            <span class="n">from_json</span><span class="o">=</span><span class="n">_from_json</span><span class="p">,</span>
+</span><span id="line-442">        <span class="p">)</span>
+</span><span id="line-443">
+</span><span id="line-444">        <span class="k">return</span> <span class="n">cls_to_register</span>
+</span><span id="line-445">
+</span><span id="line-446">    <span class="c1"># Support both @register_json_type and @register_json_type(...)</span>
+</span><span id="line-447">    <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-448">        <span class="c1"># Called as @register_json_type (no parens) - cls is the class being decorated</span>
+</span><span id="line-449">        <span class="k">return</span> <span class="n">decorator</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+</span><span id="line-450">    <span class="k">else</span><span class="p">:</span>
+</span><span id="line-451">        <span class="c1"># Called as @register_json_type(...) (with keyword params)</span>
+</span><span id="line-452">        <span class="c1"># Return the decorator to be applied</span>
+</span><span id="line-453">        <span class="k">return</span> <span class="n">decorator</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -599,7 +679,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=2fd7553c"></script>
+    <script src="../../_static/documentation_options.js?v=056c92e6"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

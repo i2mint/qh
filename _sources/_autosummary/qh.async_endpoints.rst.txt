@@ -8,6 +8,8 @@ qh.async\_endpoints
 
    .. autosummary::
    
+      add_app_task_endpoints
       add_global_task_endpoints
       add_task_endpoints
+      task_info_for_client
    

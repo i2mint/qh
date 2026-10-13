@@ -554,6 +554,35 @@ async def health():
 
 ## Migration Guide
 
+### Safer defaults: what HTTP clients can see
+
+Clients now see less by default; each old behaviour is one keyword away:
+
+| Default now                                                                                                                                                                               | Old behaviour                                                                                                                                                                             |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| An exception raised by a function gives the client a generic 500 with an error id; the exception (with traceback) is logged server-side under that id (`qh.errors`).                      | `mk_app(..., expose_errors=True)` (or `AppConfig(expose_errors=True)`; `qh.base.mk_fastapi_app(..., expose_errors=True)`; `qh.core`: `configs={'error_handler': exposing_error_handler}`) |
+| `GET /tasks/` (all tasks of all callers) is not added.                                                                                                                                    | `mk_app(..., global_task_endpoints=True)`                                                                                                                                                 |
+| Task endpoints never send a task’s traceback, and send a failed task’s error text only with `expose_errors=True`.                                                                         | `expose_errors=True` (tracebacks stay server-side)                                                                                                                                        |
+| Objects without a registered type handler (and dataclasses), at any depth and in task results, are serialized from their public attributes only (no `_private` ones; dict keys are kept). | Register a type handler for that type (`qh.types.register_type`)                                                                                                                          |
+
+To restrict tasks to the caller that created them, give the `TaskConfig` a `task_owner(request) -> str`; anyone else gets a 404 from the task endpoints:
+
+```python
+from fastapi import HTTPException
+
+def caller(request) -> str:
+    # Illustration only: a client can set any header. Use your authenticated
+    # identity (session, verified token...). Must be non-empty.
+    user = request.headers.get("X-User")
+    if not user:
+        raise HTTPException(status_code=401)
+    return user
+
+app = mk_app(
+    [slow_func], async_funcs=["slow_func"], async_config=TaskConfig(task_owner=caller)
+)
+```
+
 ### From v0.4.0 to v0.5.0
 
 The async task feature is fully backward compatible. Existing apps will work without changes.

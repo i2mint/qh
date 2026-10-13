@@ -10,7 +10,7 @@ This module bridges Python functions and HTTP endpoints via transformation rules
 |------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
 | [`apply_ingress_transforms`](#qh.endpoint.apply_ingress_transforms)(params, param_specs) | Apply ingress transformations to extracted parameters.              |
 | [`extract_http_params`](#qh.endpoint.extract_http_params)(request, param_specs)     | Extract parameters from HTTP request based on transformation specs. |
-| [`make_endpoint`](#qh.endpoint.make_endpoint)(func, route_config)             | Create FastAPI endpoint from a function using i2.Wrap.              |
+| [`make_endpoint`](#qh.endpoint.make_endpoint)(func, route_config, \*[, ...])  | Create FastAPI endpoint from a function using i2.Wrap.              |
 | [`validate_route_config`](#qh.endpoint.validate_route_config)(func, config)           | Validate that route configuration is compatible with function.      |
 
 ### qh.endpoint.apply_egress_transform(result, egress)
@@ -39,13 +39,17 @@ Extract parameters from HTTP request based on transformation specs.
 * **Returns:**
   Dict of parameter name to extracted value
 
-### qh.endpoint.make_endpoint(func, route_config)
+### qh.endpoint.make_endpoint(func, route_config, , expose_errors=False)
 
 Create FastAPI endpoint from a function using i2.Wrap.
 
 * **Parameters:**
   * **func** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)) – The Python function to wrap
   * **route_config** ([`RouteConfig`](qh.config.html.md#qh.config.RouteConfig)) – Configuration for this route
+  * **expose_errors** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – If True, an exception raised by `func` is sent to the
+    client as `"Error in <func>: <exception>"`. By default the client
+    gets a generic message with an error id, and the exception is logged
+    (see `qh.errors`).
 * **Return type:**
   [`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)
 * **Returns:**

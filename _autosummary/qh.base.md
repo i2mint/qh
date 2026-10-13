@@ -6,7 +6,8 @@ A lighter predecessor of `qh.app.mk_app` with a dict-based route config
 (`path`, `methods`, `input_trans`, `output_trans`, `defaults`,
 `summary`, `tags`). Every endpoint reads its arguments from the JSON body
 merged with path parameters, and answers `422` for a missing required
-argument and `500` for an exception raised by the function. Importing this
+argument and `500` for an exception raised by the function (whose text only
+reaches the client with `expose_errors=True`; see `qh.errors`). Importing this
 module also patches `fastapi.testclient.TestClient.get` to accept a `json`
 body. Not used by `qh.app`; kept for its tests and for `mk_store_dispatcher`.
 
@@ -25,9 +26,13 @@ Main entry points:
 | [`mk_store_dispatcher`](#qh.base.mk_store_dispatcher)(store_getter, \*[, ...])         | Create store dispatcher routes using mk_fastapi_app.                                     |
 | [`name_based_ingress`](#qh.base.name_based_ingress)(\*\*kw)                           | Alias for mk_json_ingress with named transforms.                                         |
 
-### qh.base.mk_fastapi_app(funcs, , app=None, path_prefix='', default_methods=None, path_template='/{func_name}')
+### qh.base.mk_fastapi_app(funcs, , app=None, path_prefix='', default_methods=None, path_template='/{func_name}', expose_errors=False)
 
 Expose Python callables as FastAPI routes.
+
+`expose_errors=True` sends the text of an exception raised by a function to
+the client; by default it gets a generic message with an error id (see
+`qh.errors`).
 
 funcs can be:
 

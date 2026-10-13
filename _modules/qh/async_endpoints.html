@@ -123,6 +123,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.conventions.html">qh.conventions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.core.html">qh.core</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.endpoint.html">qh.endpoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.errors.html">qh.errors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.jsclient.html">qh.jsclient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.openapi.html">qh.openapi</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.rules.html">qh.rules</a></li>
@@ -180,193 +181,374 @@
 </span><span id="line-2"><span class="sd">Helper functions to create task management endpoints.</span>
 </span><span id="line-3">
 </span><span id="line-4"><span class="sd">These endpoints provide standard HTTP interfaces for task status and results.</span>
-</span><span id="line-5"><span class="sd">"""</span>
-</span><span id="line-6">
-</span><span id="line-7"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
-</span><span id="line-8"><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">HTTPException</span>
-</span><span id="line-9"><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONResponse</span>
-</span><span id="line-10">
-</span><span id="line-11"><span class="kn">from</span><span class="w"> </span><span class="nn">qh.async_tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_task_manager</span><span class="p">,</span> <span class="n">TaskStatus</span>
+</span><span id="line-5">
+</span><span id="line-6"><span class="sd">What a client sees is deliberately narrow: never a task's traceback (it stays in</span>
+</span><span id="line-7"><span class="sd">the task store and the server log), a failed task's error text only with</span>
+</span><span id="line-8"><span class="sd">``expose_errors=True``, never ``_private`` attributes of a result, and, when a</span>
+</span><span id="line-9"><span class="sd">``TaskConfig`` has a ``task_owner``, only the caller's own tasks (anyone else's</span>
+</span><span id="line-10"><span class="sd">answer 404). The cross-function task listing (``add_global_task_endpoints``) is</span>
+</span><span id="line-11"><span class="sd">opt-in.</span>
 </span><span id="line-12">
-</span><span id="line-13">
+</span><span id="line-13"><span class="sd">``qh.mk_app`` uses ``add_app_task_endpoints``: one set of ``/tasks/...`` routes</span>
+</span><span id="line-14"><span class="sd">for all of an app's async functions, each task resolved through the managers of</span>
+</span><span id="line-15"><span class="sd">that app's own ``TaskConfig`` objects (never a process-wide, name-keyed registry).</span>
+</span><span id="line-16"><span class="sd">"""</span>
+</span><span id="line-17">
+</span><span id="line-18"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+</span><span id="line-19"><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="n">HTTPException</span><span class="p">,</span> <span class="n">Request</span>
+</span><span id="line-20"><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.responses</span><span class="w"> </span><span class="kn">import</span> <span class="n">JSONResponse</span>
+</span><span id="line-21">
+</span><span id="line-22"><span class="kn">from</span><span class="w"> </span><span class="nn">qh.async_tasks</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span id="line-23">    <span class="n">get_task_manager</span><span class="p">,</span>
+</span><span id="line-24">    <span class="n">TaskConfig</span><span class="p">,</span>
+</span><span id="line-25">    <span class="n">TaskInfo</span><span class="p">,</span>
+</span><span id="line-26">    <span class="n">TaskManager</span><span class="p">,</span>
+</span><span id="line-27">    <span class="n">TaskStatus</span><span class="p">,</span>
+</span><span id="line-28"><span class="p">)</span>
+</span><span id="line-29"><span class="kn">from</span><span class="w"> </span><span class="nn">qh.errors</span><span class="w"> </span><span class="kn">import</span> <span class="n">DFLT_EXPOSE_ERRORS</span>
+</span><span id="line-30"><span class="kn">from</span><span class="w"> </span><span class="nn">qh.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">public_jsonable</span>
+</span><span id="line-31">
+</span><span id="line-32"><span class="n">DFLT_TASKS_PATH_PREFIX</span> <span class="o">=</span> <span class="s2">"/tasks"</span>
+</span><span id="line-33"><span class="n">DFLT_TASK_LIST_LIMIT</span> <span class="o">=</span> <span class="mi">100</span>
+</span><span id="line-34">
+</span><span id="line-35"><span class="c1"># Fields of a TaskInfo never sent to a client</span>
+</span><span id="line-36"><span class="n">_SERVER_ONLY_TASK_FIELDS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"traceback"</span><span class="p">,</span> <span class="s2">"owner"</span><span class="p">)</span>
+</span><span id="line-37"><span class="n">_HIDDEN_ERROR_TEXT</span> <span class="o">=</span> <span class="s2">"Task failed (details are in the server log)"</span>
+</span><span id="line-38">
+</span><span id="line-39"><span class="c1"># (manager, config) pairs that a task id may belong to</span>
+</span><span id="line-40"><span class="n">ManagerSources</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">TaskManager</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TaskConfig</span><span class="p">]]]]</span>
+</span><span id="line-41">
+</span><span id="line-42">
+<div class="viewcode-block" id="task_info_for_client">
+<a class="viewcode-back" href="../../_autosummary/qh.async_endpoints.html#qh.async_endpoints.task_info_for_client">[docs]</a>
+</span><span id="line-43"><span class="k">def</span><span class="w"> </span><span class="nf">task_info_for_client</span><span class="p">(</span>
+</span><span id="line-44">    <span class="n">task_info</span><span class="p">:</span> <span class="n">TaskInfo</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">expose_errors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">DFLT_EXPOSE_ERRORS</span>
+</span><span id="line-45"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="line-46"><span class="w">    </span><span class="sd">"""The client-facing view of a task: ``TaskInfo.to_dict()`` without the</span>
+</span><span id="line-47"><span class="sd">    traceback and owner, with the result's private attributes left out, and with</span>
+</span><span id="line-48"><span class="sd">    the error text replaced unless ``expose_errors``.</span>
+</span><span id="line-49">
+</span><span id="line-50"><span class="sd">    &gt;&gt;&gt; import time</span>
+</span><span id="line-51"><span class="sd">    &gt;&gt;&gt; info = TaskInfo('t1', TaskStatus.FAILED, time.time(), error='/srv/db: denied',</span>
+</span><span id="line-52"><span class="sd">    ...                 traceback='Traceback ...', owner='alice')</span>
+</span><span id="line-53"><span class="sd">    &gt;&gt;&gt; d = task_info_for_client(info)</span>
+</span><span id="line-54"><span class="sd">    &gt;&gt;&gt; 'traceback' in d, 'owner' in d, d['error'] == _HIDDEN_ERROR_TEXT</span>
+</span><span id="line-55"><span class="sd">    (False, False, True)</span>
+</span><span id="line-56"><span class="sd">    &gt;&gt;&gt; task_info_for_client(info, expose_errors=True)['error']</span>
+</span><span id="line-57"><span class="sd">    '/srv/db: denied'</span>
+</span><span id="line-58"><span class="sd">    """</span>
+</span><span id="line-59">    <span class="n">data</span> <span class="o">=</span> <span class="n">task_info</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+</span><span id="line-60">    <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">_SERVER_ONLY_TASK_FIELDS</span><span class="p">:</span>
+</span><span id="line-61">        <span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="line-62">    <span class="n">data</span><span class="p">[</span><span class="s2">"result"</span><span class="p">]</span> <span class="o">=</span> <span class="n">public_jsonable</span><span class="p">(</span><span class="n">task_info</span><span class="o">.</span><span class="n">result</span><span class="p">)</span>
+</span><span id="line-63">    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"error"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">expose_errors</span><span class="p">:</span>
+</span><span id="line-64">        <span class="n">data</span><span class="p">[</span><span class="s2">"error"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_HIDDEN_ERROR_TEXT</span>
+</span><span id="line-65">    <span class="k">return</span> <span class="n">data</span></div>
+
+</span><span id="line-66">
+</span><span id="line-67">
+</span><span id="line-68"><span class="k">def</span><span class="w"> </span><span class="nf">_is_visible_to</span><span class="p">(</span><span class="n">task_info</span><span class="p">:</span> <span class="n">TaskInfo</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">task_config</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span id="line-69">    <span class="n">task_owner</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">task_config</span><span class="p">,</span> <span class="s2">"task_owner"</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+</span><span id="line-70">    <span class="k">if</span> <span class="n">task_owner</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-71">        <span class="k">return</span> <span class="kc">True</span>
+</span><span id="line-72">    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">task_info</span><span class="o">.</span><span class="n">owner</span><span class="p">)</span> <span class="ow">and</span> <span class="n">task_info</span><span class="o">.</span><span class="n">owner</span> <span class="o">==</span> <span class="n">task_owner</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+</span><span id="line-73">
+</span><span id="line-74">
+</span><span id="line-75"><span class="k">def</span><span class="w"> </span><span class="nf">_find_visible_task</span><span class="p">(</span>
+</span><span id="line-76">    <span class="n">task_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">sources</span><span class="p">:</span> <span class="n">ManagerSources</span>
+</span><span id="line-77"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TaskManager</span><span class="p">,</span> <span class="n">TaskInfo</span><span class="p">]:</span>
+</span><span id="line-78"><span class="w">    </span><span class="sd">"""The task's manager and info, if the caller may see it, else a 404.</span>
+</span><span id="line-79">
+</span><span id="line-80"><span class="sd">    A task is visible only if EVERY config whose manager knows the task allows it</span>
+</span><span id="line-81"><span class="sd">    (configs may share a store, and the strictest one wins).</span>
+</span><span id="line-82"><span class="sd">    """</span>
+</span><span id="line-83">    <span class="n">found</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-84">    <span class="k">for</span> <span class="n">manager</span><span class="p">,</span> <span class="n">task_config</span> <span class="ow">in</span> <span class="n">sources</span><span class="p">():</span>
+</span><span id="line-85">        <span class="n">task_info</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">get_status</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
+</span><span id="line-86">        <span class="k">if</span> <span class="n">task_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-87">            <span class="k">continue</span>
+</span><span id="line-88">        <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_visible_to</span><span class="p">(</span><span class="n">task_info</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">task_config</span><span class="p">):</span>
+</span><span id="line-89">            <span class="n">found</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-90">            <span class="k">break</span>
+</span><span id="line-91">        <span class="n">found</span> <span class="o">=</span> <span class="n">found</span> <span class="ow">or</span> <span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="n">task_info</span><span class="p">)</span>
+</span><span id="line-92">    <span class="k">if</span> <span class="n">found</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-93">        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Task not found"</span><span class="p">)</span>
+</span><span id="line-94">    <span class="k">return</span> <span class="n">found</span>
+</span><span id="line-95">
+</span><span id="line-96">
+</span><span id="line-97"><span class="k">def</span><span class="w"> </span><span class="nf">_add_task_routes</span><span class="p">(</span>
+</span><span id="line-98">    <span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span>
+</span><span id="line-99">    <span class="n">sources</span><span class="p">:</span> <span class="n">ManagerSources</span><span class="p">,</span>
+</span><span id="line-100">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-101">    <span class="n">path_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-102">    <span class="n">expose_errors</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+</span><span id="line-103"><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-104">    <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+</span><span id="line-105">        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path_prefix</span><span class="si">}</span><span class="s2">/</span><span class="se">{{</span><span class="s2">task_id</span><span class="se">}}</span><span class="s2">/status"</span><span class="p">,</span>
+</span><span id="line-106">        <span class="n">summary</span><span class="o">=</span><span class="s2">"Get task status"</span><span class="p">,</span>
+</span><span id="line-107">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"tasks"</span><span class="p">],</span>
+</span><span id="line-108">    <span class="p">)</span>
+</span><span id="line-109">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_task_status</span><span class="p">(</span><span class="n">task_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+</span><span id="line-110"><span class="w">        </span><span class="sd">"""Get the status of a task."""</span>
+</span><span id="line-111">        <span class="n">_</span><span class="p">,</span> <span class="n">task_info</span> <span class="o">=</span> <span class="n">_find_visible_task</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
+</span><span id="line-112">
+</span><span id="line-113">        <span class="k">return</span> <span class="p">{</span>
+</span><span id="line-114">            <span class="s2">"task_id"</span><span class="p">:</span> <span class="n">task_info</span><span class="o">.</span><span class="n">task_id</span><span class="p">,</span>
+</span><span id="line-115">            <span class="s2">"status"</span><span class="p">:</span> <span class="n">task_info</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+</span><span id="line-116">            <span class="s2">"created_at"</span><span class="p">:</span> <span class="n">task_info</span><span class="o">.</span><span class="n">created_at</span><span class="p">,</span>
+</span><span id="line-117">            <span class="s2">"started_at"</span><span class="p">:</span> <span class="n">task_info</span><span class="o">.</span><span class="n">started_at</span><span class="p">,</span>
+</span><span id="line-118">            <span class="s2">"completed_at"</span><span class="p">:</span> <span class="n">task_info</span><span class="o">.</span><span class="n">completed_at</span><span class="p">,</span>
+</span><span id="line-119">        <span class="p">}</span>
+</span><span id="line-120">
+</span><span id="line-121">    <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+</span><span id="line-122">        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path_prefix</span><span class="si">}</span><span class="s2">/</span><span class="se">{{</span><span class="s2">task_id</span><span class="se">}}</span><span class="s2">/result"</span><span class="p">,</span>
+</span><span id="line-123">        <span class="n">summary</span><span class="o">=</span><span class="s2">"Get task result"</span><span class="p">,</span>
+</span><span id="line-124">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"tasks"</span><span class="p">],</span>
+</span><span id="line-125">    <span class="p">)</span>
+</span><span id="line-126">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_task_result</span><span class="p">(</span>
+</span><span id="line-127">        <span class="n">task_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-128">        <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span>
+</span><span id="line-129">        <span class="n">wait</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="line-130">        <span class="n">timeout</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-131">    <span class="p">):</span>
+</span><span id="line-132"><span class="w">        </span><span class="sd">"""</span>
+</span><span id="line-133"><span class="sd">        Get the result of a completed task.</span>
+</span><span id="line-134">
+</span><span id="line-135"><span class="sd">        Args:</span>
+</span><span id="line-136"><span class="sd">            task_id: Task identifier</span>
+</span><span id="line-137"><span class="sd">            wait: Whether to block until task completes</span>
+</span><span id="line-138"><span class="sd">            timeout: Maximum time to wait in seconds</span>
+</span><span id="line-139">
+</span><span id="line-140"><span class="sd">        Returns:</span>
+</span><span id="line-141"><span class="sd">            A dict with ``task_id`` and ``status``, plus ``result`` when</span>
+</span><span id="line-142"><span class="sd">            completed. A failed or still-pending/running task is returned as</span>
+</span><span id="line-143"><span class="sd">            a ``JSONResponse`` (500 or 202) instead of raising.</span>
+</span><span id="line-144">
+</span><span id="line-145"><span class="sd">        Raises:</span>
+</span><span id="line-146"><span class="sd">            HTTPException: 404 if ``task_id`` is unknown (or not the caller's);</span>
+</span><span id="line-147"><span class="sd">                408 if ``wait`` timed out.</span>
+</span><span id="line-148"><span class="sd">        """</span>
+</span><span id="line-149">        <span class="n">task_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_find_visible_task</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
+</span><span id="line-150">
+</span><span id="line-151">        <span class="k">try</span><span class="p">:</span>
+</span><span id="line-152">            <span class="n">result</span> <span class="o">=</span> <span class="n">task_manager</span><span class="o">.</span><span class="n">get_result</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="n">wait</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+</span><span id="line-153">            <span class="k">return</span> <span class="p">{</span>
+</span><span id="line-154">                <span class="s2">"task_id"</span><span class="p">:</span> <span class="n">task_id</span><span class="p">,</span>
+</span><span id="line-155">                <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"completed"</span><span class="p">,</span>
+</span><span id="line-156">                <span class="s2">"result"</span><span class="p">:</span> <span class="n">public_jsonable</span><span class="p">(</span><span class="n">result</span><span class="p">),</span>
+</span><span id="line-157">            <span class="p">}</span>
+</span><span id="line-158">        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span id="line-159">            <span class="c1"># Task not found, failed, or not completed</span>
+</span><span id="line-160">            <span class="n">task_info</span> <span class="o">=</span> <span class="n">task_manager</span><span class="o">.</span><span class="n">get_status</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
+</span><span id="line-161">            <span class="k">if</span> <span class="ow">not</span> <span class="n">task_info</span><span class="p">:</span>
+</span><span id="line-162">                <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Task not found"</span><span class="p">)</span>
+</span><span id="line-163">
+</span><span id="line-164">            <span class="k">if</span> <span class="n">task_info</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">TaskStatus</span><span class="o">.</span><span class="n">FAILED</span><span class="p">:</span>
+</span><span id="line-165">                <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
+</span><span id="line-166">                    <span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+</span><span id="line-167">                    <span class="n">content</span><span class="o">=</span><span class="p">{</span>
+</span><span id="line-168">                        <span class="s2">"task_id"</span><span class="p">:</span> <span class="n">task_id</span><span class="p">,</span>
+</span><span id="line-169">                        <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"failed"</span><span class="p">,</span>
+</span><span id="line-170">                        <span class="s2">"error"</span><span class="p">:</span> <span class="n">task_info_for_client</span><span class="p">(</span>
+</span><span id="line-171">                            <span class="n">task_info</span><span class="p">,</span> <span class="n">expose_errors</span><span class="o">=</span><span class="n">expose_errors</span>
+</span><span id="line-172">                        <span class="p">)[</span><span class="s2">"error"</span><span class="p">],</span>
+</span><span id="line-173">                    <span class="p">},</span>
+</span><span id="line-174">                <span class="p">)</span>
+</span><span id="line-175">            <span class="k">else</span><span class="p">:</span>
+</span><span id="line-176">                <span class="c1"># Still pending/running</span>
+</span><span id="line-177">                <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
+</span><span id="line-178">                    <span class="n">status_code</span><span class="o">=</span><span class="mi">202</span><span class="p">,</span>
+</span><span id="line-179">                    <span class="n">content</span><span class="o">=</span><span class="p">{</span>
+</span><span id="line-180">                        <span class="s2">"task_id"</span><span class="p">:</span> <span class="n">task_id</span><span class="p">,</span>
+</span><span id="line-181">                        <span class="s2">"status"</span><span class="p">:</span> <span class="n">task_info</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+</span><span id="line-182">                        <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Task not yet completed"</span><span class="p">,</span>
+</span><span id="line-183">                    <span class="p">},</span>
+</span><span id="line-184">                <span class="p">)</span>
+</span><span id="line-185">        <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
+</span><span id="line-186">            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+</span><span id="line-187">                <span class="n">status_code</span><span class="o">=</span><span class="mi">408</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Task did not complete within </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s"</span>
+</span><span id="line-188">            <span class="p">)</span>
+</span><span id="line-189">
+</span><span id="line-190">    <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+</span><span id="line-191">        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path_prefix</span><span class="si">}</span><span class="s2">/</span><span class="se">{{</span><span class="s2">task_id</span><span class="se">}}</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="line-192">        <span class="n">summary</span><span class="o">=</span><span class="s2">"Get complete task info"</span><span class="p">,</span>
+</span><span id="line-193">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"tasks"</span><span class="p">],</span>
+</span><span id="line-194">    <span class="p">)</span>
+</span><span id="line-195">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_task_info</span><span class="p">(</span><span class="n">task_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+</span><span id="line-196"><span class="w">        </span><span class="sd">"""Get information about a task (never its traceback)."""</span>
+</span><span id="line-197">        <span class="n">_</span><span class="p">,</span> <span class="n">task_info</span> <span class="o">=</span> <span class="n">_find_visible_task</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
+</span><span id="line-198">        <span class="k">return</span> <span class="n">task_info_for_client</span><span class="p">(</span><span class="n">task_info</span><span class="p">,</span> <span class="n">expose_errors</span><span class="o">=</span><span class="n">expose_errors</span><span class="p">)</span>
+</span><span id="line-199">
+</span><span id="line-200">    <span class="nd">@app</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
+</span><span id="line-201">        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path_prefix</span><span class="si">}</span><span class="s2">/</span><span class="se">{{</span><span class="s2">task_id</span><span class="se">}}</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="line-202">        <span class="n">summary</span><span class="o">=</span><span class="s2">"Cancel or delete a task"</span><span class="p">,</span>
+</span><span id="line-203">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"tasks"</span><span class="p">],</span>
+</span><span id="line-204">    <span class="p">)</span>
+</span><span id="line-205">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete_task</span><span class="p">(</span><span class="n">task_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">):</span>
+</span><span id="line-206"><span class="w">        </span><span class="sd">"""Cancel (if running) or delete a task."""</span>
+</span><span id="line-207">        <span class="n">task_manager</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_find_visible_task</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">sources</span><span class="p">)</span>
+</span><span id="line-208">        <span class="k">if</span> <span class="ow">not</span> <span class="n">task_manager</span><span class="o">.</span><span class="n">cancel_task</span><span class="p">(</span><span class="n">task_id</span><span class="p">):</span>
+</span><span id="line-209">            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Task not found"</span><span class="p">)</span>
+</span><span id="line-210">        <span class="k">return</span> <span class="p">{</span><span class="s2">"task_id"</span><span class="p">:</span> <span class="n">task_id</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"deleted"</span><span class="p">}</span>
+</span><span id="line-211">
+</span><span id="line-212">
+</span><span id="line-213"><span class="k">def</span><span class="w"> </span><span class="nf">_distinct_managers</span><span class="p">(</span>
+</span><span id="line-214">    <span class="n">task_configs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TaskConfig</span><span class="p">]],</span>
+</span><span id="line-215"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">TaskManager</span><span class="p">,</span> <span class="n">TaskConfig</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
+</span><span id="line-216"><span class="w">    </span><span class="sd">"""``(manager, config, func_names)`` per distinct config."""</span>
+</span><span id="line-217">    <span class="n">by_config</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TaskManager</span><span class="p">,</span> <span class="n">TaskConfig</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="line-218">    <span class="k">for</span> <span class="n">func_name</span><span class="p">,</span> <span class="n">task_config</span> <span class="ow">in</span> <span class="n">task_configs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="line-219">        <span class="k">if</span> <span class="n">task_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-220">            <span class="k">continue</span>
+</span><span id="line-221">        <span class="n">entry</span> <span class="o">=</span> <span class="n">by_config</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+</span><span id="line-222">            <span class="nb">id</span><span class="p">(</span><span class="n">task_config</span><span class="p">),</span> <span class="p">(</span><span class="n">task_config</span><span class="o">.</span><span class="n">get_manager</span><span class="p">(),</span> <span class="n">task_config</span><span class="p">,</span> <span class="p">[])</span>
+</span><span id="line-223">        <span class="p">)</span>
+</span><span id="line-224">        <span class="n">entry</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
+</span><span id="line-225">    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">by_config</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</span><span id="line-226">
+</span><span id="line-227">
+<div class="viewcode-block" id="add_app_task_endpoints">
+<a class="viewcode-back" href="../../_autosummary/qh.async_endpoints.html#qh.async_endpoints.add_app_task_endpoints">[docs]</a>
+</span><span id="line-228"><span class="k">def</span><span class="w"> </span><span class="nf">add_app_task_endpoints</span><span class="p">(</span>
+</span><span id="line-229">    <span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span>
+</span><span id="line-230">    <span class="n">task_configs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TaskConfig</span><span class="p">]],</span>
+</span><span id="line-231">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-232">    <span class="n">path_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_TASKS_PATH_PREFIX</span><span class="p">,</span>
+</span><span id="line-233">    <span class="n">expose_errors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">DFLT_EXPOSE_ERRORS</span><span class="p">,</span>
+</span><span id="line-234"><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-235"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-236"><span class="sd">    Add one set of task endpoints serving the tasks of all the given functions.</span>
+</span><span id="line-237">
+</span><span id="line-238"><span class="sd">    Creates ``GET {path_prefix}/{task_id}/status``, ``.../result``,</span>
+</span><span id="line-239"><span class="sd">    ``GET {path_prefix}/{task_id}`` and ``DELETE {path_prefix}/{task_id}``. A task</span>
+</span><span id="line-240"><span class="sd">    is looked up in the managers of ``task_configs`` only, and is visible to a</span>
+</span><span id="line-241"><span class="sd">    caller only if every ``task_owner`` among the configs that know the task</span>
+</span><span id="line-242"><span class="sd">    allows it.</span>
+</span><span id="line-243">
+</span><span id="line-244"><span class="sd">    Args:</span>
+</span><span id="line-245"><span class="sd">        app: FastAPI application</span>
+</span><span id="line-246"><span class="sd">        task_configs: ``{func_name: TaskConfig}`` of the app's async functions</span>
+</span><span id="line-247"><span class="sd">        path_prefix: URL path prefix for task endpoints</span>
+</span><span id="line-248"><span class="sd">        expose_errors: Whether a failed task's error text reaches the client</span>
+</span><span id="line-249"><span class="sd">            (its traceback never does).</span>
+</span><span id="line-250"><span class="sd">    """</span>
+</span><span id="line-251">    <span class="n">managers</span> <span class="o">=</span> <span class="n">_distinct_managers</span><span class="p">(</span><span class="n">task_configs</span><span class="p">)</span>
+</span><span id="line-252">
+</span><span id="line-253">    <span class="k">def</span><span class="w"> </span><span class="nf">sources</span><span class="p">():</span>
+</span><span id="line-254">        <span class="k">return</span> <span class="p">((</span><span class="n">manager</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span> <span class="k">for</span> <span class="n">manager</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">managers</span><span class="p">)</span>
+</span><span id="line-255">
+</span><span id="line-256">    <span class="n">_add_task_routes</span><span class="p">(</span>
+</span><span id="line-257">        <span class="n">app</span><span class="p">,</span> <span class="n">sources</span><span class="p">,</span> <span class="n">path_prefix</span><span class="o">=</span><span class="n">path_prefix</span><span class="p">,</span> <span class="n">expose_errors</span><span class="o">=</span><span class="n">expose_errors</span>
+</span><span id="line-258">    <span class="p">)</span></div>
+
+</span><span id="line-259">
+</span><span id="line-260">
 <div class="viewcode-block" id="add_task_endpoints">
 <a class="viewcode-back" href="../../_autosummary/qh.async_endpoints.html#qh.async_endpoints.add_task_endpoints">[docs]</a>
-</span><span id="line-14"><span class="k">def</span><span class="w"> </span><span class="nf">add_task_endpoints</span><span class="p">(</span>
-</span><span id="line-15">    <span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span>
-</span><span id="line-16">    <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="line-17">    <span class="n">path_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"/tasks"</span><span class="p">,</span>
-</span><span id="line-18"><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-19"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-20"><span class="sd">    Add task management endpoints for a specific function.</span>
-</span><span id="line-21">
-</span><span id="line-22"><span class="sd">    Creates the following endpoints:</span>
-</span><span id="line-23">
-</span><span id="line-24"><span class="sd">    - GET {path_prefix}/{task_id}/status - Get task status</span>
-</span><span id="line-25"><span class="sd">    - GET {path_prefix}/{task_id}/result - Get task result (waits if needed)</span>
-</span><span id="line-26"><span class="sd">    - GET {path_prefix}/{task_id} - Get complete task info</span>
-</span><span id="line-27"><span class="sd">    - DELETE {path_prefix}/{task_id} - Cancel/delete a task</span>
-</span><span id="line-28">
-</span><span id="line-29"><span class="sd">    Args:</span>
-</span><span id="line-30"><span class="sd">        app: FastAPI application</span>
-</span><span id="line-31"><span class="sd">        func_name: Name of the function these tasks belong to</span>
-</span><span id="line-32"><span class="sd">        path_prefix: URL path prefix for task endpoints</span>
-</span><span id="line-33"><span class="sd">    """</span>
-</span><span id="line-34">
-</span><span id="line-35">    <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-</span><span id="line-36">        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path_prefix</span><span class="si">}</span><span class="s2">/</span><span class="se">{{</span><span class="s2">task_id</span><span class="se">}}</span><span class="s2">/status"</span><span class="p">,</span>
-</span><span id="line-37">        <span class="n">summary</span><span class="o">=</span><span class="s2">"Get task status"</span><span class="p">,</span>
-</span><span id="line-38">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"tasks"</span><span class="p">],</span>
-</span><span id="line-39">    <span class="p">)</span>
-</span><span id="line-40">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_task_status</span><span class="p">(</span><span class="n">task_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="line-41"><span class="w">        </span><span class="sd">"""Get the status of a task."""</span>
-</span><span id="line-42">        <span class="n">task_manager</span> <span class="o">=</span> <span class="n">get_task_manager</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
-</span><span id="line-43">        <span class="n">task_info</span> <span class="o">=</span> <span class="n">task_manager</span><span class="o">.</span><span class="n">get_status</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
-</span><span id="line-44">
-</span><span id="line-45">        <span class="k">if</span> <span class="ow">not</span> <span class="n">task_info</span><span class="p">:</span>
-</span><span id="line-46">            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Task not found"</span><span class="p">)</span>
-</span><span id="line-47">
-</span><span id="line-48">        <span class="k">return</span> <span class="p">{</span>
-</span><span id="line-49">            <span class="s2">"task_id"</span><span class="p">:</span> <span class="n">task_info</span><span class="o">.</span><span class="n">task_id</span><span class="p">,</span>
-</span><span id="line-50">            <span class="s2">"status"</span><span class="p">:</span> <span class="n">task_info</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-</span><span id="line-51">            <span class="s2">"created_at"</span><span class="p">:</span> <span class="n">task_info</span><span class="o">.</span><span class="n">created_at</span><span class="p">,</span>
-</span><span id="line-52">            <span class="s2">"started_at"</span><span class="p">:</span> <span class="n">task_info</span><span class="o">.</span><span class="n">started_at</span><span class="p">,</span>
-</span><span id="line-53">            <span class="s2">"completed_at"</span><span class="p">:</span> <span class="n">task_info</span><span class="o">.</span><span class="n">completed_at</span><span class="p">,</span>
-</span><span id="line-54">        <span class="p">}</span>
-</span><span id="line-55">
-</span><span id="line-56">    <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-</span><span id="line-57">        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path_prefix</span><span class="si">}</span><span class="s2">/</span><span class="se">{{</span><span class="s2">task_id</span><span class="se">}}</span><span class="s2">/result"</span><span class="p">,</span>
-</span><span id="line-58">        <span class="n">summary</span><span class="o">=</span><span class="s2">"Get task result"</span><span class="p">,</span>
-</span><span id="line-59">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"tasks"</span><span class="p">],</span>
-</span><span id="line-60">    <span class="p">)</span>
-</span><span id="line-61">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_task_result</span><span class="p">(</span>
-</span><span id="line-62">        <span class="n">task_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="line-63">        <span class="n">wait</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="line-64">        <span class="n">timeout</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-65">    <span class="p">):</span>
-</span><span id="line-66"><span class="w">        </span><span class="sd">"""</span>
-</span><span id="line-67"><span class="sd">        Get the result of a completed task.</span>
-</span><span id="line-68">
-</span><span id="line-69"><span class="sd">        Args:</span>
-</span><span id="line-70"><span class="sd">            task_id: Task identifier</span>
-</span><span id="line-71"><span class="sd">            wait: Whether to block until task completes</span>
-</span><span id="line-72"><span class="sd">            timeout: Maximum time to wait in seconds</span>
-</span><span id="line-73">
-</span><span id="line-74"><span class="sd">        Returns:</span>
-</span><span id="line-75"><span class="sd">            A dict with ``task_id`` and ``status``, plus ``result`` when</span>
-</span><span id="line-76"><span class="sd">            completed. A failed or still-pending/running task is returned as</span>
-</span><span id="line-77"><span class="sd">            a ``JSONResponse`` (500 or 202) instead of raising.</span>
-</span><span id="line-78">
-</span><span id="line-79"><span class="sd">        Raises:</span>
-</span><span id="line-80"><span class="sd">            HTTPException: 404 if ``task_id`` is unknown to this function's</span>
-</span><span id="line-81"><span class="sd">                task manager; 408 if ``wait`` timed out.</span>
-</span><span id="line-82"><span class="sd">        """</span>
-</span><span id="line-83">        <span class="n">task_manager</span> <span class="o">=</span> <span class="n">get_task_manager</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
-</span><span id="line-84">
-</span><span id="line-85">        <span class="k">try</span><span class="p">:</span>
-</span><span id="line-86">            <span class="n">result</span> <span class="o">=</span> <span class="n">task_manager</span><span class="o">.</span><span class="n">get_result</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">wait</span><span class="o">=</span><span class="n">wait</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
-</span><span id="line-87">            <span class="k">return</span> <span class="p">{</span><span class="s2">"task_id"</span><span class="p">:</span> <span class="n">task_id</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"completed"</span><span class="p">,</span> <span class="s2">"result"</span><span class="p">:</span> <span class="n">result</span><span class="p">}</span>
-</span><span id="line-88">        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="line-89">            <span class="c1"># Task not found, failed, or not completed</span>
-</span><span id="line-90">            <span class="n">task_info</span> <span class="o">=</span> <span class="n">task_manager</span><span class="o">.</span><span class="n">get_status</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
-</span><span id="line-91">            <span class="k">if</span> <span class="ow">not</span> <span class="n">task_info</span><span class="p">:</span>
-</span><span id="line-92">                <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Task not found"</span><span class="p">)</span>
-</span><span id="line-93">
-</span><span id="line-94">            <span class="k">if</span> <span class="n">task_info</span><span class="o">.</span><span class="n">status</span> <span class="o">==</span> <span class="n">TaskStatus</span><span class="o">.</span><span class="n">FAILED</span><span class="p">:</span>
-</span><span id="line-95">                <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
-</span><span id="line-96">                    <span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-</span><span id="line-97">                    <span class="n">content</span><span class="o">=</span><span class="p">{</span>
-</span><span id="line-98">                        <span class="s2">"task_id"</span><span class="p">:</span> <span class="n">task_id</span><span class="p">,</span>
-</span><span id="line-99">                        <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"failed"</span><span class="p">,</span>
-</span><span id="line-100">                        <span class="s2">"error"</span><span class="p">:</span> <span class="n">task_info</span><span class="o">.</span><span class="n">error</span><span class="p">,</span>
-</span><span id="line-101">                        <span class="s2">"traceback"</span><span class="p">:</span> <span class="n">task_info</span><span class="o">.</span><span class="n">traceback</span><span class="p">,</span>
-</span><span id="line-102">                    <span class="p">},</span>
-</span><span id="line-103">                <span class="p">)</span>
-</span><span id="line-104">            <span class="k">else</span><span class="p">:</span>
-</span><span id="line-105">                <span class="c1"># Still pending/running</span>
-</span><span id="line-106">                <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
-</span><span id="line-107">                    <span class="n">status_code</span><span class="o">=</span><span class="mi">202</span><span class="p">,</span>
-</span><span id="line-108">                    <span class="n">content</span><span class="o">=</span><span class="p">{</span>
-</span><span id="line-109">                        <span class="s2">"task_id"</span><span class="p">:</span> <span class="n">task_id</span><span class="p">,</span>
-</span><span id="line-110">                        <span class="s2">"status"</span><span class="p">:</span> <span class="n">task_info</span><span class="o">.</span><span class="n">status</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-</span><span id="line-111">                        <span class="s2">"message"</span><span class="p">:</span> <span class="s2">"Task not yet completed"</span><span class="p">,</span>
-</span><span id="line-112">                    <span class="p">},</span>
-</span><span id="line-113">                <span class="p">)</span>
-</span><span id="line-114">        <span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
-</span><span id="line-115">            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
-</span><span id="line-116">                <span class="n">status_code</span><span class="o">=</span><span class="mi">408</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Task did not complete within </span><span class="si">{</span><span class="n">timeout</span><span class="si">}</span><span class="s2">s"</span>
-</span><span id="line-117">            <span class="p">)</span>
-</span><span id="line-118">
-</span><span id="line-119">    <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-</span><span id="line-120">        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path_prefix</span><span class="si">}</span><span class="s2">/</span><span class="se">{{</span><span class="s2">task_id</span><span class="se">}}</span><span class="s2">"</span><span class="p">,</span>
-</span><span id="line-121">        <span class="n">summary</span><span class="o">=</span><span class="s2">"Get complete task info"</span><span class="p">,</span>
-</span><span id="line-122">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"tasks"</span><span class="p">],</span>
-</span><span id="line-123">    <span class="p">)</span>
-</span><span id="line-124">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_task_info</span><span class="p">(</span><span class="n">task_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="line-125"><span class="w">        </span><span class="sd">"""Get complete information about a task."""</span>
-</span><span id="line-126">        <span class="n">task_manager</span> <span class="o">=</span> <span class="n">get_task_manager</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
-</span><span id="line-127">        <span class="n">task_info</span> <span class="o">=</span> <span class="n">task_manager</span><span class="o">.</span><span class="n">get_status</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
-</span><span id="line-128">
-</span><span id="line-129">        <span class="k">if</span> <span class="ow">not</span> <span class="n">task_info</span><span class="p">:</span>
-</span><span id="line-130">            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Task not found"</span><span class="p">)</span>
-</span><span id="line-131">
-</span><span id="line-132">        <span class="k">return</span> <span class="n">task_info</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-</span><span id="line-133">
-</span><span id="line-134">    <span class="nd">@app</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span>
-</span><span id="line-135">        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path_prefix</span><span class="si">}</span><span class="s2">/</span><span class="se">{{</span><span class="s2">task_id</span><span class="se">}}</span><span class="s2">"</span><span class="p">,</span>
-</span><span id="line-136">        <span class="n">summary</span><span class="o">=</span><span class="s2">"Cancel or delete a task"</span><span class="p">,</span>
-</span><span id="line-137">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"tasks"</span><span class="p">],</span>
-</span><span id="line-138">    <span class="p">)</span>
-</span><span id="line-139">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">delete_task</span><span class="p">(</span><span class="n">task_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="line-140"><span class="w">        </span><span class="sd">"""Cancel (if running) or delete a task."""</span>
-</span><span id="line-141">        <span class="n">task_manager</span> <span class="o">=</span> <span class="n">get_task_manager</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
-</span><span id="line-142">        <span class="n">deleted</span> <span class="o">=</span> <span class="n">task_manager</span><span class="o">.</span><span class="n">cancel_task</span><span class="p">(</span><span class="n">task_id</span><span class="p">)</span>
-</span><span id="line-143">
-</span><span id="line-144">        <span class="k">if</span> <span class="ow">not</span> <span class="n">deleted</span><span class="p">:</span>
-</span><span id="line-145">            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">404</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Task not found"</span><span class="p">)</span>
-</span><span id="line-146">
-</span><span id="line-147">        <span class="k">return</span> <span class="p">{</span><span class="s2">"task_id"</span><span class="p">:</span> <span class="n">task_id</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"deleted"</span><span class="p">}</span></div>
+</span><span id="line-261"><span class="k">def</span><span class="w"> </span><span class="nf">add_task_endpoints</span><span class="p">(</span>
+</span><span id="line-262">    <span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span>
+</span><span id="line-263">    <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-264">    <span class="n">path_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_TASKS_PATH_PREFIX</span><span class="p">,</span>
+</span><span id="line-265">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-266">    <span class="n">task_config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TaskConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-267">    <span class="n">expose_errors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">DFLT_EXPOSE_ERRORS</span><span class="p">,</span>
+</span><span id="line-268"><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-269"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-270"><span class="sd">    Add task management endpoints for a specific function.</span>
+</span><span id="line-271">
+</span><span id="line-272"><span class="sd">    Creates the following endpoints:</span>
+</span><span id="line-273">
+</span><span id="line-274"><span class="sd">    - GET {path_prefix}/{task_id}/status - Get task status</span>
+</span><span id="line-275"><span class="sd">    - GET {path_prefix}/{task_id}/result - Get task result (waits if needed)</span>
+</span><span id="line-276"><span class="sd">    - GET {path_prefix}/{task_id} - Get complete task info</span>
+</span><span id="line-277"><span class="sd">    - DELETE {path_prefix}/{task_id} - Cancel/delete a task</span>
+</span><span id="line-278">
+</span><span id="line-279"><span class="sd">    Args:</span>
+</span><span id="line-280"><span class="sd">        app: FastAPI application</span>
+</span><span id="line-281"><span class="sd">        func_name: Name of the function these tasks belong to</span>
+</span><span id="line-282"><span class="sd">        path_prefix: URL path prefix for task endpoints</span>
+</span><span id="line-283"><span class="sd">        task_config: The function's ``TaskConfig``: its manager holds the tasks</span>
+</span><span id="line-284"><span class="sd">            and its ``task_owner`` (if any) restricts every endpoint to the</span>
+</span><span id="line-285"><span class="sd">            task's creator. Without one, the function's manager is looked up by</span>
+</span><span id="line-286"><span class="sd">            name in the process-wide registry (``get_task_manager``).</span>
+</span><span id="line-287"><span class="sd">        expose_errors: Whether a failed task's error text reaches the client</span>
+</span><span id="line-288"><span class="sd">            (its traceback never does).</span>
+</span><span id="line-289"><span class="sd">    """</span>
+</span><span id="line-290">
+</span><span id="line-291">    <span class="k">def</span><span class="w"> </span><span class="nf">sources</span><span class="p">():</span>
+</span><span id="line-292">        <span class="k">if</span> <span class="n">task_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-293">            <span class="k">return</span> <span class="p">[(</span><span class="n">task_config</span><span class="o">.</span><span class="n">get_manager</span><span class="p">(),</span> <span class="n">task_config</span><span class="p">)]</span>
+</span><span id="line-294">        <span class="k">return</span> <span class="p">[(</span><span class="n">get_task_manager</span><span class="p">(</span><span class="n">func_name</span><span class="p">),</span> <span class="kc">None</span><span class="p">)]</span>
+</span><span id="line-295">
+</span><span id="line-296">    <span class="n">_add_task_routes</span><span class="p">(</span>
+</span><span id="line-297">        <span class="n">app</span><span class="p">,</span> <span class="n">sources</span><span class="p">,</span> <span class="n">path_prefix</span><span class="o">=</span><span class="n">path_prefix</span><span class="p">,</span> <span class="n">expose_errors</span><span class="o">=</span><span class="n">expose_errors</span>
+</span><span id="line-298">    <span class="p">)</span></div>
 
-</span><span id="line-148">
-</span><span id="line-149">
+</span><span id="line-299">
+</span><span id="line-300">
 <div class="viewcode-block" id="add_global_task_endpoints">
 <a class="viewcode-back" href="../../_autosummary/qh.async_endpoints.html#qh.async_endpoints.add_global_task_endpoints">[docs]</a>
-</span><span id="line-150"><span class="k">def</span><span class="w"> </span><span class="nf">add_global_task_endpoints</span><span class="p">(</span>
-</span><span id="line-151">    <span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span>
-</span><span id="line-152">    <span class="n">path_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"/tasks"</span><span class="p">,</span>
-</span><span id="line-153"><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-154"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-155"><span class="sd">    Add global task management endpoints (cross all functions).</span>
-</span><span id="line-156">
-</span><span id="line-157"><span class="sd">    Creates:</span>
-</span><span id="line-158">
-</span><span id="line-159"><span class="sd">    - GET {path_prefix}/ - List all recent tasks</span>
-</span><span id="line-160">
-</span><span id="line-161"><span class="sd">    Args:</span>
-</span><span id="line-162"><span class="sd">        app: FastAPI application</span>
-</span><span id="line-163"><span class="sd">        path_prefix: URL path prefix for task endpoints</span>
-</span><span id="line-164"><span class="sd">    """</span>
-</span><span id="line-165">
-</span><span id="line-166">    <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-</span><span id="line-167">        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path_prefix</span><span class="si">}</span><span class="s2">/"</span><span class="p">,</span>
-</span><span id="line-168">        <span class="n">summary</span><span class="o">=</span><span class="s2">"List all tasks"</span><span class="p">,</span>
-</span><span id="line-169">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"tasks"</span><span class="p">],</span>
-</span><span id="line-170">    <span class="p">)</span>
-</span><span id="line-171">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_all_tasks</span><span class="p">(</span><span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
-</span><span id="line-172"><span class="w">        </span><span class="sd">"""List recent tasks across all functions."""</span>
-</span><span id="line-173">        <span class="kn">from</span><span class="w"> </span><span class="nn">qh.async_tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">_task_managers</span>
-</span><span id="line-174">
-</span><span id="line-175">        <span class="n">all_tasks</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="line-176">        <span class="k">for</span> <span class="n">func_name</span><span class="p">,</span> <span class="n">manager</span> <span class="ow">in</span> <span class="n">_task_managers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="line-177">            <span class="n">tasks</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">list_tasks</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">)</span>
-</span><span id="line-178">            <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">:</span>
-</span><span id="line-179">                <span class="n">task_dict</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-</span><span id="line-180">                <span class="n">task_dict</span><span class="p">[</span><span class="s2">"function"</span><span class="p">]</span> <span class="o">=</span> <span class="n">func_name</span>
-</span><span id="line-181">                <span class="n">all_tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">task_dict</span><span class="p">)</span>
-</span><span id="line-182">
-</span><span id="line-183">        <span class="c1"># Sort by creation time, most recent first</span>
-</span><span id="line-184">        <span class="n">all_tasks</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="s2">"created_at"</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="line-185">
-</span><span id="line-186">        <span class="k">return</span> <span class="p">{</span><span class="s2">"tasks"</span><span class="p">:</span> <span class="n">all_tasks</span><span class="p">[:</span><span class="n">limit</span><span class="p">]}</span></div>
+</span><span id="line-301"><span class="k">def</span><span class="w"> </span><span class="nf">add_global_task_endpoints</span><span class="p">(</span>
+</span><span id="line-302">    <span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span>
+</span><span id="line-303">    <span class="n">path_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DFLT_TASKS_PATH_PREFIX</span><span class="p">,</span>
+</span><span id="line-304">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-305">    <span class="n">task_configs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TaskConfig</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-306">    <span class="n">expose_errors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">DFLT_EXPOSE_ERRORS</span><span class="p">,</span>
+</span><span id="line-307"><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-308"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-309"><span class="sd">    Add global task management endpoints (cross all functions).</span>
+</span><span id="line-310">
+</span><span id="line-311"><span class="sd">    Creates:</span>
+</span><span id="line-312">
+</span><span id="line-313"><span class="sd">    - GET {path_prefix}/ - List all recent tasks</span>
+</span><span id="line-314">
+</span><span id="line-315"><span class="sd">    ``qh.mk_app`` only adds this with ``global_task_endpoints=True``: it lists the</span>
+</span><span id="line-316"><span class="sd">    tasks of every caller, except that a function whose ``TaskConfig`` has a</span>
+</span><span id="line-317"><span class="sd">    ``task_owner`` only contributes the caller's own tasks.</span>
+</span><span id="line-318">
+</span><span id="line-319"><span class="sd">    Args:</span>
+</span><span id="line-320"><span class="sd">        app: FastAPI application</span>
+</span><span id="line-321"><span class="sd">        path_prefix: URL path prefix for task endpoints</span>
+</span><span id="line-322"><span class="sd">        task_configs: ``{func_name: TaskConfig}`` of the functions to list (with</span>
+</span><span id="line-323"><span class="sd">            the ``task_owner`` each one enforces). Defaults to every manager of</span>
+</span><span id="line-324"><span class="sd">            the process-wide registry (``get_task_manager``), with its own config.</span>
+</span><span id="line-325"><span class="sd">        expose_errors: Whether failed tasks' error text is listed</span>
+</span><span id="line-326"><span class="sd">    """</span>
+</span><span id="line-327">
+</span><span id="line-328">    <span class="k">def</span><span class="w"> </span><span class="nf">sources</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">TaskManager</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TaskConfig</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
+</span><span id="line-329">        <span class="k">if</span> <span class="n">task_configs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-330">            <span class="k">return</span> <span class="n">_distinct_managers</span><span class="p">(</span><span class="n">task_configs</span><span class="p">)</span>
+</span><span id="line-331">        <span class="kn">from</span><span class="w"> </span><span class="nn">qh.async_tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">_task_managers</span>
+</span><span id="line-332">
+</span><span id="line-333">        <span class="k">return</span> <span class="p">[(</span><span class="n">m</span><span class="p">,</span> <span class="n">m</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">_task_managers</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+</span><span id="line-334">
+</span><span id="line-335">    <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+</span><span id="line-336">        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path_prefix</span><span class="si">}</span><span class="s2">/"</span><span class="p">,</span>
+</span><span id="line-337">        <span class="n">summary</span><span class="o">=</span><span class="s2">"List all tasks"</span><span class="p">,</span>
+</span><span id="line-338">        <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">"tasks"</span><span class="p">],</span>
+</span><span id="line-339">    <span class="p">)</span>
+</span><span id="line-340">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">list_all_tasks</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">DFLT_TASK_LIST_LIMIT</span><span class="p">):</span>
+</span><span id="line-341"><span class="w">        </span><span class="sd">"""List recent tasks across all functions."""</span>
+</span><span id="line-342">        <span class="n">managers</span> <span class="o">=</span> <span class="n">sources</span><span class="p">()</span>
+</span><span id="line-343">        <span class="n">all_tasks</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="line-344">        <span class="k">for</span> <span class="n">manager</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">func_names</span> <span class="ow">in</span> <span class="n">managers</span><span class="p">:</span>
+</span><span id="line-345">            <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">manager</span><span class="o">.</span><span class="n">list_tasks</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">):</span>
+</span><span id="line-346">                <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">task_id</span> <span class="ow">in</span> <span class="n">all_tasks</span><span class="p">:</span>
+</span><span id="line-347">                    <span class="k">continue</span>
+</span><span id="line-348">                <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
+</span><span id="line-349">                    <span class="n">_is_visible_to</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+</span><span id="line-350">                    <span class="k">for</span> <span class="n">other</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">managers</span>
+</span><span id="line-351">                    <span class="k">if</span> <span class="n">other</span><span class="o">.</span><span class="n">get_status</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">task_id</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span id="line-352">                <span class="p">):</span>
+</span><span id="line-353">                    <span class="k">continue</span>
+</span><span id="line-354">                <span class="n">task_dict</span> <span class="o">=</span> <span class="n">task_info_for_client</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">expose_errors</span><span class="o">=</span><span class="n">expose_errors</span><span class="p">)</span>
+</span><span id="line-355">                <span class="n">task_dict</span><span class="p">[</span><span class="s2">"function"</span><span class="p">]</span> <span class="o">=</span> <span class="n">func_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">func_names</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span id="line-356">                <span class="n">all_tasks</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">task_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">task_dict</span>
+</span><span id="line-357">
+</span><span id="line-358">        <span class="c1"># Sort by creation time, most recent first</span>
+</span><span id="line-359">        <span class="n">tasks</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">all_tasks</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">t</span><span class="p">[</span><span class="s2">"created_at"</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-360">
+</span><span id="line-361">        <span class="k">return</span> <span class="p">{</span><span class="s2">"tasks"</span><span class="p">:</span> <span class="n">tasks</span><span class="p">[:</span><span class="n">limit</span><span class="p">]}</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -381,7 +563,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=2fd7553c"></script>
+    <script src="../../_static/documentation_options.js?v=056c92e6"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

@@ -123,6 +123,7 @@
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.conventions.html">qh.conventions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.core.html">qh.core</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.endpoint.html">qh.endpoint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.errors.html">qh.errors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.jsclient.html">qh.jsclient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.openapi.html">qh.openapi</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.rules.html">qh.rules</a></li>
@@ -177,6 +178,8 @@
   <h2 id="A">A</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
+      <li><a href="_autosummary/qh.async_endpoints.html#qh.async_endpoints.add_app_task_endpoints">add_app_task_endpoints() (in module qh.async_endpoints)</a>
+</li>
       <li><a href="_autosummary/qh.client.html#qh.client.HttpClient.add_function">add_function() (qh.client.HttpClient method)</a>
 
       <ul style="list-style-type:none">
@@ -351,6 +354,8 @@
         <li><a href="_autosummary/qh.openapi.html#qh.openapi.enhance_openapi_schema">(in module qh.openapi)</a>
 </li>
       </ul></li>
+      <li><a href="_autosummary/qh.errors.html#qh.errors.error_detail">error_detail() (in module qh.errors)</a>
+</li>
       <li><a href="_autosummary/qh.html#qh.export_js_client">export_js_client() (in module qh)</a>
 
       <ul style="list-style-type:none">
@@ -371,6 +376,8 @@
         <li><a href="_autosummary/qh.jsclient.html#qh.jsclient.export_ts_client">(in module qh.jsclient)</a>
 </li>
       </ul></li>
+      <li><a href="_autosummary/qh.core.html#qh.core.exposing_error_handler">exposing_error_handler() (in module qh.core)</a>
+</li>
       <li><a href="_autosummary/qh.openapi.html#qh.openapi.extract_function_signature">extract_function_signature() (in module qh.openapi)</a>
 </li>
       <li><a href="_autosummary/qh.endpoint.html#qh.endpoint.extract_http_params">extract_http_params() (in module qh.endpoint)</a>
@@ -443,6 +450,12 @@
       </ul></li>
       <li><a href="_autosummary/qh.conventions.html#qh.conventions.get_id_params">get_id_params() (in module qh.conventions)</a>
 </li>
+      <li><a href="_autosummary/qh.async_tasks.html#qh.async_tasks.TaskConfig.get_manager">get_manager() (qh.async_tasks.TaskConfig method)</a>
+
+      <ul style="list-style-type:none">
+        <li><a href="_autosummary/qh.html#qh.TaskConfig.get_manager">(qh.TaskConfig method)</a>
+</li>
+      </ul></li>
       <li><a href="_autosummary/qh.openapi.html#qh.openapi.get_python_type_name">get_python_type_name() (in module qh.openapi)</a>
 </li>
       <li><a href="_autosummary/qh.async_tasks.html#qh.async_tasks.TaskManager.get_result">get_result() (qh.async_tasks.TaskManager method)</a>
@@ -687,6 +700,8 @@
 </li>
         <li><a href="_autosummary/qh.endpoint.html#module-qh.endpoint">qh.endpoint</a>
 </li>
+        <li><a href="_autosummary/qh.errors.html#module-qh.errors">qh.errors</a>
+</li>
         <li><a href="_autosummary/qh.jsclient.html#module-qh.jsclient">qh.jsclient</a>
 </li>
         <li><a href="_autosummary/qh.openapi.html#module-qh.openapi">qh.openapi</a>
@@ -738,14 +753,16 @@
         <li><a href="_autosummary/qh.app.html#qh.app.print_routes">(in module qh.app)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="_autosummary/qh.html#qh.ProcessPoolTaskExecutor">ProcessPoolTaskExecutor (class in qh)</a>
 
       <ul style="list-style-type:none">
         <li><a href="_autosummary/qh.async_tasks.html#qh.async_tasks.ProcessPoolTaskExecutor">(class in qh.async_tasks)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
+      <li><a href="_autosummary/qh.types.html#qh.types.public_jsonable">public_jsonable() (in module qh.types)</a>
+</li>
       <li><a href="_autosummary/qh.types.html#qh.types.TypeHandler.python_type">python_type (qh.types.TypeHandler attribute)</a>
 </li>
       <li><a href="_autosummary/qh.html#qh.python_type_to_json_schema">python_type_to_json_schema() (in module qh)</a>
@@ -826,8 +843,6 @@
         <li><a href="_autosummary/qh.conventions.html#module-qh.conventions">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li>
     qh.core
 
@@ -835,11 +850,20 @@
         <li><a href="_autosummary/qh.core.html#module-qh.core">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li>
     qh.endpoint
 
       <ul style="list-style-type:none">
         <li><a href="_autosummary/qh.endpoint.html#module-qh.endpoint">module</a>
+</li>
+      </ul></li>
+      <li>
+    qh.errors
+
+      <ul style="list-style-type:none">
+        <li><a href="_autosummary/qh.errors.html#module-qh.errors">module</a>
 </li>
       </ul></li>
       <li>
@@ -948,6 +972,8 @@
   <h2 id="S">S</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
+      <li><a href="_autosummary/qh.core.html#qh.core.safe_error_handler">safe_error_handler() (in module qh.core)</a>
+</li>
       <li><a href="_autosummary/qh.html#qh.serve_app">serve_app() (in module qh)</a>
 
       <ul style="list-style-type:none">
@@ -1021,6 +1047,8 @@
   <h2 id="T">T</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
+      <li><a href="_autosummary/qh.async_endpoints.html#qh.async_endpoints.task_info_for_client">task_info_for_client() (in module qh.async_endpoints)</a>
+</li>
       <li><a href="_autosummary/qh.html#qh.TaskConfig">TaskConfig (class in qh)</a>
 
       <ul style="list-style-type:none">
@@ -1065,14 +1093,14 @@
       </ul></li>
       <li><a href="_autosummary/qh.testing.html#qh.testing.test_client">test_client() (in module qh.testing)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="_autosummary/qh.html#qh.ServiceInfo.thread">thread (qh.ServiceInfo attribute)</a>
 
       <ul style="list-style-type:none">
         <li><a href="_autosummary/qh.testing.html#qh.testing.ServiceInfo.thread">(qh.testing.ServiceInfo attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="_autosummary/qh.html#qh.ThreadPoolTaskExecutor">ThreadPoolTaskExecutor (class in qh)</a>
 
       <ul style="list-style-type:none">
@@ -1250,7 +1278,7 @@
 </footer>
     </div>
     
-    <script src="_static/documentation_options.js?v=2fd7553c"></script>
+    <script src="_static/documentation_options.js?v=056c92e6"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>

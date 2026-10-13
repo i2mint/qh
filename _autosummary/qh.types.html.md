@@ -14,11 +14,12 @@ automatic conversion functions (ingress/egress transformations).
 
 ### Functions
 
-| [`get_transform_spec_for_type`](#qh.types.get_transform_spec_for_type)(python_type)           | Get TransformSpec for a type from global registry.   |
-|-----------------------------------------------------------------------------------------------------|------------------------------------------------------|
-| [`get_type_handler`](#qh.types.get_type_handler)(python_type)                      | Get handler for a type from global registry.         |
-| [`register_json_type`](#qh.types.register_json_type)([cls, to_json, from_json])      | Decorator to register a custom type.                 |
-| [`register_type`](#qh.types.register_type)(python_type, \*, to_json, from_json) | Register a type in the global registry.              |
+| [`get_transform_spec_for_type`](#qh.types.get_transform_spec_for_type)(python_type)           | Get TransformSpec for a type from global registry.                                                                                            |
+|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| [`get_type_handler`](#qh.types.get_type_handler)(python_type)                      | Get handler for a type from global registry.                                                                                                  |
+| [`public_jsonable`](#qh.types.public_jsonable)(obj, \*[, \_path])                 | Prepare a value for JSON encoding (`fastapi.encoders.jsonable_encoder`) without ever exposing `_private` attributes of the objects inside it. |
+| [`register_json_type`](#qh.types.register_json_type)([cls, to_json, from_json])      | Decorator to register a custom type.                                                                                                          |
+| [`register_type`](#qh.types.register_type)(python_type, \*, to_json, from_json) | Register a type in the global registry.                                                                                                       |
 
 ### Classes
 
@@ -135,6 +136,27 @@ Get handler for a type from global registry.
 
 * **Return type:**
   [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`TypeHandler`](#qh.types.TypeHandler)]
+
+### qh.types.public_jsonable(obj, , \_path=())
+
+Prepare a value for JSON encoding (`fastapi.encoders.jsonable_encoder`)
+without ever exposing `_private` attributes of the objects inside it.
+
+Containers are walked; registered types use their handler; dataclasses and
+plain objects become dicts of their public fields/attributes (recursively);
+values FastAPI already knows how to encode (datetime, UUID, Enum, pydantic
+models, whose private attributes it already leaves out, …) are kept as they
+are. Dict keys are data, not attributes, so they are never filtered.
+
+* **Return type:**
+  [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)
+
+```pycon
+>>> class Inner:
+...     def __init__(self): self.name, self._token = 'x', 'SECRET'
+>>> public_jsonable({'_id': 1, 'items': [Inner()]})
+{'_id': 1, 'items': [{'name': 'x'}]}
+```
 
 ### qh.types.register_json_type(cls=None, , to_json=None, from_json=None)
 

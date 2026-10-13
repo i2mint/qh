@@ -24,7 +24,7 @@ Configuration flows from general to specific:
 | [`FunctionConfigBuilder`](#qh.config.FunctionConfigBuilder)(parent, func)                | Fluent interface for building function-specific configuration. |
 | [`RouteConfig`](#qh.config.RouteConfig)([path, methods, rule_chain, ...])      | Configuration for a single route (function endpoint).          |
 
-### *class* qh.config.AppConfig(default_methods=<factory>, path_template='/{func_name}', path_prefix='', rule_chain=<factory>, title='qh API', version='0.1.0', docs_url='/docs', redoc_url='/redoc', openapi_url='/openapi.json', fastapi_kwargs=<factory>)
+### *class* qh.config.AppConfig(default_methods=<factory>, path_template='/{func_name}', path_prefix='', rule_chain=<factory>, expose_errors=False, title='qh API', version='0.1.0', docs_url='/docs', redoc_url='/redoc', openapi_url='/openapi.json', fastapi_kwargs=<factory>)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 

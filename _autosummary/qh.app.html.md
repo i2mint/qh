@@ -34,7 +34,7 @@ Main entry points:
 | [`mk_app`](#qh.app.mk_app)(funcs, \*[, app, config, ...])       | Create a FastAPI application whose routes call the given Python functions.   |
 | [`print_routes`](#qh.app.print_routes)(app)                           | Print a text table of a FastAPI app's routes (methods, path, endpoint name). |
 
-### qh.app.create_app(funcs, , app=None, config=None, use_conventions=False, async_funcs=None, async_config=None, enhanced_openapi=True, \*\*kwargs)
+### qh.app.create_app(funcs, , app=None, config=None, use_conventions=False, async_funcs=None, async_config=None, enhanced_openapi=True, expose_errors=None, global_task_endpoints=False, \*\*kwargs)
 
 Create a FastAPI application whose routes call the given Python functions.
 
@@ -75,6 +75,17 @@ what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
     - None (uses default TaskConfig for functions in async_funcs)
     - TaskConfig object (applies to all async_funcs)
     - Dict mapping function names to TaskConfig objects
+  * **expose_errors** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`bool`](https://docs.python.org/3/builtins/functions.html#bool)]) – Whether the text of an exception raised by a function
+    (or by a background task) is sent to the client. Defaults to the
+    `config`’s `expose_errors`, which defaults to False: the client
+    gets a generic 500 message with an error id, and the exception is
+    logged server-side under that id (see [`qh.errors`](qh.errors.html.md#module-qh.errors)). Pass True
+    to send it (development, trusted clients). Tracebacks
+    of background tasks are never sent.
+  * **global_task_endpoints** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to add `GET /tasks/`, listing the tasks of
+    all `async_funcs` (of every caller, unless their `TaskConfig` has
+    a `task_owner`). Off by default; per-task endpoints
+    (`/tasks/{task_id}...`) are unaffected.
   * **enhanced_openapi** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to serve an enhanced OpenAPI document at
     `/openapi.json` — one with `requestBody` / `responses` /
     `components.schemas` derived from each function’s Python type
@@ -173,7 +184,7 @@ List the routes of a FastAPI app as plain dicts.
 ('/add', ['POST'], True)
 ```
 
-### qh.app.make_app(funcs, , app=None, config=None, use_conventions=False, async_funcs=None, async_config=None, enhanced_openapi=True, \*\*kwargs)
+### qh.app.make_app(funcs, , app=None, config=None, use_conventions=False, async_funcs=None, async_config=None, enhanced_openapi=True, expose_errors=None, global_task_endpoints=False, \*\*kwargs)
 
 Create a FastAPI application whose routes call the given Python functions.
 
@@ -214,6 +225,17 @@ what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
     - None (uses default TaskConfig for functions in async_funcs)
     - TaskConfig object (applies to all async_funcs)
     - Dict mapping function names to TaskConfig objects
+  * **expose_errors** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`bool`](https://docs.python.org/3/builtins/functions.html#bool)]) – Whether the text of an exception raised by a function
+    (or by a background task) is sent to the client. Defaults to the
+    `config`’s `expose_errors`, which defaults to False: the client
+    gets a generic 500 message with an error id, and the exception is
+    logged server-side under that id (see [`qh.errors`](qh.errors.html.md#module-qh.errors)). Pass True
+    to send it (development, trusted clients). Tracebacks
+    of background tasks are never sent.
+  * **global_task_endpoints** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to add `GET /tasks/`, listing the tasks of
+    all `async_funcs` (of every caller, unless their `TaskConfig` has
+    a `task_owner`). Off by default; per-task endpoints
+    (`/tasks/{task_id}...`) are unaffected.
   * **enhanced_openapi** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to serve an enhanced OpenAPI document at
     `/openapi.json` — one with `requestBody` / `responses` /
     `components.schemas` derived from each function’s Python type
@@ -284,7 +306,7 @@ With async support:
 Now `POST /expensive_task?async=true` returns `{"task_id": ...}` and
 `GET /tasks/{task_id}/result` returns the result when ready.
 
-### qh.app.mk_app(funcs, , app=None, config=None, use_conventions=False, async_funcs=None, async_config=None, enhanced_openapi=True, \*\*kwargs)
+### qh.app.mk_app(funcs, , app=None, config=None, use_conventions=False, async_funcs=None, async_config=None, enhanced_openapi=True, expose_errors=None, global_task_endpoints=False, \*\*kwargs)
 
 Create a FastAPI application whose routes call the given Python functions.
 
@@ -325,6 +347,17 @@ what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
     - None (uses default TaskConfig for functions in async_funcs)
     - TaskConfig object (applies to all async_funcs)
     - Dict mapping function names to TaskConfig objects
+  * **expose_errors** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`bool`](https://docs.python.org/3/builtins/functions.html#bool)]) – Whether the text of an exception raised by a function
+    (or by a background task) is sent to the client. Defaults to the
+    `config`’s `expose_errors`, which defaults to False: the client
+    gets a generic 500 message with an error id, and the exception is
+    logged server-side under that id (see [`qh.errors`](qh.errors.html.md#module-qh.errors)). Pass True
+    to send it (development, trusted clients). Tracebacks
+    of background tasks are never sent.
+  * **global_task_endpoints** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to add `GET /tasks/`, listing the tasks of
+    all `async_funcs` (of every caller, unless their `TaskConfig` has
+    a `task_owner`). Off by default; per-task endpoints
+    (`/tasks/{task_id}...`) are unaffected.
   * **enhanced_openapi** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – Whether to serve an enhanced OpenAPI document at
     `/openapi.json` — one with `requestBody` / `responses` /
     `components.schemas` derived from each function’s Python type
