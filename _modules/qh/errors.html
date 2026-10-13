@@ -226,8 +226,10 @@
 </span><span id="line-45">    <span class="n">error_id</span> <span class="o">=</span> <span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span>
 </span><span id="line-46">    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">"Error in </span><span class="si">%s</span><span class="s2"> (error id: </span><span class="si">%s</span><span class="s2">)"</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">error_id</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">exc</span><span class="p">)</span>
 </span><span id="line-47">    <span class="k">if</span> <span class="n">expose_errors</span><span class="p">:</span>
-</span><span id="line-48">        <span class="k">return</span> <span class="n">exposed_text</span> <span class="k">if</span> <span class="n">exposed_text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"Error in </span><span class="si">{</span><span class="n">context</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
-</span><span id="line-49">    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Internal error in </span><span class="si">{</span><span class="n">context</span><span class="si">}</span><span class="s2"> (error id: </span><span class="si">{</span><span class="n">error_id</span><span class="si">}</span><span class="s2">)"</span></div>
+</span><span id="line-48">        <span class="k">return</span> <span class="p">(</span>
+</span><span id="line-49">            <span class="n">exposed_text</span> <span class="k">if</span> <span class="n">exposed_text</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"Error in </span><span class="si">{</span><span class="n">context</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">"</span>
+</span><span id="line-50">        <span class="p">)</span>
+</span><span id="line-51">    <span class="k">return</span> <span class="sa">f</span><span class="s2">"Internal error in </span><span class="si">{</span><span class="n">context</span><span class="si">}</span><span class="s2"> (error id: </span><span class="si">{</span><span class="n">error_id</span><span class="si">}</span><span class="s2">)"</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -242,7 +244,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=056c92e6"></script>
+    <script src="../../_static/documentation_options.js?v=a11416ff"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

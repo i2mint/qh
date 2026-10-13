@@ -1,4 +1,4 @@
-> built 2026-10-13 02:30 UTC from 81f25f2 (master) · qh 0.0.20. Details: build_info.json
+> built 2026-10-13 02:39 UTC from 77f3981 (master) · qh 0.0.21. Details: build_info.json
 
 # index.html.md
 
@@ -574,6 +574,7 @@ To restrict tasks to the caller that created them, give the `TaskConfig` a `task
 ```python
 from fastapi import HTTPException
 
+
 def caller(request) -> str:
     # Illustration only: a client can set any header. Use your authenticated
     # identity (session, verified token...). Must be non-empty.
@@ -581,6 +582,7 @@ def caller(request) -> str:
     if not user:
         raise HTTPException(status_code=401)
     return user
+
 
 app = mk_app(
     [slow_func], async_funcs=["slow_func"], async_config=TaskConfig(task_owner=caller)
@@ -4726,10 +4728,10 @@ which are Mappings of MutableMappings (dict of dicts).
 
 ### Functions
 
-| [`add_mall_access`](_autosummary/qh.stores_qh.html.md#qh.stores_qh.add_mall_access)(get_mall[, app, write, delete])   | Add mall/store access endpoints to a FastAPI application.   |
-|----------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
-| [`add_store_access`](_autosummary/qh.stores_qh.html.md#qh.stores_qh.add_store_access)(get_obj[, app, methods, ...])    | Add store access endpoints to a FastAPI application.        |
-| [`create_method_endpoint`](_autosummary/qh.stores_qh.html.md#qh.stores_qh.create_method_endpoint)(method_name, config, ...)  | Create an endpoint function for a specific mapping method.  |
+| [`add_mall_access`](_autosummary/qh.stores_qh.html.md#qh.stores_qh.add_mall_access)(get_mall[, app, write, ...])     | Add mall/store access endpoints to a FastAPI application.   |
+|---------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
+| [`add_store_access`](_autosummary/qh.stores_qh.html.md#qh.stores_qh.add_store_access)(get_obj[, app, methods, ...])   | Add store access endpoints to a FastAPI application.        |
+| [`create_method_endpoint`](_autosummary/qh.stores_qh.html.md#qh.stores_qh.create_method_endpoint)(method_name, config, ...) | Create an endpoint function for a specific mapping method.  |
 
 ### Classes
 
@@ -4746,14 +4748,53 @@ Request body for setting store values.
 
 Configuration for the model, should be a dictionary conforming to [`ConfigDict`][pydantic.config.ConfigDict].
 
-### qh.stores_qh.add_mall_access(get_mall, app=None, , write=False, delete=False)
+### qh.stores_qh.add_mall_access(get_mall, app=None, , write=False, delete=False, caller=None, expose_errors=False)
 
 Add mall/store access endpoints to a FastAPI application.
 
+Routes live under `/users/{user_id}/mall`, so without an access check any
+client can address any user’s mall. `caller` is that check.
+
+* **Parameters:**
+  * **get_mall** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)], [`Mapping`](https://docs.python.org/3/library/typing.html#typing.Mapping)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`MutableMapping`](https://docs.python.org/3/library/typing.html#typing.MutableMapping)]]) – Function that takes a `user_id` and returns that user’s mall
+    (a mapping of store keys to stores).
+  * **app** – `None`, a `FastAPI` instance, a title string, or a dict of
+    `FastAPI` kwargs (as in `add_store_access`).
+  * **write** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – If True, add a `PUT` route to set store items.
+  * **delete** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – If True, add a `DELETE` route to delete store items.
+  * **caller** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[`Request`], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]) – `caller(request) -> user id` (sync or async) identifying the
+    authenticated client, e.g. from a session or a verified token. When
+    given, every route checks that it equals the `user_id` in the URL
+    before the mall is looked up: an unknown caller (`None`, `""` or
+    a bool) gets 401, a different user 403. To reject a request with
+    another status (e.g. a bad token), raise `HTTPException` from
+    `caller`; any other exception becomes a 500. A sync `caller`
+    runs in a thread pool, so it may block. The comparison is exact, so
+    `get_mall` should not normalise ids (case, whitespace) that
+    `caller` returns un-normalised. When `None` (the default),
+    no check is made, which is only appropriate when every client may
+    read (and, with `write`/`delete`, change) every user’s mall.
+  * **expose_errors** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – If True, exceptions raised by `get_mall` or by a store
+    operation are sent to the client as text (see `add_store_access`).
 * **Return type:**
   `FastAPI`
 
-### qh.stores_qh.add_store_access(get_obj, app=None, , methods=None, get_obj_dispatch=None, base_path='/users/{user_id}/mall/{store_key}')
+```pycon
+>>> from fastapi.testclient import TestClient
+>>> malls = {'alice': {'notes': {'a': 1}}, 'bob': {'notes': {'b': 2}}}
+>>> app = add_mall_access(
+...     malls.get, caller=lambda request: request.headers.get('x-user')
+... )
+>>> client = TestClient(app)
+>>> client.get('/users/alice/mall', headers={'x-user': 'alice'}).json()
+['notes']
+>>> client.get('/users/bob/mall/notes', headers={'x-user': 'alice'}).status_code
+403
+>>> client.get('/users/bob/mall').status_code
+401
+```
+
+### qh.stores_qh.add_store_access(get_obj, app=None, , methods=None, get_obj_dispatch=None, base_path='/users/{user_id}/mall/{store_key}', dependencies=None, expose_errors=False)
 
 Add store access endpoints to a FastAPI application.
 
@@ -4773,12 +4814,20 @@ Add store access endpoints to a FastAPI application.
     - Value is None to use defaults or a dict with configuration
   * **get_obj_dispatch** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)]) – Configuration for how to dispatch the get_obj function
   * **base_path** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – Base path for all endpoints
+  * **dependencies** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Sequence`](https://docs.python.org/3/library/typing.html#typing.Sequence)]) – FastAPI dependencies (e.g. `[Depends(check_caller)]`)
+    added to every route this function registers; the place for an
+    authentication or authorization check.
+  * **expose_errors** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – If True, exceptions raised by `get_obj` or by a store
+    operation are sent to the client as text. By default the client
+    gets `get_obj_dispatch['error_message']` (which only echoes the
+    path parameters) or a generic message with an error id, and the
+    exception is logged server-side (see `qh.errors`).
 * **Return type:**
   `FastAPI`
 * **Returns:**
   FastAPI application instance with store endpoints added
 
-### qh.stores_qh.create_method_endpoint(method_name, config, get_obj_fn, path_params=None)
+### qh.stores_qh.create_method_endpoint(method_name, config, get_obj_fn, path_params=None, , expose_errors=False)
 
 Create an endpoint function for a specific mapping method.
 
@@ -4787,6 +4836,9 @@ Create an endpoint function for a specific mapping method.
   * **config** ([`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)) – Configuration for the endpoint
   * **get_obj_fn** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)) – Function to retrieve the object to operate on
   * **path_params** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`List`](https://docs.python.org/3/library/typing.html#typing.List)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]]) – List of path parameter names (e.g., [‘user_id’, ‘store_key’])
+  * **expose_errors** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – If True, a failing store operation sends its exception
+    text to the client; by default the client gets a generic message
+    with an error id (see `qh.errors`).
 * **Returns:**
   An async endpoint function compatible with FastAPI
 * **Raises:**
@@ -5425,18 +5477,18 @@ Register a type in the global registry.
 
 # About this build
 
-This documentation was built on **2026-10-13 02:30 UTC** from commit <a href="https://github.com/i2mint/qh/commit/81f25f2261ecd7e50dfefe779b49a55ecbd5d156"><code>81f25f2</code></a> on branch <code>master</code>, for **qh 0.0.20** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-13 02:39 UTC** from commit <a href="https://github.com/i2mint/qh/commit/77f3981f73ced8618da867043ac71b93ab5792ea"><code>77f3981</code></a> on branch <code>master</code>, for **qh 0.0.21** (from <code>pyproject.toml</code>).
 
 #### WARNING
 The documentation and the package may be misaligned:
 
-- The documented version (0.0.20) is behind the latest release on PyPI (0.0.21): `pip install qh` gives newer code than these docs describe.
+- The documented version (0.0.21) is behind the latest release on PyPI (0.0.22): `pip install qh` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/qh/commit/81f25f2261ecd7e50dfefe779b49a55ecbd5d156"><code>81f25f2261ecd7e50dfefe779b49a55ecbd5d156</code></a> |
+| Commit              | <a href="https://github.com/i2mint/qh/commit/77f3981f73ced8618da867043ac71b93ab5792ea"><code>77f3981f73ced8618da867043ac71b93ab5792ea</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
 | Tags at this commit | none                                                                                                                                             |
 | Working tree        | clean                                                                                                                                            |
@@ -5447,9 +5499,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/qh</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/qh/actions/runs/38337021152">38337021152</a>            |
+| Run          | <a href="https://github.com/i2mint/qh/actions/runs/38337787495">38337787495</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>81f25f2261ecd7e50dfefe779b49a55ecbd5d156</code> (in the history of the built commit) |
+| Event commit | <code>77f3981f73ced8618da867043ac71b93ab5792ea</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5474,13 +5526,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/qh/0.0.21/">0.0.21</a>, newer than the documented version (0.0.20).
+Latest release: <a href="https://pypi.org/project/qh/0.0.22/">0.0.22</a>, newer than the documented version (0.0.21).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/qh && cd qh
-git checkout 81f25f2261ecd7e50dfefe779b49a55ecbd5d156
+git checkout 77f3981f73ced8618da867043ac71b93ab5792ea
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
