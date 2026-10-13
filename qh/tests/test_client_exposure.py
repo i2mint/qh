@@ -158,3 +158,129 @@ def test_task_owner_restricts_every_task_endpoint():
 
     assert client.delete(f"/tasks/{task_id}", headers=bob).status_code == 404
     assert client.delete(f"/tasks/{task_id}", headers=alice).status_code == 200
+
+
+# --- found by the adversarial review ----------------------------------------------
+
+from dataclasses import dataclass, field
+
+
+class Inner:
+    def __init__(self):
+        self.label = "in"
+        self._token = "SECRET_NESTED"
+
+
+@dataclass(slots=True)
+class SlotsDC:
+    name: str = "n"
+    _token: str = "SECRET_SLOTS"
+
+
+@dataclass
+class Outer:
+    child: Inner = field(default_factory=Inner)
+    _pw: str = "SECRET_TOP"
+
+
+def nested_output() -> dict:
+    return {"_id": 1, "a": Inner(), "b": [SlotsDC()], "c": Outer()}
+
+
+def slots_output() -> SlotsDC:
+    return SlotsDC()
+
+
+def test_private_attributes_never_leak_at_any_depth():
+    client = TestClient(mk_app([nested_output, slots_output]))
+    response = client.post("/nested_output", json={})
+    assert "SECRET" not in response.text
+    assert response.json() == {
+        "_id": 1,  # dict keys are data: kept
+        "a": {"label": "in"},
+        "b": [{"name": "n"}],
+        "c": {"child": {"label": "in"}},
+    }
+    assert client.post("/slots_output", json={}).json() == {"name": "n"}
+
+
+def make_outer(x: int) -> Outer:
+    return Outer()
+
+
+def test_task_results_drop_private_attributes():
+    client = TestClient(mk_app([make_outer], async_funcs=["make_outer"]))
+    task_id = client.post("/make_outer?async=true", json={"x": 1}).json()["task_id"]
+    _wait_done(client, task_id)
+    for path in (f"/tasks/{task_id}", f"/tasks/{task_id}/result"):
+        response = client.get(path)
+        assert response.status_code == 200 and "SECRET" not in response.text
+    assert client.get(f"/tasks/{task_id}/result").json()["result"] == {
+        "child": {"label": "in"}
+    }
+
+
+def test_apps_do_not_see_each_others_tasks():
+    """Two apps exposing a function with the same name keep separate tasks."""
+    private = TaskConfig(task_owner=_owner_from_header)
+    app_a = TestClient(mk_app([work], async_funcs=["work"], async_config=private))
+    app_b = TestClient(mk_app([work], async_funcs=["work"]))
+    task_id = app_a.post(
+        "/work?async=true", json={"x": 21}, headers={"X-User": "alice"}
+    ).json()["task_id"]
+    _wait_done(app_a, task_id, headers={"X-User": "alice"})
+    for path in ("", "/status", "/result"):
+        assert app_b.get(f"/tasks/{task_id}{path}").status_code == 404
+
+
+def other_work(x: int) -> int:
+    return x + 1
+
+
+def test_shared_task_routes_use_each_tasks_own_config():
+    """All async funcs share /tasks/{id}: each task obeys its own TaskConfig."""
+    shared_store_private = TaskConfig(task_owner=_owner_from_header)
+    public = TaskConfig(store=shared_store_private.get_store())
+    app = mk_app(
+        [work, other_work],
+        async_funcs=["work", "other_work"],
+        async_config={"work": public, "other_work": shared_store_private},
+    )
+    client = TestClient(app)
+    alice = {"X-User": "alice"}
+    private_id = client.post(
+        "/other_work?async=true", json={"x": 1}, headers=alice
+    ).json()["task_id"]
+    _wait_done(client, private_id, headers=alice)
+    # the stricter config wins, even though the public config shares the store
+    assert client.get(f"/tasks/{private_id}/result").status_code in (401, 404)
+    bob = {"X-User": "bob"}
+    assert client.get(f"/tasks/{private_id}/result", headers=bob).status_code == 404
+    assert client.get(f"/tasks/{private_id}/result", headers=alice).json()["result"] == 2
+
+
+def test_shared_task_routes_serve_every_async_func():
+    """With separate stores, each function's tasks are reachable at /tasks/{id}."""
+    private = TaskConfig(task_owner=_owner_from_header)
+    app = mk_app(
+        [work, other_work],
+        async_funcs=["work", "other_work"],
+        async_config={"work": TaskConfig(), "other_work": private},
+    )
+    client = TestClient(app)
+    alice, bob = {"X-User": "alice"}, {"X-User": "bob"}
+    public_id = client.post("/work?async=true", json={"x": 1}).json()["task_id"]
+    assert _wait_done(client, public_id)["status"] == "completed"
+    private_id = client.post(
+        "/other_work?async=true", json={"x": 1}, headers=alice
+    ).json()["task_id"]
+    assert _wait_done(client, private_id, headers=alice)["status"] == "completed"
+    assert client.get(f"/tasks/{private_id}", headers=bob).status_code == 404
+
+
+def test_empty_owner_fails_closed():
+    config = TaskConfig(task_owner=lambda request: "")
+    client = TestClient(mk_app([work], async_funcs=["work"], async_config=config))
+    task_id = client.post("/work?async=true", json={"x": 1}).json()["task_id"]
+    time.sleep(POLL_INTERVAL)
+    assert client.get(f"/tasks/{task_id}/status").status_code == 404

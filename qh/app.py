@@ -300,7 +300,10 @@ def mk_app(
 
     # Add task management endpoints if any async functions were configured
     if async_funcs:
-        from qh.async_endpoints import add_global_task_endpoints, add_task_endpoints
+        from qh.async_endpoints import (
+            add_app_task_endpoints,
+            add_global_task_endpoints,
+        )
 
         task_configs = {}
         for func in func_configs.keys():
@@ -314,14 +317,16 @@ def mk_app(
                     task_config = None
                 task_configs[func.__name__] = task_config
 
-                # Add per-function task endpoints
-                if task_config and getattr(task_config, "create_task_endpoints", True):
-                    add_task_endpoints(
-                        app,
-                        func.__name__,
-                        task_config=task_config,
-                        expose_errors=app_config.expose_errors,
-                    )
+        # One set of /tasks/{task_id}... routes for all of this app's async funcs
+        endpoint_task_configs = {
+            name: task_config
+            for name, task_config in task_configs.items()
+            if task_config and getattr(task_config, "create_task_endpoints", True)
+        }
+        if endpoint_task_configs:
+            add_app_task_endpoints(
+                app, endpoint_task_configs, expose_errors=app_config.expose_errors
+            )
 
         # The cross-function task listing is opt-in
         if global_task_endpoints:

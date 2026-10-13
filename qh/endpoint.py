@@ -205,22 +205,32 @@ def make_endpoint(
 
     # Determine if we need egress transformation for output
     # For now, we'll use a simple JSON serializer
-    from qh.types import get_type_handler
+    from qh.types import get_type_handler, public_jsonable
 
     def default_egress(obj: Any) -> Any:
-        """Default output transformation."""
-        # Handle common types
+        """Default output transformation.
+
+        Never exposes ``_private`` attributes, at any depth (``public_jsonable``):
+        register a type handler (``qh.types.register_type``) to serialize a type
+        differently.
+        """
+        import dataclasses
+
         if isinstance(obj, (dict, list, str, int, float, bool, type(None))):
-            return obj
+            return public_jsonable(obj)
         # Consult the type registry (numpy arrays, pandas frames, user-registered types)
         handler = get_type_handler(type(obj))
         if handler is not None:
             return handler.to_json(obj)
-        # Fall back to the object's public attributes (never ``_private`` ones,
-        # which routinely hold tokens, hashes, connections...). Register a type
-        # handler (qh.types.register_type) to serialize a type differently.
-        if hasattr(obj, "__dict__"):
-            return {k: v for k, v in vars(obj).items() if not k.startswith("_")}
+        # Fall back to the object's public attributes (or dataclass fields)
+        if hasattr(obj, "__dict__") or dataclasses.is_dataclass(obj):
+            if dataclasses.is_dataclass(obj) and not hasattr(obj, "__dict__"):
+                return public_jsonable(obj)
+            return {
+                k: public_jsonable(v)
+                for k, v in vars(obj).items()
+                if not k.startswith("_")
+            }
         # Otherwise convert to string
         return str(obj)
 

@@ -148,3 +148,16 @@ def test_no_args_function(client_no_args):
 # Optional: Run pytest directly if this file is executed
 if __name__ == "__main__":
     pytest.main([__file__])
+
+
+def test_error_handler_opt_in_is_per_app():
+    """qh.core: configs=... applies to that app only (default_configs is not mutated)."""
+    from qh.core import exposing_error_handler, mk_fastapi_app as core_mk_app
+
+    exposing = TestClient(
+        core_mk_app([error_prone_func], {"error_handler": exposing_error_handler})
+    )
+    # (qh.core fails on any call today, so compare which handler answered)
+    assert "error id" not in exposing.post("/error_prone_func", json={}).text
+    later = TestClient(core_mk_app([error_prone_func]))
+    assert "error id" in later.post("/error_prone_func", json={}).text
