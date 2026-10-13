@@ -253,9 +253,7 @@ def add_app_task_endpoints(
     def sources():
         return ((manager, config) for manager, config, _ in managers)
 
-    _add_task_routes(
-        app, sources, path_prefix=path_prefix, expose_errors=expose_errors
-    )
+    _add_task_routes(app, sources, path_prefix=path_prefix, expose_errors=expose_errors)
 
 
 def add_task_endpoints(
@@ -293,9 +291,7 @@ def add_task_endpoints(
             return [(task_config.get_manager(), task_config)]
         return [(get_task_manager(func_name), None)]
 
-    _add_task_routes(
-        app, sources, path_prefix=path_prefix, expose_errors=expose_errors
-    )
+    _add_task_routes(app, sources, path_prefix=path_prefix, expose_errors=expose_errors)
 
 
 def add_global_task_endpoints(

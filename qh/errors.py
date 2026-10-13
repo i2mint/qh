@@ -45,5 +45,7 @@ def error_detail(
     error_id = uuid4().hex
     logger.error("Error in %s (error id: %s)", context, error_id, exc_info=exc)
     if expose_errors:
-        return exposed_text if exposed_text is not None else f"Error in {context}: {exc}"
+        return (
+            exposed_text if exposed_text is not None else f"Error in {context}: {exc}"
+        )
     return f"Internal error in {context} (error id: {error_id})"

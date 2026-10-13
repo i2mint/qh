@@ -551,6 +551,7 @@ To restrict tasks to the caller that created them, give the `TaskConfig` a `task
 ```python
 from fastapi import HTTPException
 
+
 def caller(request) -> str:
     # Illustration only: a client can set any header. Use your authenticated
     # identity (session, verified token...). Must be non-empty.
@@ -558,6 +559,7 @@ def caller(request) -> str:
     if not user:
         raise HTTPException(status_code=401)
     return user
+
 
 app = mk_app(
     [slow_func], async_funcs=["slow_func"], async_config=TaskConfig(task_owner=caller)
