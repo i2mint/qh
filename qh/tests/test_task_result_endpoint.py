@@ -119,30 +119,67 @@ def test_legacy_name_keyed_task_routes(monkeypatch):
     assert listed[task_id]["function"] == func_name
 
 
+async def _asgi(app, method, path, *, json_body=None, query=b""):
+    """One request straight through the ASGI ``app`` (no HTTP client library), as
+    ``(status, json)``, so that two can run concurrently on one event loop."""
+    import json
+
+    body = b"" if json_body is None else json.dumps(json_body).encode()
+    scope = {
+        "type": "http",
+        "asgi": {"version": "3.0"},
+        "http_version": "1.1",
+        "method": method,
+        "scheme": "http",
+        "path": path,
+        "raw_path": path.encode(),
+        "query_string": query,
+        "headers": [(b"content-type", b"application/json")],
+        "client": ("test", 1),
+        "server": ("test", 80),
+    }
+    received, sent = False, []
+
+    async def receive():
+        nonlocal received
+        if received:
+            return {"type": "http.disconnect"}
+        received = True
+        return {"type": "http.request", "body": body, "more_body": False}
+
+    async def send(message):
+        sent.append(message)
+
+    await app(scope, receive, send)
+    status = next(m["status"] for m in sent if m["type"] == "http.response.start")
+    content = b"".join(
+        m.get("body", b"") for m in sent if m["type"] == "http.response.body"
+    )
+    return status, json.loads(content)
+
+
 def test_waiting_for_a_result_does_not_stall_other_requests():
     """``?wait=true`` used to poll with ``time.sleep`` on the event loop, so every
     other request waited as long as the task did."""
     import asyncio
 
-    import httpx
-
     _release.clear()
     app = mk_app([gated_work, work], async_funcs=["gated_work"])
 
     async def go():
-        transport = httpx.ASGITransport(app=app)
-        async with httpx.AsyncClient(transport=transport, base_url="http://t") as c:
-            r = await c.post("/gated_work?async=true", json={"x": 1})
-            task_id = r.json()["task_id"]
-            started = time.monotonic()
-            waiting = asyncio.create_task(
-                c.get(f"/tasks/{task_id}/result", params={"wait": True, "timeout": 5})
-            )
-            await asyncio.sleep(0.2)  # the waiter is now waiting
-            other = await c.post("/work", json={"x": 3})
-            other_took = time.monotonic() - started
-            _release.set()
-            return other.json(), other_took, (await waiting).json()
+        _, created = await _asgi(
+            app, "POST", "/gated_work", json_body={"x": 1}, query=b"async=true"
+        )
+        task_id = created["task_id"]
+        started = time.monotonic()
+        waiting = asyncio.create_task(
+            _asgi(app, "GET", f"/tasks/{task_id}/result", query=b"wait=true&timeout=5")
+        )
+        await asyncio.sleep(0.2)  # the waiter is now waiting
+        _, other = await _asgi(app, "POST", "/work", json_body={"x": 3})
+        other_took = time.monotonic() - started
+        _release.set()
+        return other, other_took, (await waiting)[1]
 
     try:
         other, other_took, waited = asyncio.run(go())
