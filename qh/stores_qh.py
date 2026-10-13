@@ -24,6 +24,8 @@ from collections.abc import ItemsView, KeysView, ValuesView
 from fastapi import Body, Depends, FastAPI, HTTPException, Path, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
+from starlette.concurrency import run_in_threadpool
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from qh.errors import DFLT_EXPOSE_ERRORS, error_detail
 
@@ -115,7 +117,9 @@ def _serialize_value(value: Any) -> Any:
     elif isinstance(value, (str, int, float, bool, type(None))):
         return value
     else:
-        # For complex objects, convert to string representation
+        # For complex objects, convert to string representation (sent to the
+        # client as is: a store holding objects whose str() carries secrets
+        # should serialize them itself)
         return str(value)
 
 
@@ -482,30 +486,30 @@ def add_store_access(
                 # No default available for this method
                 continue
 
+    def _not_found_detail(args) -> str:
+        error_params = {param: arg for param, arg in zip(path_params, args)}
+        try:
+            return get_obj_dispatch["error_message"].format(**error_params)
+        except (KeyError, IndexError):  # no template, or one naming other params
+            return "Object not found"
+
     def _get_obj_or_error(*args) -> Mapping:
         """Get object or raise HTTP exception."""
+        error_code = get_obj_dispatch.get("error_code", 404)
         try:
             obj = get_obj(*args)
-            if obj is None:
-                # Format error message with all path params
-                error_params = {param: arg for param, arg in zip(path_params, args)}
-                error_message = get_obj_dispatch["error_message"].format(**error_params)
-                raise HTTPException(
-                    status_code=get_obj_dispatch["error_code"], detail=error_message
-                )
-            return obj
-        except HTTPException:
+        except StarletteHTTPException:
             raise
         except Exception as e:
-            error_params = {param: arg for param, arg in zip(path_params, args)}
             if expose_errors:
                 detail = str(e)
             else:
-                logger.info("get_obj failed for %s", error_params, exc_info=e)
-                detail = get_obj_dispatch["error_message"].format(**error_params)
-            raise HTTPException(
-                status_code=get_obj_dispatch["error_code"], detail=detail
-            )
+                logger.info("get_obj failed for %s", args, exc_info=e)
+                detail = _not_found_detail(args)
+            raise HTTPException(status_code=error_code, detail=detail)
+        if obj is None:
+            raise HTTPException(status_code=error_code, detail=_not_found_detail(args))
+        return obj
 
     # Reorder endpoints to prioritize static routes over dynamic ones
     ordered_methods = [
@@ -584,9 +588,14 @@ def add_mall_access(
         delete: If True, add a ``DELETE`` route to delete store items.
         caller: ``caller(request) -> user id`` (sync or async) identifying the
             authenticated client, e.g. from a session or a verified token. When
-            given, every route checks that it equals the ``user_id`` in the URL:
-            a ``None`` caller gets 401, a different user 403. ``caller`` may
-            also raise its own ``HTTPException``. When ``None`` (the default),
+            given, every route checks that it equals the ``user_id`` in the URL
+            before the mall is looked up: an unknown caller (``None``, ``""`` or
+            a bool) gets 401, a different user 403. To reject a request with
+            another status (e.g. a bad token), raise ``HTTPException`` from
+            ``caller``; any other exception becomes a 500. A sync ``caller``
+            runs in a thread pool, so it may block. The comparison is exact, so
+            ``get_mall`` should not normalise ids (case, whitespace) that
+            ``caller`` returns un-normalised. When ``None`` (the default),
             no check is made, which is only appropriate when every client may
             read (and, with ``write``/``delete``, change) every user's mall.
         expose_errors: If True, exceptions raised by ``get_mall`` or by a store
@@ -620,7 +629,7 @@ def add_mall_access(
         not_found = f"Mall not found for user: {user_id}"
         try:
             mall = get_mall(user_id)
-        except HTTPException:
+        except StarletteHTTPException:
             raise
         except Exception as e:
             # If get_mall raises an exception, treat as 404
@@ -686,16 +695,20 @@ def add_mall_access(
 
 def _caller_check(caller: Callable[[Request], Any]) -> Callable:
     """Make a FastAPI dependency that requires ``caller(request)`` to be the
-    ``user_id`` path parameter: 401 if the caller is unknown (``None``), 403 if
-    it is someone else."""
+    ``user_id`` path parameter: 401 if the caller is unknown (``None``, ``""``,
+    or a bool, a common "no user" sentinel that would otherwise match a user
+    called ``False``), 403 if it is someone else."""
 
     async def check_caller(
         request: Request, user_id: str = Path(..., description="User ID")
     ) -> None:
-        who = caller(request)
-        if inspect.isawaitable(who):
-            who = await who
-        if who is None:
+        if inspect.iscoroutinefunction(caller):
+            who = await caller(request)
+        else:
+            who = await run_in_threadpool(caller, request)
+            if inspect.isawaitable(who):
+                who = await who
+        if who is None or isinstance(who, bool) or who == "":
             raise HTTPException(status_code=401, detail="Not authenticated")
         if str(who) != user_id:
             raise HTTPException(status_code=403, detail="Not allowed")

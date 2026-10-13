@@ -144,3 +144,36 @@ def test_caller_may_raise_its_own_http_exception():
 def test_no_caller_keeps_open_access():
     client = TestClient(add_mall_access(_malls().get))
     assert client.get("/users/bob/mall/notes/b").json() == {"value": 2}
+
+
+@pytest.mark.parametrize("sentinel", [None, "", False, True])
+def test_falsy_or_bool_caller_is_unauthenticated(sentinel):
+    malls = {"False": {"s": {}}, "True": {"s": {}}, "": {"s": {}}}
+    client = TestClient(add_mall_access(malls.get, caller=lambda request: sentinel))
+    for user in ("False", "True"):
+        assert client.get(f"/users/{user}/mall").status_code == 401
+
+
+def test_custom_dispatch_without_usable_message_still_404s():
+    def get_obj(user_id):
+        raise RuntimeError(SECRET)
+
+    for dispatch in (
+        {"path_params": ["user_id"], "error_code": 404},
+        {"path_params": ["user_id"], "error_code": 404, "error_message": "{nope}"},
+    ):
+        app = add_store_access(
+            get_obj, get_obj_dispatch=dispatch, base_path="/users/{user_id}"
+        )
+        r = TestClient(app).get("/users/x")
+        assert r.status_code == 404 and SECRET not in r.text
+
+
+def test_starlette_http_exception_from_get_mall_passes_through():
+    from starlette.exceptions import HTTPException as StarletteHTTPException
+
+    def get_mall(user_id):
+        raise StarletteHTTPException(status_code=418, detail="teapot")
+
+    r = TestClient(add_mall_access(get_mall)).get("/users/u/mall")
+    assert r.status_code == 418 and r.json()["detail"] == "teapot"
