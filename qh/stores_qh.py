@@ -21,7 +21,7 @@ import inspect
 import logging
 from collections.abc import ItemsView, KeysView, ValuesView
 
-from fastapi import Body, Depends, FastAPI, HTTPException, Path, Request
+from fastapi import Body, Depends, FastAPI, HTTPException, Path, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
@@ -391,7 +391,7 @@ def create_method_endpoint(
         # Generic handler for other methods
         async def endpoint(
             user_id: str = Path(..., description="User ID"),
-            item_key: str = Path(..., description="Item key", default=None),
+            item_key: Optional[str] = Query(None, description="Item key"),
         ):
             obj = get_obj_fn(user_id)
             args = []

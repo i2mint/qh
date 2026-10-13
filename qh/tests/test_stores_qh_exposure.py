@@ -178,3 +178,33 @@ def test_starlette_http_exception_from_get_mall_passes_through():
     r = TestClient(add_mall_access(get_mall)).get("/users/u/mall")
     assert r.status_code == 418 and r.json()["detail"] == "teapot"
 
+
+def test_dependencies_guard_extra_method_routes_too():
+    from fastapi import Depends
+
+    def deny():
+        raise HTTPException(status_code=403, detail="no")
+
+    methods = {"__iter__": None, "keys": {"path": "/keys", "method": "get"}}
+    client = TestClient(
+        add_store_access(
+            lambda user_id: {"a": 1},
+            methods=methods,
+            base_path="/s/{user_id}",
+            dependencies=[Depends(deny)],
+        )
+    )
+    assert client.get("/s/u").status_code == 403
+    assert client.get("/s/u/keys").status_code == 403
+
+
+def test_extra_method_routes_dispatch_to_the_store():
+    """A method outside the built-in list gets a generic route (it used to fail
+    when the app was built)."""
+    methods = {"__iter__": None, "get": {"path": "/get", "method": "get"}}
+    client = TestClient(
+        add_store_access(
+            lambda user_id: {"a": 1}, methods=methods, base_path="/s/{user_id}"
+        )
+    )
+    assert client.get("/s/u/get", params={"item_key": "a"}).json() == {"value": 1}

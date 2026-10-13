@@ -18,6 +18,7 @@ that app's own ``TaskConfig`` objects (never a process-wide, name-keyed registry
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+from starlette.concurrency import run_in_threadpool
 
 from qh.async_tasks import (
     get_task_manager,
@@ -149,7 +150,11 @@ def _add_task_routes(
         task_manager, _ = _find_visible_task(task_id, request, sources)
 
         try:
-            result = task_manager.get_result(task_id, wait=wait, timeout=timeout)
+            # in a worker thread: ``get_result`` polls with ``time.sleep``, which would
+            # stall every other request on the event loop for as long as it waits
+            result = await run_in_threadpool(
+                task_manager.get_result, task_id, wait=wait, timeout=timeout
+            )
             return {
                 "task_id": task_id,
                 "status": "completed",
