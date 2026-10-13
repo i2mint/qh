@@ -22,7 +22,6 @@ qh/
 ├── conventions.py      # Convention-based routing (REST patterns)
 ├── types.py            # Type registry for automatic serialization/deserialization
 ├── base.py             # Lower-level mk_fastapi_app() and utilities
-├── core.py             # Core FastAPI app creation with Wrap-based composition
 ├── openapi.py          # OpenAPI spec generation and enhancement
 ├── client.py           # Python client generation from OpenAPI specs
 ├── jsclient.py         # JavaScript/TypeScript client generation
@@ -265,7 +264,7 @@ class Point:
 
 ### Async Test Support
 ```python
-# From test_core.py
+# From test_base_post_routes.py
 async def async_greeter(greeting: str, name: str = "world") -> str:
     await asyncio.sleep(0.1)  # Simulate async operation
     return f"{greeting}, {name}!"

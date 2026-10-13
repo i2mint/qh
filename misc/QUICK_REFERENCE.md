@@ -241,7 +241,6 @@ qh/
 ├── conventions.py           → REST conventions (get_user → GET /users/{id})
 ├── types.py                 → Type registry, custom serialization
 ├── base.py                  → Lower-level mk_fastapi_app()
-├── core.py                  → Core with i2.Wrap composition
 ├── openapi.py               → OpenAPI spec generation
 ├── client.py                → Python client generation from specs
 ├── jsclient.py              → JavaScript/TypeScript code gen
