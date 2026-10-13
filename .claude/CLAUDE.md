@@ -8,13 +8,12 @@ decide where each parameter lives in the request and how it (de)serializes.
 
 ## Module map (`qh/`)
 
-**Three generations of app-building coexist** — `app.py` is current/primary;
-`base.py` and `core.py` are earlier, still-present takes:
+**Two generations of app-building coexist** — `app.py` is current/primary;
+`base.py` is an earlier, still-present take (a third, `core.py`, never worked
+and was removed, i2mint/qh#17):
 - `app.py` — **primary entry point**: `mk_app`, `inspect_routes`, `print_routes`.
 - `base.py` — a lighter, config-free predecessor with a dict-based route config
   and a store dispatcher.
-- `core.py` — an early, self-contained take built on `i2.wrapper.Wrap`
-  (`mk_fastapi_app`).
 
 **Supporting the primary path:**
 - `config.py` — `RouteConfig` / `AppConfig`: per-route and app-wide configuration.

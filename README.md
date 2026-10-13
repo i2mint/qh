@@ -541,7 +541,7 @@ Clients now see less by default; each old behaviour is one keyword away:
 
 | Default now | Old behaviour |
 |---|---|
-| An exception raised by a function gives the client a generic 500 with an error id; the exception (with traceback) is logged server-side under that id (`qh.errors`). | `mk_app(..., expose_errors=True)` (or `AppConfig(expose_errors=True)`; `qh.base.mk_fastapi_app(..., expose_errors=True)`; `qh.core`: `configs={'error_handler': exposing_error_handler}`) |
+| An exception raised by a function gives the client a generic 500 with an error id; the exception (with traceback) is logged server-side under that id (`qh.errors`). | `mk_app(..., expose_errors=True)` (or `AppConfig(expose_errors=True)`; `qh.base.mk_fastapi_app(..., expose_errors=True)`) |
 | `GET /tasks/` (all tasks of all callers) is not added. | `mk_app(..., global_task_endpoints=True)` |
 | Task endpoints never send a task's traceback, and send a failed task's error text only with `expose_errors=True`. | `expose_errors=True` (tracebacks stay server-side) |
 | Objects without a registered type handler (and dataclasses), at any depth and in task results, are serialized from their public attributes only (no `_private` ones; dict keys are kept). | Register a type handler for that type (`qh.types.register_type`) |

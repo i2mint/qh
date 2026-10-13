@@ -1,8 +1,10 @@
-"""Test core.py functionality."""
+"""``qh.base.mk_fastapi_app``: sync, async and argument-less functions as POST routes.
+
+(This file tested ``qh.core`` until that module was removed, i2mint/qh#17.)"""
 
 import pytest
 from fastapi.testclient import TestClient
-from qh.base import mk_fastapi_app  # Adjust import based on your package structure
+from qh.base import mk_fastapi_app
 import asyncio
 
 
@@ -130,14 +132,6 @@ def test_error_handling(client_error):
     assert "error id" in response.text
 
 
-def test_exposing_error_handler_opt_in():
-    from qh.core import exposing_error_handler
-
-    response = exposing_error_handler(ValueError("Something went wrong"))
-    assert response.status_code == 500
-    assert b"Something went wrong" in response.body
-
-
 def test_no_args_function(client_no_args):
     """Test a function with no arguments."""
     response = client_no_args.post("/no_args_func", json={})
@@ -149,15 +143,3 @@ def test_no_args_function(client_no_args):
 if __name__ == "__main__":
     pytest.main([__file__])
 
-
-def test_error_handler_opt_in_is_per_app():
-    """qh.core: configs=... applies to that app only (default_configs is not mutated)."""
-    from qh.core import exposing_error_handler, mk_fastapi_app as core_mk_app
-
-    exposing = TestClient(
-        core_mk_app([error_prone_func], {"error_handler": exposing_error_handler})
-    )
-    # (qh.core fails on any call today, so compare which handler answered)
-    assert "error id" not in exposing.post("/error_prone_func", json={}).text
-    later = TestClient(core_mk_app([error_prone_func]))
-    assert "error id" in later.post("/error_prone_func", json={}).text
