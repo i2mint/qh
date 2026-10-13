@@ -3,13 +3,17 @@
 An early, self-contained take on the qh idea: ``mk_fastapi_app`` turns a
 collection of callables into ``POST`` routes that read a JSON body as keyword
 arguments and return the JSON-encoded result. It is not used by ``qh.app.mk_app``,
-the maintained entry point, and it keeps a process-wide ``default_configs``
-dict that ``mk_fastapi_app`` mutates; prefer ``qh.app`` for new code.
+the maintained entry point; prefer ``qh.app`` for new code. ``mk_fastapi_app``'s
+``configs`` and ``func_configs`` override the process-wide ``default_configs``
+for that app only.
 
 Main entry points:
 
 - ``mk_fastapi_app``: callables in, FastAPI app out
-- ``default_configs``: the mutable process-wide defaults (path, method, mappers)
+- ``default_configs``: the process-wide defaults (path, method, mappers)
+- ``safe_error_handler`` (the default) / ``exposing_error_handler``: what a client
+  sees when a function raises; set ``configs={'error_handler': exposing_error_handler}``
+  to send it the exception text (see ``qh.errors``)
 """
 
 from fastapi import FastAPI, Request, Response
@@ -19,13 +23,29 @@ from collections.abc import Iterable, Callable
 from i2.wrapper import Wrap
 import inspect
 
+from qh.errors import error_detail
+
+
+def safe_error_handler(exc: Exception) -> Response:
+    """Answer 500 with a generic message and an error id; the exception is logged."""
+    return Response(content=error_detail(exc, context="request"), status_code=500)
+
+
+def exposing_error_handler(exc: Exception) -> Response:
+    """Answer 500 with the exception text (the pre-``qh.errors`` behaviour)."""
+    detail = error_detail(
+        exc, context="request", expose_errors=True, exposed_text=str(exc)
+    )
+    return Response(content=detail, status_code=500)
+
+
 # Default configuration
 default_configs = {
     "http_method": "post",
     "path": lambda func: f"/{func.__name__}",
     "input_mapper": None,  # To be set below
     "output_mapper": None,  # To be set below
-    "error_handler": lambda exc: Response(content=str(exc), status_code=500),
+    "error_handler": safe_error_handler,
 }
 
 
@@ -60,9 +80,17 @@ def get_config_for_func(
 
 
 def mk_wrapped_func(
-    func: Callable, input_mapper: Callable, output_mapper: Callable
+    func: Callable,
+    input_mapper: Callable,
+    output_mapper: Callable,
+    *,
+    error_handler: Optional[Callable[[Exception], Response]] = None,
 ) -> Callable:
-    """Wrap a function with ingress and egress transformations."""
+    """Wrap a function with ingress and egress transformations.
+
+    ``error_handler`` turns an exception into the response; it defaults to
+    ``default_configs['error_handler']`` (``safe_error_handler``).
+    """
     is_async = inspect.iscoroutinefunction(func)
 
     async def ingress(request: Request):
@@ -78,8 +106,8 @@ def mk_wrapped_func(
             result = await wrapped(request)
             return result
         except Exception as e:
-            config = get_config_for_func(func, default_configs, {})
-            return config["error_handler"](e)
+            handler = error_handler or default_configs["error_handler"]
+            return handler(e)
 
     return route_handler
 
@@ -91,8 +119,7 @@ def mk_fastapi_app(
 ) -> FastAPI:
     """Create a FastAPI app from a collection of functions."""
     app = FastAPI()
-    configs = configs or {}
-    default_configs.update(configs)
+    app_configs = {**default_configs, **(configs or {})}
     func_configs = func_configs or {}
 
     # Normalize funcs to a dict
@@ -100,8 +127,13 @@ def mk_fastapi_app(
         funcs = {func: {} for func in funcs}
 
     for func, specific_config in funcs.items():
-        config = get_config_for_func(func, default_configs, func_configs)
-        handler = mk_wrapped_func(func, config["input_mapper"], config["output_mapper"])
+        config = get_config_for_func(func, app_configs, func_configs)
+        handler = mk_wrapped_func(
+            func,
+            config["input_mapper"],
+            config["output_mapper"],
+            error_handler=config["error_handler"],
+        )
         app.add_api_route(
             config["path"](func),
             handler,

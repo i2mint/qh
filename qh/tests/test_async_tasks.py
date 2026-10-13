@@ -93,8 +93,10 @@ class TestBasicAsync:
             assert response.status_code == 404
 
     def test_failed_task(self):
-        """Test handling of failed tasks."""
-        app = mk_app([failing_function], async_funcs=['failing_function'])
+        """Test handling of failed tasks (error text exposed on request)."""
+        app = mk_app(
+            [failing_function], async_funcs=['failing_function'], expose_errors=True
+        )
 
         with test_app(app) as client:
             # Submit task that will fail
@@ -114,7 +116,8 @@ class TestBasicAsync:
             # The important thing is that the error was captured
             assert "error" in info
             assert "Intentional error" in info["error"]
-            assert info["traceback"] is not None
+            # tracebacks stay server-side, even with expose_errors=True
+            assert "traceback" not in info
 
 
 class TestAsyncConfig:
@@ -223,8 +226,10 @@ class TestTaskManagement:
     """Test task management endpoints."""
 
     def test_list_tasks(self):
-        """Test listing all tasks."""
-        app = mk_app([slow_function], async_funcs=['slow_function'])
+        """Test listing all tasks (the listing is opt-in)."""
+        app = mk_app(
+            [slow_function], async_funcs=['slow_function'], global_task_endpoints=True
+        )
 
         with test_app(app) as client:
             # Create a few tasks

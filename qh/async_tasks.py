@@ -18,6 +18,7 @@ Design Philosophy:
 - HTTP-first patterns (query params, standard endpoints)
 """
 
+import logging
 import uuid
 import time
 import threading
@@ -28,6 +29,8 @@ from dataclasses import dataclass, field, asdict
 from typing import Any, Callable, Dict, Optional, Protocol, Union
 from datetime import datetime
 from enum import Enum
+
+logger = logging.getLogger("qh")
 
 
 class TaskStatus(str, Enum):
@@ -51,7 +54,10 @@ class TaskInfo:
     completed_at: Optional[float] = None
     result: Any = None
     error: Optional[str] = None
+    # Server-side only: the task endpoints never send it to clients
     traceback: Optional[str] = None
+    # Who created the task, as returned by ``TaskConfig.task_owner`` (if set)
+    owner: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
@@ -316,11 +322,40 @@ class TaskConfig:
     # Default executor type if not specified: 'thread' or 'process'
     default_executor: str = "thread"
 
+    # Optional ``task_owner(request) -> str`` identifying the caller (e.g. from an
+    # authenticated session; never a header the client can simply set). When set,
+    # each task records its creator and the task endpoints answer 404 to anyone
+    # else (and the global task listing, if enabled, only shows the caller's own
+    # tasks). It must return a non-empty identity, and may raise
+    # ``HTTPException(401)`` for unauthenticated requests; a task whose owner is
+    # empty is visible to no one. The task store must keep ``TaskInfo.owner``
+    # (``InMemoryTaskStore`` does); if it does not, every ownership check fails
+    # closed. Configs sharing a store should share a ``task_owner``: a task is only
+    # visible if every config that can see it allows it.
+    task_owner: Optional[Callable[[Any], str]] = None
+
+    # The TaskManager of this config (see ``get_manager``)
+    _manager: Optional["TaskManager"] = field(
+        default=None, init=False, repr=False, compare=False
+    )
+
     def get_store(self) -> TaskStore:
         """Get or create the task store."""
         if self.store is None:
             self.store = InMemoryTaskStore(ttl=self.ttl)
         return self.store
+
+    def get_manager(self) -> "TaskManager":
+        """The task manager of this config, created on first use.
+
+        Each config has its own manager (``qh.mk_app`` uses it rather than the
+        process-wide, name-keyed ``get_task_manager`` registry, so two apps
+        exposing functions with the same name never see each other's tasks).
+        Apps built with the same ``TaskConfig`` object do share its tasks.
+        """
+        if self._manager is None:
+            self._manager = TaskManager(self)
+        return self._manager
 
     def get_executor(self) -> TaskExecutor:
         """Get or create the task executor."""
@@ -355,6 +390,8 @@ class TaskManager:
         func: Callable,
         args: tuple = (),
         kwargs: Optional[dict] = None,
+        *,
+        owner: Optional[str] = None,
     ) -> str:
         """
         Create and submit a new task.
@@ -363,6 +400,7 @@ class TaskManager:
             func: Function to execute asynchronously
             args: Positional arguments
             kwargs: Keyword arguments
+            owner: Who created the task (see ``TaskConfig.task_owner``)
 
         Returns:
             Task ID
@@ -377,6 +415,7 @@ class TaskManager:
         task_info = self.store.get_task(task_id)  # Get fresh copy
         task_info.status = TaskStatus.RUNNING
         task_info.started_at = time.time()
+        task_info.owner = owner
         self.store.update_task(task_info)
 
         # Submit for execution (after status is set to running)
@@ -406,6 +445,7 @@ class TaskManager:
             task_info.traceback = "".join(
                 traceback.format_exception(type(error), error, error.__traceback__)
             )
+            logger.error("Task %s failed", task_id, exc_info=error)
         else:
             task_info.status = TaskStatus.COMPLETED
             task_info.result = result
@@ -498,13 +538,23 @@ def get_task_manager(
     """
     Get or create a task manager for a function.
 
+    With a ``config``, this is ``config.get_manager()`` (registered under
+    ``func_name`` if that name has no manager yet). Without one, it is the
+    manager registered under ``func_name`` (created with a default config if
+    there is none): a process-wide lookup by name, kept for backward
+    compatibility; prefer ``TaskConfig.get_manager``.
+
     Args:
         func_name: Name of the function
-        config: Task configuration (only used when creating new manager)
+        config: Task configuration
 
     Returns:
         TaskManager instance
     """
+    if config is not None:
+        manager = config.get_manager()
+        _task_managers.setdefault(func_name, manager)
+        return manager
     if func_name not in _task_managers:
         _task_managers[func_name] = TaskManager(config)
     return _task_managers[func_name]

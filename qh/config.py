@@ -99,6 +99,10 @@ class AppConfig:
     # Global rule chain
     rule_chain: RuleChain = field(default_factory=lambda: DEFAULT_RULE_CHAIN)
 
+    # Whether an exception's text reaches the client (see qh.errors); by default it
+    # gets a generic message with an error id, and the exception is logged
+    expose_errors: bool = False
+
     # FastAPI app kwargs
     title: str = "qh API"
     version: str = "0.1.0"

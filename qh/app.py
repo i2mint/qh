@@ -22,6 +22,7 @@ Main entry points:
 ['/add']
 """
 
+from dataclasses import replace
 from typing import Any, Callable, Dict, List, Optional, Union
 from fastapi import FastAPI
 
@@ -52,6 +53,8 @@ def mk_app(
     async_funcs: Optional[List[Union[str, Callable]]] = None,
     async_config: Optional[Union[Dict[str, Any], TaskConfig]] = None,
     enhanced_openapi: bool = True,
+    expose_errors: Optional[bool] = None,
+    global_task_endpoints: bool = False,
     **kwargs,
 ) -> FastAPI:
     """
@@ -95,6 +98,19 @@ def mk_app(
             - None (uses default TaskConfig for functions in async_funcs)
             - TaskConfig object (applies to all async_funcs)
             - Dict mapping function names to TaskConfig objects
+
+        expose_errors: Whether the text of an exception raised by a function
+            (or by a background task) is sent to the client. Defaults to the
+            ``config``'s ``expose_errors``, which defaults to False: the client
+            gets a generic 500 message with an error id, and the exception is
+            logged server-side under that id (see :mod:`qh.errors`). Pass True
+            to send it (development, trusted clients). Tracebacks
+            of background tasks are never sent.
+
+        global_task_endpoints: Whether to add ``GET /tasks/``, listing the tasks of
+            all ``async_funcs`` (of every caller, unless their ``TaskConfig`` has
+            a ``task_owner``). Off by default; per-task endpoints
+            (``/tasks/{task_id}...``) are unaffected.
 
         enhanced_openapi: Whether to serve an enhanced OpenAPI document at
             ``/openapi.json`` — one with ``requestBody`` / ``responses`` /
@@ -233,6 +249,8 @@ def mk_app(
         )
     else:
         raise TypeError(f"Invalid config type: {type(config)}")
+    if expose_errors is not None:
+        app_config = replace(app_config, expose_errors=expose_errors)
 
     # Create or use existing FastAPI app
     if app is None:
@@ -249,7 +267,9 @@ def mk_app(
         validate_route_config(func, resolved_config)
 
         # Create endpoint
-        endpoint = make_endpoint(func, resolved_config)
+        endpoint = make_endpoint(
+            func, resolved_config, expose_errors=app_config.expose_errors
+        )
 
         # Compute full path
         full_path = app_config.path_prefix + resolved_config.path
@@ -280,17 +300,14 @@ def mk_app(
 
     # Add task management endpoints if any async functions were configured
     if async_funcs:
-        from qh.async_endpoints import add_global_task_endpoints
+        from qh.async_endpoints import (
+            add_app_task_endpoints,
+            add_global_task_endpoints,
+        )
 
-        # Add global task endpoints (list all tasks)
-        add_global_task_endpoints(app)
-
-        # Add per-function task endpoints
+        task_configs = {}
         for func in func_configs.keys():
             if func.__name__ in async_func_names:
-                from qh.async_endpoints import add_task_endpoints
-
-                # Get the task config to check if we should create endpoints
                 route_config = func_configs[func]
                 if isinstance(route_config, RouteConfig):
                     task_config = route_config.async_config
@@ -298,9 +315,26 @@ def mk_app(
                     task_config = route_config.get("async_config")
                 else:
                     task_config = None
+                task_configs[func.__name__] = task_config
 
-                if task_config and getattr(task_config, "create_task_endpoints", True):
-                    add_task_endpoints(app, func.__name__)
+        # One set of /tasks/{task_id}... routes for all of this app's async funcs
+        endpoint_task_configs = {
+            name: task_config
+            for name, task_config in task_configs.items()
+            if task_config and getattr(task_config, "create_task_endpoints", True)
+        }
+        if endpoint_task_configs:
+            add_app_task_endpoints(
+                app, endpoint_task_configs, expose_errors=app_config.expose_errors
+            )
+
+        # The cross-function task listing is opt-in
+        if global_task_endpoints:
+            add_global_task_endpoints(
+                app,
+                task_configs=task_configs,
+                expose_errors=app_config.expose_errors,
+            )
 
     # Serve an OpenAPI document with full request/response JSON Schema derived
     # from the wrapped functions' Python type hints.

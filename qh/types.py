@@ -203,6 +203,82 @@ def get_type_handler(python_type: Type) -> Optional[TypeHandler]:
     return _global_registry.get_handler(python_type)
 
 
+def _is_pydantic_model(obj) -> bool:
+    try:
+        from pydantic import BaseModel
+    except ImportError:  # pragma: no cover
+        return False
+    return isinstance(obj, BaseModel)
+
+
+def _walk_container(obj, walk):
+    from collections.abc import Mapping
+
+    if isinstance(obj, Mapping):
+        return {k: walk(v) for k, v in obj.items()}
+    return [walk(v) for v in obj]
+
+
+def public_jsonable(obj: Any, *, _path: tuple = ()) -> Any:
+    """Prepare a value for JSON encoding (``fastapi.encoders.jsonable_encoder``)
+    without ever exposing ``_private`` attributes of the objects inside it.
+
+    Containers are walked; registered types use their handler; dataclasses and
+    plain objects become dicts of their public fields/attributes (recursively);
+    values FastAPI already knows how to encode (datetime, UUID, Enum, pydantic
+    models, whose private attributes it already leaves out, ...) are kept as they
+    are. Dict keys are data, not attributes, so they are never filtered.
+
+    >>> class Inner:
+    ...     def __init__(self): self.name, self._token = 'x', 'SECRET'
+    >>> public_jsonable({'_id': 1, 'items': [Inner()]})
+    {'_id': 1, 'items': [{'name': 'x'}]}
+    """
+    from collections import deque
+    from collections.abc import Iterable
+    from enum import Enum
+    from types import GeneratorType
+    import dataclasses
+    from fastapi.encoders import ENCODERS_BY_TYPE
+
+    if isinstance(obj, (str, int, float, bool, type(None), Enum)):
+        return obj
+    if id(obj) in _path:
+        raise ValueError(f"Circular reference in output: {type(obj).__name__}")
+    path = _path + (id(obj),)
+
+    def walk(value):
+        return public_jsonable(value, _path=path)
+
+    # plain containers are walked first (the registry has identity handlers for
+    # them, which would skip the objects inside)
+    if isinstance(obj, (dict, list, tuple, set, frozenset)):
+        return _walk_container(obj, walk)
+    handler = get_type_handler(type(obj))
+    if handler is not None:
+        return handler.to_json(obj)
+    if _is_pydantic_model(obj):
+        return obj
+    # values FastAPI encodes as a whole (datetime, UUID, ip networks...) are kept;
+    # its containers (deque, generator) are walked, like any other mapping or
+    # iterable, so that the objects inside go through this filter
+    if isinstance(obj, tuple(ENCODERS_BY_TYPE)) and not isinstance(
+        obj, (deque, GeneratorType)
+    ):
+        return obj
+    if isinstance(obj, Iterable):
+        return _walk_container(obj, walk)
+    if dataclasses.is_dataclass(obj) and not isinstance(obj, type):
+        return {
+            f.name: walk(getattr(obj, f.name))
+            for f in dataclasses.fields(obj)
+            if not f.name.startswith("_")
+        }
+    if hasattr(obj, "__dict__") and not isinstance(obj, type):
+        return {k: walk(v) for k, v in vars(obj).items() if not k.startswith("_")}
+    return obj
+
+
 def get_transform_spec_for_type(python_type: Type) -> Optional[TransformSpec]:
     """Get TransformSpec for a type from global registry."""
     return _global_registry.get_transform_spec(python_type)
