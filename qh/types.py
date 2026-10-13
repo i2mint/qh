@@ -234,8 +234,10 @@ def public_jsonable(obj: Any, *, _path: tuple = ()) -> Any:
     >>> public_jsonable({'_id': 1, 'items': [Inner()]})
     {'_id': 1, 'items': [{'name': 'x'}]}
     """
+    from collections import deque
     from collections.abc import Iterable
     from enum import Enum
+    from types import GeneratorType
     import dataclasses
     from fastapi.encoders import ENCODERS_BY_TYPE
 
@@ -257,12 +259,15 @@ def public_jsonable(obj: Any, *, _path: tuple = ()) -> Any:
         return handler.to_json(obj)
     if _is_pydantic_model(obj):
         return obj
-    # any other mapping or iterable (deque, generator, custom Mapping...) is walked
-    # too, so that the objects inside it go through this filter
-    if isinstance(obj, Iterable) and not isinstance(obj, (bytes, bytearray)):
-        return _walk_container(obj, walk)
-    if isinstance(obj, tuple(ENCODERS_BY_TYPE)):
+    # values FastAPI encodes as a whole (datetime, UUID, ip networks...) are kept;
+    # its containers (deque, generator) are walked, like any other mapping or
+    # iterable, so that the objects inside go through this filter
+    if isinstance(obj, tuple(ENCODERS_BY_TYPE)) and not isinstance(
+        obj, (deque, GeneratorType)
+    ):
         return obj
+    if isinstance(obj, Iterable):
+        return _walk_container(obj, walk)
     if dataclasses.is_dataclass(obj) and not isinstance(obj, type):
         return {
             f.name: walk(getattr(obj, f.name))

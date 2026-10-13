@@ -310,3 +310,19 @@ def test_private_attributes_never_leak_through_other_containers():
         "s": [1],
         "raw": "ok",
     }
+
+
+def values_fastapi_encodes_whole():
+    from ipaddress import ip_network
+    from uuid import UUID
+
+    return {"net": ip_network("10.0.0.0/8"), "id": UUID(int=1)}
+
+
+def test_values_fastapi_encodes_are_not_walked():
+    """e.g. an ip network is iterable, but must be encoded as one string."""
+    client = TestClient(mk_app([values_fastapi_encodes_whole]))
+    assert client.post("/values_fastapi_encodes_whole", json={}).json() == {
+        "net": "10.0.0.0/8",
+        "id": "00000000-0000-0000-0000-000000000001",
+    }
