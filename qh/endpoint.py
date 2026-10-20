@@ -10,6 +10,8 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 import inspect
 import json
+import logging
+from http import HTTPStatus
 
 from i2 import Sig
 from i2.wrapper import Wrap
@@ -17,6 +19,8 @@ from i2.wrapper import Wrap
 from qh.rules import RuleChain, TransformSpec, HttpLocation, resolve_transform
 from qh.config import RouteConfig
 from qh.errors import DFLT_EXPOSE_ERRORS, error_detail
+
+logger = logging.getLogger("qh")
 
 
 async def extract_http_params(
@@ -127,6 +131,43 @@ def apply_egress_transform(
     return result
 
 
+_CONVERTIBLE = (int, float, bool, complex)
+
+
+def _mk_converter(name: str, target_type: Any) -> Optional[Callable[[Any], Any]]:
+    """An ingress converting a string from the URL to ``target_type`` (a plain class),
+    answering 422 when it doesn't convert; ``None`` when there is nothing to convert."""
+    if target_type not in _CONVERTIBLE:
+        return None
+
+    def convert(value):
+        if value is None or isinstance(value, target_type):
+            return value
+        try:
+            if target_type is bool:
+                lowered = str(value).lower()
+                if lowered in ("true", "1"):
+                    return True
+                if lowered in ("false", "0"):
+                    return False
+                raise ValueError(value)
+            return target_type(value)
+        except (TypeError, ValueError):
+            raise HTTPException(
+                status_code=422,
+                detail=f"Parameter {name!r} is not a valid {target_type.__name__}",
+            ) from None
+
+    return convert
+
+
+def _status_phrase(status: int) -> str:
+    try:
+        return HTTPStatus(status).phrase
+    except ValueError:
+        return "Error"
+
+
 def make_endpoint(
     func: Callable,
     route_config: RouteConfig,
@@ -167,41 +208,45 @@ def make_endpoint(
 
     # Resolve transformation specs for each parameter
     rule_chain = route_config.rule_chain
-    param_specs: Dict[str, TransformSpec] = {}
 
     # Get type hints for type conversion
     type_hints = get_type_hints(func) if hasattr(func, "__annotations__") else {}
 
-    for param_name in sig.parameters:
-        # Check for parameter-specific override
-        if param_name in route_config.param_overrides:
-            param_specs[param_name] = route_config.param_overrides[param_name]
-        # Check if this is a path parameter
-        elif param_name in path_param_names:
-            # Path parameters should be extracted from the URL path
-            param_specs[param_name] = TransformSpec(http_location=HttpLocation.PATH)
-        # For GET-only requests, non-path parameters come from query string
-        elif use_query_params:
-            param_type = type_hints.get(param_name, str)
+    def mk_param_specs(*, query: bool) -> Dict[str, TransformSpec]:
+        """Where each parameter is read from; ``query`` puts the non-path ones in the
+        query string (a GET), else the rule chain decides (typically the JSON body)."""
+        specs: Dict[str, TransformSpec] = {}
+        for param_name in sig.parameters:
+            # Check for parameter-specific override
+            if param_name in route_config.param_overrides:
+                specs[param_name] = route_config.param_overrides[param_name]
+            # Path parameters are extracted from the URL path, converted to their
+            # annotation (a value that doesn't convert is a 422)
+            elif param_name in path_param_names:
+                specs[param_name] = TransformSpec(
+                    http_location=HttpLocation.PATH,
+                    ingress=_mk_converter(param_name, type_hints.get(param_name, str)),
+                )
+            # For GET requests, non-path parameters come from the query string
+            elif query:
+                specs[param_name] = TransformSpec(
+                    http_location=HttpLocation.QUERY,
+                    ingress=_mk_converter(param_name, type_hints.get(param_name, str)),
+                )
+            else:
+                # Resolve from rule chain
+                specs[param_name] = resolve_transform(func, param_name, rule_chain)
+        return specs
 
-            # Create type converter for query params (they come as strings)
-            def make_query_converter(target_type):
-                def convert(value):
-                    if value is None:
-                        return None
-                    if isinstance(value, target_type):
-                        return value
-                    return target_type(value)
-
-                return convert
-
-            param_specs[param_name] = TransformSpec(
-                http_location=HttpLocation.QUERY,
-                ingress=make_query_converter(param_type) if param_type != str else None,
-            )
-        else:
-            # Resolve from rule chain
-            param_specs[param_name] = resolve_transform(func, param_name, rule_chain)
+    param_specs = mk_param_specs(query=use_query_params)
+    # A GET on a route that also has body methods can't carry a body: read its
+    # parameters from the query string instead.
+    get_param_specs = (
+        mk_param_specs(query=True)
+        if "GET" in methods and not use_query_params
+        else param_specs
+    )
+    error_map = route_config.error_map or {}
 
     # Determine if we need egress transformation for output
     # For now, we'll use a simple JSON serializer
@@ -238,10 +283,11 @@ def make_endpoint(
         """FastAPI endpoint that wraps the original function."""
         try:
             # Extract parameters from HTTP request
-            http_params = await extract_http_params(request, param_specs)
+            specs = get_param_specs if request.method in ("GET", "HEAD") else param_specs
+            http_params = await extract_http_params(request, specs)
 
             # Apply ingress transformations
-            transformed_params = apply_ingress_transforms(http_params, param_specs)
+            transformed_params = apply_ingress_transforms(http_params, specs)
 
             # Validate required parameters
             for param_name, param in sig.parameters.items():
@@ -323,6 +369,15 @@ def make_endpoint(
             raise
 
         except Exception as e:
+            status = next(
+                (error_map[t] for t in type(e).__mro__ if t in error_map), None
+            )
+            if status is not None:
+                logger.info("%s in %s mapped to %s", type(e).__name__, func.__name__, status)
+                raise HTTPException(
+                    status_code=status,
+                    detail=str(e) if expose_errors else _status_phrase(status),
+                )
             # Wrap other exceptions; the client only sees the exception text if
             # expose_errors (it is always logged server-side)
             raise HTTPException(
@@ -342,6 +397,8 @@ def make_endpoint(
     # (qh.openapi) consumes this to classify body/path/query parameters without
     # re-deriving the logic.
     endpoint._qh_param_specs = param_specs  # type: ignore
+    # What a GET reads when it differs (a GET+POST route): the query string.
+    endpoint._qh_get_param_specs = get_param_specs  # type: ignore
     endpoint._qh_route_config = route_config  # type: ignore
 
     return endpoint

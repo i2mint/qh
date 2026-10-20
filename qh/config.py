@@ -48,6 +48,10 @@ class RouteConfig:
     tags: Optional[List[str]] = None
     response_model: Optional[type] = None
 
+    # Exception type -> HTTP status, applied before the generic 500 (the most specific
+    # type in the exception's MRO wins). Merged over the app-level ``error_map``.
+    error_map: Optional[Dict[type, int]] = None
+
     # Advanced options
     include_in_schema: bool = True
     deprecated: bool = False
@@ -72,6 +76,11 @@ class RouteConfig:
             response_model=other.response_model
             if other.response_model is not None
             else self.response_model,
+            error_map=(
+                {**(self.error_map or {}), **(other.error_map or {})}
+                if self.error_map or other.error_map
+                else None
+            ),
             include_in_schema=other.include_in_schema,
             deprecated=other.deprecated or self.deprecated,
         )
@@ -102,6 +111,12 @@ class AppConfig:
     # Whether an exception's text reaches the client (see qh.errors); by default it
     # gets a generic message with an error id, and the exception is logged
     expose_errors: bool = False
+
+    # Exception type -> HTTP status for every route (e.g. ``{KeyError: 404,
+    # ValueError: 422}``); a route's own ``error_map`` takes precedence. Unmapped
+    # exceptions stay a 500. A mapped error's text reaches the client only with
+    # ``expose_errors``; otherwise it gets the status phrase.
+    error_map: Dict[type, int] = field(default_factory=dict)
 
     # FastAPI app kwargs
     title: str = "qh API"
@@ -151,6 +166,7 @@ def resolve_route_config(
     app_level = RouteConfig(
         methods=app_config.default_methods,
         rule_chain=app_config.rule_chain,
+        error_map=dict(app_config.error_map) or None,
     )
     config = config.merge_with(app_level)
 
