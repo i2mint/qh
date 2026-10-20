@@ -388,6 +388,8 @@ def inspect_routes(app: FastAPI) -> List[Dict[str, Any]]:
             # classification) for OpenAPI request/response schema generation.
             if hasattr(route.endpoint, "_qh_param_specs"):
                 route_info["param_specs"] = route.endpoint._qh_param_specs
+            if hasattr(route.endpoint, "_qh_get_param_specs"):
+                route_info["get_param_specs"] = route.endpoint._qh_get_param_specs
             routes.append(route_info)
 
     return routes

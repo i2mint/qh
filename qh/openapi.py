@@ -743,7 +743,13 @@ def enhance_openapi_schema(
 
             if include_schemas:
                 _apply_operation_schemas(
-                    operation, func, param_specs, method_lower, component_schemas
+                    operation,
+                    func,
+                    (route_info.get("get_param_specs") or param_specs)
+                    if method_lower == "get"
+                    else param_specs,
+                    method_lower,
+                    component_schemas,
                 )
 
             if include_examples:
