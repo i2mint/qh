@@ -283,7 +283,9 @@ def make_endpoint(
         """FastAPI endpoint that wraps the original function."""
         try:
             # Extract parameters from HTTP request
-            specs = get_param_specs if request.method in ("GET", "HEAD") else param_specs
+            specs = (
+                get_param_specs if request.method in ("GET", "HEAD") else param_specs
+            )
             http_params = await extract_http_params(request, specs)
 
             # Apply ingress transformations
@@ -373,7 +375,9 @@ def make_endpoint(
                 (error_map[t] for t in type(e).__mro__ if t in error_map), None
             )
             if status is not None:
-                logger.info("%s in %s mapped to %s", type(e).__name__, func.__name__, status)
+                logger.info(
+                    "%s in %s mapped to %s", type(e).__name__, func.__name__, status
+                )
                 raise HTTPException(
                     status_code=status,
                     detail=str(e) if expose_errors else _status_phrase(status),
