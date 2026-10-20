@@ -37,21 +37,36 @@ Handler for serializing/deserializing a specific type.
 
 The Python type this handler manages
 
+* **Type:**
+  [`Type`](https://docs.python.org/3/library/typing.html#typing.Type)
+
 #### to_json
 
 Function to serialize Python object to JSON-compatible format
+
+* **Type:**
+  [`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
 
 #### from_json
 
 Function to deserialize JSON to Python object
 
+* **Type:**
+  [`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
+
 #### http_location
 
 Where in HTTP request/response this appears
 
+* **Type:**
+  [`HttpLocation`](qh.rules.html.md#qh.rules.HttpLocation)
+
 #### content_type
 
 Optional HTTP content type for binary data
+
+* **Type:**
+  [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 #### to_transform_spec()
 
@@ -108,9 +123,9 @@ Get TransformSpec for a type.
 Register a type handler.
 
 * **Parameters:**
-  * **python_type** ([`Type`](https://docs.python.org/3/library/typing.html#typing.Type)[[`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)]) – The Python type
-  * **to_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]) – Function to serialize to JSON-compatible format
-  * **from_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)]) – Function to deserialize from JSON
+  * **python_type** ([`Type`](https://docs.python.org/3/library/typing.html#typing.Type)[`T`]) – The Python type
+  * **to_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[`T`], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]) – Function to serialize to JSON-compatible format
+  * **from_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], `T`]) – Function to deserialize from JSON
   * **http_location** ([`HttpLocation`](qh.rules.html.md#qh.rules.HttpLocation)) – Where this appears in HTTP
   * **content_type** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]) – Optional content type for binary data
 * **Return type:**
@@ -148,15 +163,15 @@ values FastAPI already knows how to encode (datetime, UUID, Enum, pydantic
 models, whose private attributes it already leaves out, …) are kept as they
 are. Dict keys are data, not attributes, so they are never filtered.
 
-* **Return type:**
-  [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)
-
 ```pycon
 >>> class Inner:
 ...     def __init__(self): self.name, self._token = 'x', 'SECRET'
 >>> public_jsonable({'_id': 1, 'items': [Inner()]})
 {'_id': 1, 'items': [{'name': 'x'}]}
 ```
+
+* **Return type:**
+  [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)
 
 ### qh.types.register_json_type(cls=None, , to_json=None, from_json=None)
 
@@ -168,12 +183,12 @@ Can be used as:
 2. With explicit serializers
 
 * **Parameters:**
-  * **cls** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Type`](https://docs.python.org/3/library/typing.html#typing.Type)[[`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)]]) – The class being decorated, when used as `@register_json_type`
+  * **cls** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Type`](https://docs.python.org/3/library/typing.html#typing.Type)[`T`]]) – The class being decorated, when used as `@register_json_type`
     with no arguments; `None` when called as
     `@register_json_type(to_json=..., from_json=...)`.
-  * **to_json** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]) – Serializer; when omitted, falls back to `cls.to_dict()`,
+  * **to_json** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[`T`], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]) – Serializer; when omitted, falls back to `cls.to_dict()`,
     then `obj.__dict__`.
-  * **from_json** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)]]) – Deserializer; when omitted, falls back to
+  * **from_json** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], `T`]]) – Deserializer; when omitted, falls back to
     `cls.from_dict`, then `cls(**data)`.
 
 ### Examples
@@ -207,9 +222,9 @@ Can be used as:
 Register a type in the global registry.
 
 * **Parameters:**
-  * **python_type** ([`Type`](https://docs.python.org/3/library/typing.html#typing.Type)[[`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)]) – The Python type
-  * **to_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]) – Function to serialize to JSON-compatible format
-  * **from_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)]) – Function to deserialize from JSON
+  * **python_type** ([`Type`](https://docs.python.org/3/library/typing.html#typing.Type)[`T`]) – The Python type
+  * **to_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[`T`], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]) – Function to serialize to JSON-compatible format
+  * **from_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], `T`]) – Function to deserialize from JSON
   * **http_location** ([`HttpLocation`](qh.rules.html.md#qh.rules.HttpLocation)) – Where this appears in HTTP
   * **content_type** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]) – Optional content type for binary data
 * **Return type:**

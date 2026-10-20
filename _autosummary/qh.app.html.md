@@ -45,7 +45,7 @@ as a JSON object (see `RouteConfig` and `AppConfig` in `qh.config` for
 what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
 
 * **Parameters:**
-  * **funcs** (`Union`[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`List`](https://docs.python.org/3/library/typing.html#typing.List)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)], [`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), `Union`[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`RouteConfig`](qh.config.html.md#qh.config.RouteConfig)]]]) – 
+  * **funcs** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`List`](https://docs.python.org/3/library/typing.html#typing.List)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)], [`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`RouteConfig`](qh.config.html.md#qh.config.RouteConfig)]]]) – 
 
     Functions to expose as HTTP endpoints. Can be:
     - A single callable
@@ -53,7 +53,7 @@ what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
     - A dict mapping callables to their route configurations
   * **app** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[`FastAPI`]) – Optional existing FastAPI app to add routes to.
     If None, creates a new app.
-  * **config** (`Union`[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`AppConfig`](qh.config.html.md#qh.config.AppConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
+  * **config** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`AppConfig`](qh.config.html.md#qh.config.AppConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
 
     Optional app-level configuration. Can be:
     - AppConfig object
@@ -66,10 +66,10 @@ what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
     - get_user(user_id) → GET /users/{user_id}
     - list_users() → GET /users
     - create_user(user) → POST /users
-  * **async_funcs** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`List`](https://docs.python.org/3/library/typing.html#typing.List)[`Union`[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)]]]) – List of functions (by name or reference) that should support
+  * **async_funcs** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`List`](https://docs.python.org/3/library/typing.html#typing.List)[[`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)]]]) – List of functions (by name or reference) that should support
     async task execution. When enabled, clients can add ?async=true to
     get a task ID instead of blocking for the result.
-  * **async_config** (`Union`[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`TaskConfig`](qh.async_tasks.html.md#qh.async_tasks.TaskConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
+  * **async_config** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`TaskConfig`](qh.async_tasks.html.md#qh.async_tasks.TaskConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
 
     Configuration for async task processing. Can be:
     - None (uses default TaskConfig for functions in async_funcs)
@@ -195,7 +195,7 @@ as a JSON object (see `RouteConfig` and `AppConfig` in `qh.config` for
 what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
 
 * **Parameters:**
-  * **funcs** (`Union`[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`List`](https://docs.python.org/3/library/typing.html#typing.List)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)], [`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), `Union`[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`RouteConfig`](qh.config.html.md#qh.config.RouteConfig)]]]) – 
+  * **funcs** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`List`](https://docs.python.org/3/library/typing.html#typing.List)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)], [`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`RouteConfig`](qh.config.html.md#qh.config.RouteConfig)]]]) – 
 
     Functions to expose as HTTP endpoints. Can be:
     - A single callable
@@ -203,7 +203,7 @@ what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
     - A dict mapping callables to their route configurations
   * **app** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[`FastAPI`]) – Optional existing FastAPI app to add routes to.
     If None, creates a new app.
-  * **config** (`Union`[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`AppConfig`](qh.config.html.md#qh.config.AppConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
+  * **config** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`AppConfig`](qh.config.html.md#qh.config.AppConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
 
     Optional app-level configuration. Can be:
     - AppConfig object
@@ -216,10 +216,10 @@ what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
     - get_user(user_id) → GET /users/{user_id}
     - list_users() → GET /users
     - create_user(user) → POST /users
-  * **async_funcs** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`List`](https://docs.python.org/3/library/typing.html#typing.List)[`Union`[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)]]]) – List of functions (by name or reference) that should support
+  * **async_funcs** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`List`](https://docs.python.org/3/library/typing.html#typing.List)[[`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)]]]) – List of functions (by name or reference) that should support
     async task execution. When enabled, clients can add ?async=true to
     get a task ID instead of blocking for the result.
-  * **async_config** (`Union`[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`TaskConfig`](qh.async_tasks.html.md#qh.async_tasks.TaskConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
+  * **async_config** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`TaskConfig`](qh.async_tasks.html.md#qh.async_tasks.TaskConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
 
     Configuration for async task processing. Can be:
     - None (uses default TaskConfig for functions in async_funcs)
@@ -317,7 +317,7 @@ as a JSON object (see `RouteConfig` and `AppConfig` in `qh.config` for
 what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
 
 * **Parameters:**
-  * **funcs** (`Union`[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`List`](https://docs.python.org/3/library/typing.html#typing.List)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)], [`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), `Union`[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`RouteConfig`](qh.config.html.md#qh.config.RouteConfig)]]]) – 
+  * **funcs** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`List`](https://docs.python.org/3/library/typing.html#typing.List)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)], [`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`RouteConfig`](qh.config.html.md#qh.config.RouteConfig)]]]) – 
 
     Functions to expose as HTTP endpoints. Can be:
     - A single callable
@@ -325,7 +325,7 @@ what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
     - A dict mapping callables to their route configurations
   * **app** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[`FastAPI`]) – Optional existing FastAPI app to add routes to.
     If None, creates a new app.
-  * **config** (`Union`[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`AppConfig`](qh.config.html.md#qh.config.AppConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
+  * **config** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`AppConfig`](qh.config.html.md#qh.config.AppConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
 
     Optional app-level configuration. Can be:
     - AppConfig object
@@ -338,10 +338,10 @@ what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
     - get_user(user_id) → GET /users/{user_id}
     - list_users() → GET /users
     - create_user(user) → POST /users
-  * **async_funcs** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`List`](https://docs.python.org/3/library/typing.html#typing.List)[`Union`[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)]]]) – List of functions (by name or reference) that should support
+  * **async_funcs** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`List`](https://docs.python.org/3/library/typing.html#typing.List)[[`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)]]]) – List of functions (by name or reference) that should support
     async task execution. When enabled, clients can add ?async=true to
     get a task ID instead of blocking for the result.
-  * **async_config** (`Union`[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`TaskConfig`](qh.async_tasks.html.md#qh.async_tasks.TaskConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
+  * **async_config** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`TaskConfig`](qh.async_tasks.html.md#qh.async_tasks.TaskConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
 
     Configuration for async task processing. Can be:
     - None (uses default TaskConfig for functions in async_funcs)

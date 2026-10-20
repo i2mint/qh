@@ -94,9 +94,6 @@ The client-facing view of a task: `TaskInfo.to_dict()` without the
 traceback and owner, with the result’s private attributes left out, and with
 the error text replaced unless `expose_errors`.
 
-* **Return type:**
-  [`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]
-
 ```pycon
 >>> import time
 >>> info = TaskInfo('t1', TaskStatus.FAILED, time.time(), error='/srv/db: denied',
@@ -107,3 +104,6 @@ the error text replaced unless `expose_errors`.
 >>> task_info_for_client(info, expose_errors=True)['error']
 '/srv/db: denied'
 ```
+
+* **Return type:**
+  [`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]

@@ -30,6 +30,7 @@
 <meta content="qh.stores_qh | qh" name="twitter:title"/>
 <link href="../_static/pygments.css?v=d75fae25" rel="stylesheet" type="text/css"/>
 <link href="../_static/theme.css?v=d6d7c91b" rel="stylesheet" type="text/css"/>
+<link href="../_static/sphinx_autodoc_typehints.css?v=057ac668" rel="stylesheet" type="text/css"/>
 <link href="../_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
 <link href="../_static/epythet.css?v=4eca2ba3" rel="stylesheet" type="text/css"/>
 <link href="../search.html" rel="search" title="Search"/>
@@ -150,14 +151,14 @@ which are Mappings of MutableMappings (dict of dicts).</p>
 <p class="rubric">Classes</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#qh.stores_qh.StoreValue" title="qh.stores_qh.StoreValue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StoreValue</span></code></a>(**data)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qh.stores_qh.StoreValue" title="qh.stores_qh.StoreValue"><code class="xref py py-obj docutils literal notranslate"><span class="pre">StoreValue</span></code></a>(*, value)</p></td>
 <td><p>Request body for setting store values.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py class">
 <dt class="sig sig-object py" id="qh.stores_qh.StoreValue">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.stores_qh.</span></span><span class="sig-name descname"><span class="pre">StoreValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/stores_qh.html#StoreValue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.stores_qh.StoreValue" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.stores_qh.StoreValue'">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.stores_qh.</span></span><span class="sig-name descname"><span class="pre">StoreValue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/stores_qh.html#StoreValue"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.stores_qh.StoreValue" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.stores_qh.StoreValue'">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseModel</span></code></p>
 <p>Request body for setting store values.</p>
 <dl class="field-list simple">
@@ -262,7 +263,7 @@ exception is logged server-side (see <code class="docutils literal notranslate">
 </dd></dl>
 <dl class="py function">
 <dt class="sig sig-object py" id="qh.stores_qh.create_method_endpoint">
-<span class="sig-prename descclassname"><span class="pre">qh.stores_qh.</span></span><span class="sig-name descname"><span class="pre">create_method_endpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_obj_fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">expose_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/stores_qh.html#create_method_endpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.stores_qh.create_method_endpoint" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.stores_qh.create_method_endpoint'">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">qh.stores_qh.</span></span><span class="sig-name descname"><span class="pre">create_method_endpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">method_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_obj_fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">expose_errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/stores_qh.html#create_method_endpoint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.stores_qh.create_method_endpoint" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.stores_qh.create_method_endpoint'">¶</a></dt>
 <dd><p>Create an endpoint function for a specific mapping method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -274,6 +275,9 @@ exception is logged server-side (see <code class="docutils literal notranslate">
 <li><p><strong>expose_errors</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a></span>) – If True, a failing store operation sends its exception
 text to the client; by default the client gets a generic message
 with an error id (see <code class="docutils literal notranslate"><span class="pre">qh.errors</span></code>).</p></li>
+<li><p><strong>base_path</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a></span>) – The route the method’s <code class="docutils literal notranslate"><span class="pre">config['path']</span></code> is appended to; only
+read by the generic branch, to tell whether <code class="docutils literal notranslate"><span class="pre">item_key</span></code> is already a
+path parameter.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -309,7 +313,7 @@ with an error id (see <code class="docutils literal notranslate"><span class="pr
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=3294188c"></script>
+<script src="../_static/documentation_options.js?v=f91d8841"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

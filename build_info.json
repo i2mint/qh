@@ -1,37 +1,37 @@
 {
   "schema_version": 1,
-  "built_at": "2026-10-13T06:46:32Z",
+  "built_at": "2026-10-20T02:54:52Z",
   "package": {
     "name": "qh",
-    "version": "0.0.23",
+    "version": "0.0.24",
     "display_name": "qh",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "afbcf415cfcaa143166d1370b1b8fe1010e5c6da",
-    "short_commit": "afbcf41",
+    "commit": "96cfd2f83c890cda8808e5b6485c63ab0957c0fd",
+    "short_commit": "96cfd2f",
     "branch": "master",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/i2mint/qh",
-    "commit_url": "https://github.com/i2mint/qh/commit/afbcf415cfcaa143166d1370b1b8fe1010e5c6da",
+    "commit_url": "https://github.com/i2mint/qh/commit/96cfd2f83c890cda8808e5b6485c63ab0957c0fd",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "i2mint/qh",
-    "sha": "afbcf415cfcaa143166d1370b1b8fe1010e5c6da",
+    "sha": "96cfd2f83c890cda8808e5b6485c63ab0957c0fd",
     "sha_in_history": true,
     "ref": "refs/heads/master",
     "ref_name": "master",
-    "run_id": "38358430456",
-    "run_url": "https://github.com/i2mint/qh/actions/runs/38358430456",
+    "run_id": "39361310465",
+    "run_url": "https://github.com/i2mint/qh/actions/runs/39361310465",
     "server_url": "https://github.com"
   },
   "tools": {
-    "epythet": "0.2.14",
-    "sphinx": "9.1.0",
+    "epythet": "0.2.18",
+    "sphinx": "9.1.1",
     "docutils": "0.22.4",
     "python": "3.12.15"
   },
@@ -60,14 +60,16 @@
   },
   "pypi": {
     "checked": true,
-    "latest": "0.0.23",
-    "relation": "same",
+    "latest": "0.0.25",
+    "relation": "behind",
     "error": null
   },
-  "reproduce": "git clone https://github.com/i2mint/qh && cd qh\ngit checkout afbcf415cfcaa143166d1370b1b8fe1010e5c6da\npip install \"epythet==0.2.14\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/i2mint/qh && cd qh\ngit checkout 96cfd2f83c890cda8808e5b6485c63ab0957c0fd\npip install \"epythet==0.2.18\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
-    "aligned": true,
-    "notes": []
+    "aligned": false,
+    "notes": [
+      "The documented version (0.0.24) is behind the latest release on PyPI (0.0.25): `pip install qh` gives newer code than these docs describe."
+    ]
   }
 }

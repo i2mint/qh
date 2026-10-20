@@ -24,7 +24,7 @@ Configuration flows from general to specific:
 | [`FunctionConfigBuilder`](#qh.config.FunctionConfigBuilder)(parent, func)                | Fluent interface for building function-specific configuration. |
 | [`RouteConfig`](#qh.config.RouteConfig)([path, methods, rule_chain, ...])      | Configuration for a single route (function endpoint).          |
 
-### *class* qh.config.AppConfig(default_methods=<factory>, path_template='/{func_name}', path_prefix='', rule_chain=<factory>, expose_errors=False, title='qh API', version='0.1.0', docs_url='/docs', redoc_url='/redoc', openapi_url='/openapi.json', fastapi_kwargs=<factory>)
+### *class* qh.config.AppConfig(default_methods=<factory>, path_template='/{func_name}', path_prefix='', rule_chain=<factory>, expose_errors=False, error_map=dict(), title='qh API', version='0.1.0', docs_url='/docs', redoc_url='/redoc', openapi_url='/openapi.json', fastapi_kwargs=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -132,7 +132,7 @@ Set OpenAPI tags.
 * **Return type:**
   [`FunctionConfigBuilder`](#qh.config.FunctionConfigBuilder)
 
-### *class* qh.config.RouteConfig(path=None, methods=None, rule_chain=None, param_overrides=<factory>, async_config=None, summary=None, description=None, tags=None, response_model=None, include_in_schema=True, deprecated=False)
+### *class* qh.config.RouteConfig(path=None, methods=None, rule_chain=None, param_overrides=dict(), async_config=None, summary=None, description=None, tags=None, response_model=None, error_map=None, include_in_schema=True, deprecated=False)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 

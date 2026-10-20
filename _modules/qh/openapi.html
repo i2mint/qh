@@ -30,6 +30,7 @@
   <meta name="twitter:title" content="qh.openapi | qh" />
   <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
   <link rel="stylesheet" type="text/css" href="../../_static/theme.css?v=d6d7c91b" />
+  <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
   <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
   <link rel="stylesheet" type="text/css" href="../../_static/epythet.css?v=4eca2ba3" />
   <link rel="search" title="Search" href="../../search.html" />
@@ -944,149 +945,155 @@
 </span><span id="line-743">
 </span><span id="line-744">            <span class="k">if</span> <span class="n">include_schemas</span><span class="p">:</span>
 </span><span id="line-745">                <span class="n">_apply_operation_schemas</span><span class="p">(</span>
-</span><span id="line-746">                    <span class="n">operation</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">param_specs</span><span class="p">,</span> <span class="n">method_lower</span><span class="p">,</span> <span class="n">component_schemas</span>
-</span><span id="line-747">                <span class="p">)</span>
-</span><span id="line-748">
-</span><span id="line-749">            <span class="k">if</span> <span class="n">include_examples</span><span class="p">:</span>
-</span><span id="line-750">                <span class="n">examples</span> <span class="o">=</span> <span class="n">generate_examples_for_function</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-</span><span id="line-751">                <span class="k">if</span> <span class="n">examples</span> <span class="ow">and</span> <span class="s2">"requestBody"</span> <span class="ow">in</span> <span class="n">operation</span><span class="p">:</span>
-</span><span id="line-752">                    <span class="n">content</span> <span class="o">=</span> <span class="n">operation</span><span class="p">[</span><span class="s2">"requestBody"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"content"</span><span class="p">,</span> <span class="p">{})</span>
-</span><span id="line-753">                    <span class="n">json_content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"application/json"</span><span class="p">,</span> <span class="p">{})</span>
-</span><span id="line-754">                    <span class="n">json_content</span><span class="p">[</span><span class="s2">"examples"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-755">                        <span class="sa">f</span><span class="s2">"example_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">:</span> <span class="n">ex</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ex</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
-</span><span id="line-756">                    <span class="p">}</span>
-</span><span id="line-757">
-</span><span id="line-758">            <span class="k">if</span> <span class="n">include_transformers</span><span class="p">:</span>
-</span><span id="line-759">                <span class="n">operation</span><span class="p">[</span><span class="s2">"x-python-transformers"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-760">                    <span class="s2">"note"</span><span class="p">:</span> <span class="s2">"Type transformation metadata would go here"</span>
-</span><span id="line-761">                <span class="p">}</span>
-</span><span id="line-762">
-</span><span id="line-763">            <span class="n">path_item</span><span class="p">[</span><span class="n">method_lower</span><span class="p">]</span> <span class="o">=</span> <span class="n">operation</span>
-</span><span id="line-764">
-</span><span id="line-765">        <span class="n">schema</span><span class="p">[</span><span class="s2">"paths"</span><span class="p">][</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="n">path_item</span>
-</span><span id="line-766">
-</span><span id="line-767">    <span class="k">if</span> <span class="n">include_schemas</span> <span class="ow">and</span> <span class="n">component_schemas</span><span class="p">:</span>
-</span><span id="line-768">        <span class="n">components</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"components"</span><span class="p">,</span> <span class="p">{})</span>
-</span><span id="line-769">        <span class="n">components</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"schemas"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">component_schemas</span><span class="p">)</span>
+</span><span id="line-746">                    <span class="n">operation</span><span class="p">,</span>
+</span><span id="line-747">                    <span class="n">func</span><span class="p">,</span>
+</span><span id="line-748">                    <span class="p">(</span><span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"get_param_specs"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">param_specs</span><span class="p">)</span>
+</span><span id="line-749">                    <span class="k">if</span> <span class="n">method_lower</span> <span class="o">==</span> <span class="s2">"get"</span>
+</span><span id="line-750">                    <span class="k">else</span> <span class="n">param_specs</span><span class="p">,</span>
+</span><span id="line-751">                    <span class="n">method_lower</span><span class="p">,</span>
+</span><span id="line-752">                    <span class="n">component_schemas</span><span class="p">,</span>
+</span><span id="line-753">                <span class="p">)</span>
+</span><span id="line-754">
+</span><span id="line-755">            <span class="k">if</span> <span class="n">include_examples</span><span class="p">:</span>
+</span><span id="line-756">                <span class="n">examples</span> <span class="o">=</span> <span class="n">generate_examples_for_function</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+</span><span id="line-757">                <span class="k">if</span> <span class="n">examples</span> <span class="ow">and</span> <span class="s2">"requestBody"</span> <span class="ow">in</span> <span class="n">operation</span><span class="p">:</span>
+</span><span id="line-758">                    <span class="n">content</span> <span class="o">=</span> <span class="n">operation</span><span class="p">[</span><span class="s2">"requestBody"</span><span class="p">]</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"content"</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-759">                    <span class="n">json_content</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"application/json"</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-760">                    <span class="n">json_content</span><span class="p">[</span><span class="s2">"examples"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-761">                        <span class="sa">f</span><span class="s2">"example_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">"</span><span class="p">:</span> <span class="n">ex</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ex</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span>
+</span><span id="line-762">                    <span class="p">}</span>
+</span><span id="line-763">
+</span><span id="line-764">            <span class="k">if</span> <span class="n">include_transformers</span><span class="p">:</span>
+</span><span id="line-765">                <span class="n">operation</span><span class="p">[</span><span class="s2">"x-python-transformers"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-766">                    <span class="s2">"note"</span><span class="p">:</span> <span class="s2">"Type transformation metadata would go here"</span>
+</span><span id="line-767">                <span class="p">}</span>
+</span><span id="line-768">
+</span><span id="line-769">            <span class="n">path_item</span><span class="p">[</span><span class="n">method_lower</span><span class="p">]</span> <span class="o">=</span> <span class="n">operation</span>
 </span><span id="line-770">
-</span><span id="line-771">    <span class="k">return</span> <span class="n">schema</span></div>
-
+</span><span id="line-771">        <span class="n">schema</span><span class="p">[</span><span class="s2">"paths"</span><span class="p">][</span><span class="n">path</span><span class="p">]</span> <span class="o">=</span> <span class="n">path_item</span>
 </span><span id="line-772">
-</span><span id="line-773">
-</span><span id="line-774"><span class="k">def</span><span class="w"> </span><span class="nf">_apply_operation_schemas</span><span class="p">(</span>
-</span><span id="line-775">    <span class="n">operation</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-</span><span id="line-776">    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
-</span><span id="line-777">    <span class="n">param_specs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-</span><span id="line-778">    <span class="n">method_lower</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span id="line-779">    <span class="n">component_schemas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
-</span><span id="line-780"><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-781"><span class="w">    </span><span class="sd">"""Fill an operation's ``requestBody`` / ``parameters`` / ``responses`` in place."""</span>
-</span><span id="line-782">    <span class="n">parameters</span> <span class="o">=</span> <span class="n">build_parameters</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">param_specs</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
-</span><span id="line-783">    <span class="k">if</span> <span class="n">parameters</span><span class="p">:</span>
-</span><span id="line-784">        <span class="n">existing</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"parameters"</span><span class="p">,</span> <span class="p">[])</span>
-</span><span id="line-785">        <span class="n">operation</span><span class="p">[</span><span class="s2">"parameters"</span><span class="p">]</span> <span class="o">=</span> <span class="n">existing</span> <span class="o">+</span> <span class="n">parameters</span>
-</span><span id="line-786">
-</span><span id="line-787">    <span class="k">if</span> <span class="n">method_lower</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"post"</span><span class="p">,</span> <span class="s2">"put"</span><span class="p">,</span> <span class="s2">"patch"</span><span class="p">):</span>
-</span><span id="line-788">        <span class="n">body</span> <span class="o">=</span> <span class="n">build_request_body_schema</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">param_specs</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
-</span><span id="line-789">        <span class="k">if</span> <span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-790">            <span class="n">request_body</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"requestBody"</span><span class="p">,</span> <span class="p">{})</span>
-</span><span id="line-791">            <span class="n">request_body</span><span class="p">[</span><span class="s2">"required"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"required"</span><span class="p">))</span>
-</span><span id="line-792">            <span class="n">content</span> <span class="o">=</span> <span class="n">request_body</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"content"</span><span class="p">,</span> <span class="p">{})</span>
-</span><span id="line-793">            <span class="n">content</span><span class="p">[</span><span class="s2">"application/json"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"schema"</span><span class="p">:</span> <span class="n">body</span><span class="p">}</span>
-</span><span id="line-794">
-</span><span id="line-795">    <span class="n">response</span> <span class="o">=</span> <span class="n">build_response_schema</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
-</span><span id="line-796">    <span class="n">responses</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"responses"</span><span class="p">,</span> <span class="p">{})</span>
-</span><span id="line-797">    <span class="n">ok</span> <span class="o">=</span> <span class="n">responses</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"200"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Successful Response"</span><span class="p">})</span>
-</span><span id="line-798">    <span class="n">ok</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"content"</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">"application/json"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"schema"</span><span class="p">:</span> <span class="n">response</span><span class="p">}</span>
-</span><span id="line-799">
+</span><span id="line-773">    <span class="k">if</span> <span class="n">include_schemas</span> <span class="ow">and</span> <span class="n">component_schemas</span><span class="p">:</span>
+</span><span id="line-774">        <span class="n">components</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"components"</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-775">        <span class="n">components</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"schemas"</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">component_schemas</span><span class="p">)</span>
+</span><span id="line-776">
+</span><span id="line-777">    <span class="k">return</span> <span class="n">schema</span></div>
+
+</span><span id="line-778">
+</span><span id="line-779">
+</span><span id="line-780"><span class="k">def</span><span class="w"> </span><span class="nf">_apply_operation_schemas</span><span class="p">(</span>
+</span><span id="line-781">    <span class="n">operation</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+</span><span id="line-782">    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+</span><span id="line-783">    <span class="n">param_specs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+</span><span id="line-784">    <span class="n">method_lower</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span id="line-785">    <span class="n">component_schemas</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+</span><span id="line-786"><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-787"><span class="w">    </span><span class="sd">"""Fill an operation's ``requestBody`` / ``parameters`` / ``responses`` in place."""</span>
+</span><span id="line-788">    <span class="n">parameters</span> <span class="o">=</span> <span class="n">build_parameters</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">param_specs</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
+</span><span id="line-789">    <span class="k">if</span> <span class="n">parameters</span><span class="p">:</span>
+</span><span id="line-790">        <span class="n">existing</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"parameters"</span><span class="p">,</span> <span class="p">[])</span>
+</span><span id="line-791">        <span class="n">operation</span><span class="p">[</span><span class="s2">"parameters"</span><span class="p">]</span> <span class="o">=</span> <span class="n">existing</span> <span class="o">+</span> <span class="n">parameters</span>
+</span><span id="line-792">
+</span><span id="line-793">    <span class="k">if</span> <span class="n">method_lower</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"post"</span><span class="p">,</span> <span class="s2">"put"</span><span class="p">,</span> <span class="s2">"patch"</span><span class="p">):</span>
+</span><span id="line-794">        <span class="n">body</span> <span class="o">=</span> <span class="n">build_request_body_schema</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">param_specs</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
+</span><span id="line-795">        <span class="k">if</span> <span class="n">body</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-796">            <span class="n">request_body</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"requestBody"</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-797">            <span class="n">request_body</span><span class="p">[</span><span class="s2">"required"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"required"</span><span class="p">))</span>
+</span><span id="line-798">            <span class="n">content</span> <span class="o">=</span> <span class="n">request_body</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"content"</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-799">            <span class="n">content</span><span class="p">[</span><span class="s2">"application/json"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"schema"</span><span class="p">:</span> <span class="n">body</span><span class="p">}</span>
 </span><span id="line-800">
+</span><span id="line-801">    <span class="n">response</span> <span class="o">=</span> <span class="n">build_response_schema</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">component_schemas</span><span class="p">)</span>
+</span><span id="line-802">    <span class="n">responses</span> <span class="o">=</span> <span class="n">operation</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"responses"</span><span class="p">,</span> <span class="p">{})</span>
+</span><span id="line-803">    <span class="n">ok</span> <span class="o">=</span> <span class="n">responses</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"200"</span><span class="p">,</span> <span class="p">{</span><span class="s2">"description"</span><span class="p">:</span> <span class="s2">"Successful Response"</span><span class="p">})</span>
+</span><span id="line-804">    <span class="n">ok</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"content"</span><span class="p">,</span> <span class="p">{})[</span><span class="s2">"application/json"</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"schema"</span><span class="p">:</span> <span class="n">response</span><span class="p">}</span>
+</span><span id="line-805">
+</span><span id="line-806">
 <div class="viewcode-block" id="export_openapi">
 <a class="viewcode-back" href="../../_autosummary/qh.openapi.html#qh.export_openapi">[docs]</a>
-</span><span id="line-801"><span class="k">def</span><span class="w"> </span><span class="nf">export_openapi</span><span class="p">(</span>
-</span><span id="line-802">    <span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span>
-</span><span id="line-803">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-804">    <span class="n">include_examples</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-805">    <span class="n">include_python_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-806">    <span class="n">include_schemas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-807">    <span class="n">include_transformers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span id="line-808">    <span class="n">output_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-809"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-</span><span id="line-810"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-811"><span class="sd">    Export the enhanced OpenAPI schema, optionally writing it to a file.</span>
-</span><span id="line-812">
-</span><span id="line-813"><span class="sd">    Args:</span>
-</span><span id="line-814"><span class="sd">        app: the FastAPI application.</span>
-</span><span id="line-815"><span class="sd">        include_examples: include example requests.</span>
-</span><span id="line-816"><span class="sd">        include_python_metadata: include ``x-python-*`` extensions.</span>
-</span><span id="line-817"><span class="sd">        include_schemas: derive ``requestBody`` / ``responses`` /</span>
-</span><span id="line-818"><span class="sd">            ``components.schemas`` from the Python type hints.</span>
-</span><span id="line-819"><span class="sd">        include_transformers: include transformation metadata.</span>
-</span><span id="line-820"><span class="sd">        output_file: optional path to write the JSON document to.</span>
-</span><span id="line-821">
-</span><span id="line-822"><span class="sd">    Returns:</span>
-</span><span id="line-823"><span class="sd">        the enhanced OpenAPI schema dictionary.</span>
-</span><span id="line-824">
-</span><span id="line-825"><span class="sd">    Example:</span>
-</span><span id="line-826">
-</span><span id="line-827"><span class="sd">        &gt;&gt;&gt; from qh import mk_app  # doctest: +SKIP</span>
-</span><span id="line-828"><span class="sd">        &gt;&gt;&gt; from qh.openapi import export_openapi  # doctest: +SKIP</span>
-</span><span id="line-829"><span class="sd">        &gt;&gt;&gt; app = mk_app([my_func])  # doctest: +SKIP</span>
-</span><span id="line-830"><span class="sd">        &gt;&gt;&gt; spec = export_openapi(app, include_examples=True)  # doctest: +SKIP</span>
-</span><span id="line-831"><span class="sd">    """</span>
-</span><span id="line-832">    <span class="n">schema</span> <span class="o">=</span> <span class="n">enhance_openapi_schema</span><span class="p">(</span>
-</span><span id="line-833">        <span class="n">app</span><span class="p">,</span>
-</span><span id="line-834">        <span class="n">include_examples</span><span class="o">=</span><span class="n">include_examples</span><span class="p">,</span>
-</span><span id="line-835">        <span class="n">include_python_metadata</span><span class="o">=</span><span class="n">include_python_metadata</span><span class="p">,</span>
-</span><span id="line-836">        <span class="n">include_schemas</span><span class="o">=</span><span class="n">include_schemas</span><span class="p">,</span>
-</span><span id="line-837">        <span class="n">include_transformers</span><span class="o">=</span><span class="n">include_transformers</span><span class="p">,</span>
-</span><span id="line-838">    <span class="p">)</span>
-</span><span id="line-839">
-</span><span id="line-840">    <span class="k">if</span> <span class="n">output_file</span><span class="p">:</span>
-</span><span id="line-841">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-</span><span id="line-842">            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-</span><span id="line-843">
-</span><span id="line-844">    <span class="k">return</span> <span class="n">schema</span></div>
-
+</span><span id="line-807"><span class="k">def</span><span class="w"> </span><span class="nf">export_openapi</span><span class="p">(</span>
+</span><span id="line-808">    <span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span>
+</span><span id="line-809">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-810">    <span class="n">include_examples</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-811">    <span class="n">include_python_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-812">    <span class="n">include_schemas</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-813">    <span class="n">include_transformers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span id="line-814">    <span class="n">output_file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-815"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="line-816"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-817"><span class="sd">    Export the enhanced OpenAPI schema, optionally writing it to a file.</span>
+</span><span id="line-818">
+</span><span id="line-819"><span class="sd">    Args:</span>
+</span><span id="line-820"><span class="sd">        app: the FastAPI application.</span>
+</span><span id="line-821"><span class="sd">        include_examples: include example requests.</span>
+</span><span id="line-822"><span class="sd">        include_python_metadata: include ``x-python-*`` extensions.</span>
+</span><span id="line-823"><span class="sd">        include_schemas: derive ``requestBody`` / ``responses`` /</span>
+</span><span id="line-824"><span class="sd">            ``components.schemas`` from the Python type hints.</span>
+</span><span id="line-825"><span class="sd">        include_transformers: include transformation metadata.</span>
+</span><span id="line-826"><span class="sd">        output_file: optional path to write the JSON document to.</span>
+</span><span id="line-827">
+</span><span id="line-828"><span class="sd">    Returns:</span>
+</span><span id="line-829"><span class="sd">        the enhanced OpenAPI schema dictionary.</span>
+</span><span id="line-830">
+</span><span id="line-831"><span class="sd">    Example:</span>
+</span><span id="line-832">
+</span><span id="line-833"><span class="sd">        &gt;&gt;&gt; from qh import mk_app  # doctest: +SKIP</span>
+</span><span id="line-834"><span class="sd">        &gt;&gt;&gt; from qh.openapi import export_openapi  # doctest: +SKIP</span>
+</span><span id="line-835"><span class="sd">        &gt;&gt;&gt; app = mk_app([my_func])  # doctest: +SKIP</span>
+</span><span id="line-836"><span class="sd">        &gt;&gt;&gt; spec = export_openapi(app, include_examples=True)  # doctest: +SKIP</span>
+</span><span id="line-837"><span class="sd">    """</span>
+</span><span id="line-838">    <span class="n">schema</span> <span class="o">=</span> <span class="n">enhance_openapi_schema</span><span class="p">(</span>
+</span><span id="line-839">        <span class="n">app</span><span class="p">,</span>
+</span><span id="line-840">        <span class="n">include_examples</span><span class="o">=</span><span class="n">include_examples</span><span class="p">,</span>
+</span><span id="line-841">        <span class="n">include_python_metadata</span><span class="o">=</span><span class="n">include_python_metadata</span><span class="p">,</span>
+</span><span id="line-842">        <span class="n">include_schemas</span><span class="o">=</span><span class="n">include_schemas</span><span class="p">,</span>
+</span><span id="line-843">        <span class="n">include_transformers</span><span class="o">=</span><span class="n">include_transformers</span><span class="p">,</span>
+</span><span id="line-844">    <span class="p">)</span>
 </span><span id="line-845">
-</span><span id="line-846">
+</span><span id="line-846">    <span class="k">if</span> <span class="n">output_file</span><span class="p">:</span>
+</span><span id="line-847">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">output_file</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+</span><span id="line-848">            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</span><span id="line-849">
+</span><span id="line-850">    <span class="k">return</span> <span class="n">schema</span></div>
+
+</span><span id="line-851">
+</span><span id="line-852">
 <div class="viewcode-block" id="install_enhanced_openapi">
 <a class="viewcode-back" href="../../_autosummary/qh.openapi.html#qh.install_enhanced_openapi">[docs]</a>
-</span><span id="line-847"><span class="k">def</span><span class="w"> </span><span class="nf">install_enhanced_openapi</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="o">**</span><span class="n">enhance_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
-</span><span id="line-848"><span class="w">    </span><span class="sd">"""Make ``app`` serve the enhanced OpenAPI schema at its ``/openapi.json``.</span>
-</span><span id="line-849">
-</span><span id="line-850"><span class="sd">    Overrides ``app.openapi`` so the document returned by FastAPI — and rendered</span>
-</span><span id="line-851"><span class="sd">    by ``/docs`` and ``/redoc`` — carries the request/response JSON Schema and</span>
-</span><span id="line-852"><span class="sd">    ``components.schemas`` derived from the wrapped functions' Python type hints.</span>
-</span><span id="line-853">
-</span><span id="line-854"><span class="sd">    The override is **defensive**: if enhancement raises for any reason, it</span>
-</span><span id="line-855"><span class="sd">    falls back to FastAPI's plain schema, so a converter bug can never turn</span>
-</span><span id="line-856"><span class="sd">    ``/openapi.json`` into a 500.</span>
-</span><span id="line-857">
-</span><span id="line-858"><span class="sd">    Args:</span>
-</span><span id="line-859"><span class="sd">        app: the FastAPI application (typically the result of :func:`qh.mk_app`).</span>
-</span><span id="line-860"><span class="sd">        **enhance_kwargs: forwarded to :func:`enhance_openapi_schema`.</span>
-</span><span id="line-861">
-</span><span id="line-862"><span class="sd">    Returns:</span>
-</span><span id="line-863"><span class="sd">        the same ``app``, for chaining.</span>
-</span><span id="line-864"><span class="sd">    """</span>
-</span><span id="line-865">
-</span><span id="line-866">    <span class="k">def</span><span class="w"> </span><span class="nf">custom_openapi</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-</span><span id="line-867">        <span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span><span class="p">:</span>
-</span><span id="line-868">            <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span>
-</span><span id="line-869">        <span class="k">try</span><span class="p">:</span>
-</span><span id="line-870">            <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span> <span class="o">=</span> <span class="n">enhance_openapi_schema</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="o">**</span><span class="n">enhance_kwargs</span><span class="p">)</span>
-</span><span id="line-871">        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-</span><span id="line-872">            <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span> <span class="o">=</span> <span class="n">get_openapi</span><span class="p">(</span>
-</span><span id="line-873">                <span class="n">title</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
-</span><span id="line-874">                <span class="n">version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
-</span><span id="line-875">                <span class="n">openapi_version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">openapi_version</span><span class="p">,</span>
-</span><span id="line-876">                <span class="n">description</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-</span><span id="line-877">                <span class="n">routes</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">routes</span><span class="p">,</span>
-</span><span id="line-878">            <span class="p">)</span>
-</span><span id="line-879">        <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span>
-</span><span id="line-880">
-</span><span id="line-881">    <span class="n">app</span><span class="o">.</span><span class="n">openapi</span> <span class="o">=</span> <span class="n">custom_openapi</span>  <span class="c1"># type: ignore[method-assign]</span>
-</span><span id="line-882">    <span class="k">return</span> <span class="n">app</span></div>
+</span><span id="line-853"><span class="k">def</span><span class="w"> </span><span class="nf">install_enhanced_openapi</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">,</span> <span class="o">**</span><span class="n">enhance_kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FastAPI</span><span class="p">:</span>
+</span><span id="line-854"><span class="w">    </span><span class="sd">"""Make ``app`` serve the enhanced OpenAPI schema at its ``/openapi.json``.</span>
+</span><span id="line-855">
+</span><span id="line-856"><span class="sd">    Overrides ``app.openapi`` so the document returned by FastAPI — and rendered</span>
+</span><span id="line-857"><span class="sd">    by ``/docs`` and ``/redoc`` — carries the request/response JSON Schema and</span>
+</span><span id="line-858"><span class="sd">    ``components.schemas`` derived from the wrapped functions' Python type hints.</span>
+</span><span id="line-859">
+</span><span id="line-860"><span class="sd">    The override is **defensive**: if enhancement raises for any reason, it</span>
+</span><span id="line-861"><span class="sd">    falls back to FastAPI's plain schema, so a converter bug can never turn</span>
+</span><span id="line-862"><span class="sd">    ``/openapi.json`` into a 500.</span>
+</span><span id="line-863">
+</span><span id="line-864"><span class="sd">    Args:</span>
+</span><span id="line-865"><span class="sd">        app: the FastAPI application (typically the result of :func:`qh.mk_app`).</span>
+</span><span id="line-866"><span class="sd">        **enhance_kwargs: forwarded to :func:`enhance_openapi_schema`.</span>
+</span><span id="line-867">
+</span><span id="line-868"><span class="sd">    Returns:</span>
+</span><span id="line-869"><span class="sd">        the same ``app``, for chaining.</span>
+</span><span id="line-870"><span class="sd">    """</span>
+</span><span id="line-871">
+</span><span id="line-872">    <span class="k">def</span><span class="w"> </span><span class="nf">custom_openapi</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="line-873">        <span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span><span class="p">:</span>
+</span><span id="line-874">            <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span>
+</span><span id="line-875">        <span class="k">try</span><span class="p">:</span>
+</span><span id="line-876">            <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span> <span class="o">=</span> <span class="n">enhance_openapi_schema</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="o">**</span><span class="n">enhance_kwargs</span><span class="p">)</span>
+</span><span id="line-877">        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+</span><span id="line-878">            <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span> <span class="o">=</span> <span class="n">get_openapi</span><span class="p">(</span>
+</span><span id="line-879">                <span class="n">title</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
+</span><span id="line-880">                <span class="n">version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">version</span><span class="p">,</span>
+</span><span id="line-881">                <span class="n">openapi_version</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">openapi_version</span><span class="p">,</span>
+</span><span id="line-882">                <span class="n">description</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+</span><span id="line-883">                <span class="n">routes</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">routes</span><span class="p">,</span>
+</span><span id="line-884">            <span class="p">)</span>
+</span><span id="line-885">        <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">openapi_schema</span>
+</span><span id="line-886">
+</span><span id="line-887">    <span class="n">app</span><span class="o">.</span><span class="n">openapi</span> <span class="o">=</span> <span class="n">custom_openapi</span>  <span class="c1"># type: ignore[method-assign]</span>
+</span><span id="line-888">    <span class="k">return</span> <span class="n">app</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -1101,7 +1108,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=3294188c"></script>
+    <script src="../../_static/documentation_options.js?v=f91d8841"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

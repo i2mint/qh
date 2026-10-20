@@ -85,7 +85,7 @@ Main entry points:
 | [`AuTaskStore`](#qh.AuTaskStore)(au_store)                              | Adapter to use au's ComputationStore as qh's TaskStore.                       |
 | [`AuTaskExecutor`](#qh.AuTaskExecutor)(au_backend, au_store)               | Adapter to use au's ComputationBackend as qh's TaskExecutor.                  |
 
-### *class* qh.AppConfig(default_methods=<factory>, path_template='/{func_name}', path_prefix='', rule_chain=<factory>, expose_errors=False, title='qh API', version='0.1.0', docs_url='/docs', redoc_url='/redoc', openapi_url='/openapi.json', fastapi_kwargs=<factory>)
+### *class* qh.AppConfig(default_methods=<factory>, path_template='/{func_name}', path_prefix='', rule_chain=<factory>, expose_errors=False, error_map=dict(), title='qh API', version='0.1.0', docs_url='/docs', redoc_url='/redoc', openapi_url='/openapi.json', fastapi_kwargs=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -395,7 +395,7 @@ Execute tasks using a process pool (good for CPU-bound tasks).
 * **Return type:**
   [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
-### *class* qh.RouteConfig(path=None, methods=None, rule_chain=None, param_overrides=<factory>, async_config=None, summary=None, description=None, tags=None, response_model=None, include_in_schema=True, deprecated=False)
+### *class* qh.RouteConfig(path=None, methods=None, rule_chain=None, param_overrides=dict(), async_config=None, summary=None, description=None, tags=None, response_model=None, error_map=None, include_in_schema=True, deprecated=False)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -461,17 +461,29 @@ Information about a running service.
 
 Base URL of the service (e.g., ‘[http://localhost:8000](http://localhost:8000)’)
 
+* **Type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
 #### was_already_running
 
 True if service was already running, False if launched
+
+* **Type:**
+  [`bool`](https://docs.python.org/3/builtins/functions.html#bool)
 
 #### thread
 
 Thread object if service was launched in thread, None otherwise
 
+* **Type:**
+  [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Thread`](https://docs.python.org/3/library/threading.html#threading.Thread)]
+
 #### app
 
 The FastAPI app if one was provided, None otherwise
+
+* **Type:**
+  [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[`FastAPI`]
 
 ### *class* qh.TaskConfig(store=None, executor=None, ttl=3600, async_mode='query', async_param='async', async_header='X-Async', create_task_endpoints=True, default_executor='thread', task_owner=None)
 
@@ -711,7 +723,7 @@ Execute tasks using a thread pool (good for I/O-bound tasks).
 * **Return type:**
   [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
-### *class* qh.TransformSpec(http_location=HttpLocation.JSON_BODY, ingress=None, egress=None, http_name=None, metadata=<factory>)
+### *class* qh.TransformSpec(http_location=HttpLocation.JSON_BODY, ingress=None, egress=None, http_name=None, metadata=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -765,9 +777,9 @@ Get TransformSpec for a type.
 Register a type handler.
 
 * **Parameters:**
-  * **python_type** ([`Type`](https://docs.python.org/3/library/typing.html#typing.Type)[[`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)]) – The Python type
-  * **to_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]) – Function to serialize to JSON-compatible format
-  * **from_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)]) – Function to deserialize from JSON
+  * **python_type** ([`Type`](https://docs.python.org/3/library/typing.html#typing.Type)[`T`]) – The Python type
+  * **to_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[`T`], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]) – Function to serialize to JSON-compatible format
+  * **from_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], `T`]) – Function to deserialize from JSON
   * **http_location** ([`HttpLocation`](qh.rules.html.md#qh.rules.HttpLocation)) – Where this appears in HTTP
   * **content_type** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]) – Optional content type for binary data
 * **Return type:**
@@ -952,7 +964,7 @@ as a JSON object (see `RouteConfig` and `AppConfig` in `qh.config` for
 what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
 
 * **Parameters:**
-  * **funcs** (`Union`[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`List`](https://docs.python.org/3/library/typing.html#typing.List)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)], [`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), `Union`[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`RouteConfig`](qh.config.html.md#qh.config.RouteConfig)]]]) – 
+  * **funcs** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`List`](https://docs.python.org/3/library/typing.html#typing.List)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)], [`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable), [`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`RouteConfig`](qh.config.html.md#qh.config.RouteConfig)]]]) – 
 
     Functions to expose as HTTP endpoints. Can be:
     - A single callable
@@ -960,7 +972,7 @@ what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
     - A dict mapping callables to their route configurations
   * **app** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[`FastAPI`]) – Optional existing FastAPI app to add routes to.
     If None, creates a new app.
-  * **config** (`Union`[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`AppConfig`](qh.config.html.md#qh.config.AppConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
+  * **config** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`AppConfig`](qh.config.html.md#qh.config.AppConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
 
     Optional app-level configuration. Can be:
     - AppConfig object
@@ -973,10 +985,10 @@ what can be changed, and `qh.rules` for how parameters are mapped to HTTP).
     - get_user(user_id) → GET /users/{user_id}
     - list_users() → GET /users
     - create_user(user) → POST /users
-  * **async_funcs** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`List`](https://docs.python.org/3/library/typing.html#typing.List)[`Union`[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)]]]) – List of functions (by name or reference) that should support
+  * **async_funcs** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`List`](https://docs.python.org/3/library/typing.html#typing.List)[[`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)]]]) – List of functions (by name or reference) that should support
     async task execution. When enabled, clients can add ?async=true to
     get a task ID instead of blocking for the result.
-  * **async_config** (`Union`[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`TaskConfig`](qh.async_tasks.html.md#qh.async_tasks.TaskConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
+  * **async_config** ([`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[[`Dict`](https://docs.python.org/3/library/typing.html#typing.Dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`TaskConfig`](qh.async_tasks.html.md#qh.async_tasks.TaskConfig), [`None`](https://docs.python.org/3/builtins/constants.html#None)]) – 
 
     Configuration for async task processing. Can be:
     - None (uses default TaskConfig for functions in async_funcs)
@@ -1235,12 +1247,12 @@ Can be used as:
 2. With explicit serializers
 
 * **Parameters:**
-  * **cls** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Type`](https://docs.python.org/3/library/typing.html#typing.Type)[[`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)]]) – The class being decorated, when used as `@register_json_type`
+  * **cls** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Type`](https://docs.python.org/3/library/typing.html#typing.Type)[`T`]]) – The class being decorated, when used as `@register_json_type`
     with no arguments; `None` when called as
     `@register_json_type(to_json=..., from_json=...)`.
-  * **to_json** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]) – Serializer; when omitted, falls back to `cls.to_dict()`,
+  * **to_json** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[`T`], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]]) – Serializer; when omitted, falls back to `cls.to_dict()`,
     then `obj.__dict__`.
-  * **from_json** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)]]) – Deserializer; when omitted, falls back to
+  * **from_json** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], `T`]]) – Deserializer; when omitted, falls back to
     `cls.from_dict`, then `cls(**data)`.
 
 ### Examples
@@ -1274,9 +1286,9 @@ Can be used as:
 Register a type in the global registry.
 
 * **Parameters:**
-  * **python_type** ([`Type`](https://docs.python.org/3/library/typing.html#typing.Type)[[`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)]) – The Python type
-  * **to_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]) – Function to serialize to JSON-compatible format
-  * **from_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], [`TypeVar`](https://docs.python.org/3/library/typing.html#typing.TypeVar)(`T`)]) – Function to deserialize from JSON
+  * **python_type** ([`Type`](https://docs.python.org/3/library/typing.html#typing.Type)[`T`]) – The Python type
+  * **to_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[`T`], [`Any`](https://docs.python.org/3/library/typing.html#typing.Any)]) – Function to serialize to JSON-compatible format
+  * **from_json** ([`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)[[[`Any`](https://docs.python.org/3/library/typing.html#typing.Any)], `T`]) – Function to deserialize from JSON
   * **http_location** ([`HttpLocation`](qh.rules.html.md#qh.rules.HttpLocation)) – Where this appears in HTTP
   * **content_type** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]) – Optional content type for binary data
 * **Return type:**
@@ -1304,7 +1316,7 @@ A convenience wrapper around AppRunner.
   * **use_server** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – If True, runs real server; if False, uses TestClient
   * **\*\*kwargs** – Additional arguments passed to AppRunner
 * **Yields:**
-  TestClient or base URL string
+  [`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[`TestClient`, [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)] – TestClient or base URL string
 * **Return type:**
   [*Generator*](https://docs.python.org/3/library/typing.html#typing.Generator)[*TestClient* | [*str*](https://docs.python.org/3/builtins/stdtypes.html#str), *None*, *None*]
 
@@ -1337,7 +1349,7 @@ Convenience wrapper for integration testing with a real uvicorn server.
   * **port** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – Port to bind to
   * **host** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – Host to bind to
 * **Yields:**
-  Base URL string
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str) – Base URL string
 * **Return type:**
   [*Generator*](https://docs.python.org/3/library/typing.html#typing.Generator)[[*str*](https://docs.python.org/3/builtins/stdtypes.html#str), *None*, *None*]
 
@@ -1436,7 +1448,7 @@ process, a browser, a generated client pointed at a URL).
 * **Parameters:**
   **app** (`FastAPI`) – FastAPI application
 * **Yields:**
-  TestClient instance
+  `TestClient` – TestClient instance
 * **Return type:**
   [*Generator*](https://docs.python.org/3/library/typing.html#typing.Generator)[*TestClient*, *None*, *None*]
 

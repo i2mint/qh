@@ -14,10 +14,10 @@ which are Mappings of MutableMappings (dict of dicts).
 
 ### Classes
 
-| [`StoreValue`](#qh.stores_qh.StoreValue)(\*\*data)   | Request body for setting store values.   |
-|-------------------------------------------------------------------------|------------------------------------------|
+| [`StoreValue`](#qh.stores_qh.StoreValue)(\*, value)   | Request body for setting store values.   |
+|--------------------------------------------------------------------------|------------------------------------------|
 
-### *class* qh.stores_qh.StoreValue(\*\*data)
+### *class* qh.stores_qh.StoreValue(, value)
 
 Bases: `BaseModel`
 
@@ -106,7 +106,7 @@ Add store access endpoints to a FastAPI application.
 * **Returns:**
   FastAPI application instance with store endpoints added
 
-### qh.stores_qh.create_method_endpoint(method_name, config, get_obj_fn, path_params=None, , expose_errors=False)
+### qh.stores_qh.create_method_endpoint(method_name, config, get_obj_fn, path_params=None, , expose_errors=False, base_path='')
 
 Create an endpoint function for a specific mapping method.
 
@@ -118,6 +118,9 @@ Create an endpoint function for a specific mapping method.
   * **expose_errors** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – If True, a failing store operation sends its exception
     text to the client; by default the client gets a generic message
     with an error id (see `qh.errors`).
+  * **base_path** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – The route the method’s `config['path']` is appended to; only
+    read by the generic branch, to tell whether `item_key` is already a
+    path parameter.
 * **Returns:**
   An async endpoint function compatible with FastAPI
 * **Raises:**

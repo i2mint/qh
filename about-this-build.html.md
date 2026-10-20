@@ -2,16 +2,18 @@
 
 # About this build
 
-This documentation was built on **2026-10-13 06:46 UTC** from commit <a href="https://github.com/i2mint/qh/commit/afbcf415cfcaa143166d1370b1b8fe1010e5c6da"><code>afbcf41</code></a> on branch <code>master</code>, for **qh 0.0.23** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 02:54 UTC** from commit <a href="https://github.com/i2mint/qh/commit/96cfd2f83c890cda8808e5b6485c63ab0957c0fd"><code>96cfd2f</code></a> on branch <code>master</code>, for **qh 0.0.24** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.0.24) is behind the latest release on PyPI (0.0.25): `pip install qh` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/qh/commit/afbcf415cfcaa143166d1370b1b8fe1010e5c6da"><code>afbcf415cfcaa143166d1370b1b8fe1010e5c6da</code></a> |
+| Commit              | <a href="https://github.com/i2mint/qh/commit/96cfd2f83c890cda8808e5b6485c63ab0957c0fd"><code>96cfd2f83c890cda8808e5b6485c63ab0957c0fd</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
 | Tags at this commit | none                                                                                                                                             |
 | Working tree        | clean                                                                                                                                            |
@@ -22,16 +24,16 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/qh</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/qh/actions/runs/38358430456">38358430456</a>            |
+| Run          | <a href="https://github.com/i2mint/qh/actions/runs/39361310465">39361310465</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>afbcf415cfcaa143166d1370b1b8fe1010e5c6da</code> (in the history of the built commit) |
+| Event commit | <code>96cfd2f83c890cda8808e5b6485c63ab0957c0fd</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.14  |
-| Sphinx   | 9.1.0   |
+| epythet  | 0.2.18  |
+| Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
 | Python   | 3.12.15 |
 
@@ -49,14 +51,14 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/qh/0.0.23/">0.0.23</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/qh/0.0.25/">0.0.25</a>, newer than the documented version (0.0.24).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/qh && cd qh
-git checkout afbcf415cfcaa143166d1370b1b8fe1010e5c6da
-pip install "epythet==0.2.14"
+git checkout 96cfd2f83c890cda8808e5b6485c63ab0957c0fd
+pip install "epythet==0.2.18"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

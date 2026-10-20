@@ -30,6 +30,7 @@
   <meta name="twitter:title" content="qh.app | qh" />
   <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
   <link rel="stylesheet" type="text/css" href="../../_static/theme.css?v=d6d7c91b" />
+  <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
   <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
   <link rel="stylesheet" type="text/css" href="../../_static/epythet.css?v=4eca2ba3" />
   <link rel="search" title="Search" href="../../search.html" />
@@ -571,63 +572,65 @@
 </span><span id="line-388">            <span class="c1"># classification) for OpenAPI request/response schema generation.</span>
 </span><span id="line-389">            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span> <span class="s2">"_qh_param_specs"</span><span class="p">):</span>
 </span><span id="line-390">                <span class="n">route_info</span><span class="p">[</span><span class="s2">"param_specs"</span><span class="p">]</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="o">.</span><span class="n">_qh_param_specs</span>
-</span><span id="line-391">            <span class="n">routes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">route_info</span><span class="p">)</span>
-</span><span id="line-392">
-</span><span id="line-393">    <span class="k">return</span> <span class="n">routes</span></div>
-
+</span><span id="line-391">            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="p">,</span> <span class="s2">"_qh_get_param_specs"</span><span class="p">):</span>
+</span><span id="line-392">                <span class="n">route_info</span><span class="p">[</span><span class="s2">"get_param_specs"</span><span class="p">]</span> <span class="o">=</span> <span class="n">route</span><span class="o">.</span><span class="n">endpoint</span><span class="o">.</span><span class="n">_qh_get_param_specs</span>
+</span><span id="line-393">            <span class="n">routes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">route_info</span><span class="p">)</span>
 </span><span id="line-394">
-</span><span id="line-395">
+</span><span id="line-395">    <span class="k">return</span> <span class="n">routes</span></div>
+
+</span><span id="line-396">
+</span><span id="line-397">
 <div class="viewcode-block" id="print_routes">
 <a class="viewcode-back" href="../../_autosummary/qh.app.html#qh.print_routes">[docs]</a>
-</span><span id="line-396"><span class="k">def</span><span class="w"> </span><span class="nf">print_routes</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-397"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-398"><span class="sd">    Print a text table of a FastAPI app's routes (methods, path, endpoint name).</span>
-</span><span id="line-399">
-</span><span id="line-400"><span class="sd">    Args:</span>
-</span><span id="line-401"><span class="sd">        app: FastAPI application</span>
-</span><span id="line-402">
-</span><span id="line-403"><span class="sd">    Examples:</span>
+</span><span id="line-398"><span class="k">def</span><span class="w"> </span><span class="nf">print_routes</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">FastAPI</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-399"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-400"><span class="sd">    Print a text table of a FastAPI app's routes (methods, path, endpoint name).</span>
+</span><span id="line-401">
+</span><span id="line-402"><span class="sd">    Args:</span>
+</span><span id="line-403"><span class="sd">        app: FastAPI application</span>
 </span><span id="line-404">
-</span><span id="line-405"><span class="sd">        &gt;&gt;&gt; from qh import mk_app, print_routes</span>
-</span><span id="line-406"><span class="sd">        &gt;&gt;&gt; def add(x: int, y: int) -&gt; int:</span>
-</span><span id="line-407"><span class="sd">        ...     return x + y</span>
-</span><span id="line-408"><span class="sd">        &gt;&gt;&gt; print_routes(mk_app([add], config={'docs_url': None, 'redoc_url': None, 'openapi_url': None}))</span>
-</span><span id="line-409"><span class="sd">        METHODS  PATH  ENDPOINT</span>
-</span><span id="line-410"><span class="sd">        ----------------------------------------------------------</span>
-</span><span id="line-411"><span class="sd">        POST  /add  add</span>
-</span><span id="line-412"><span class="sd">    """</span>
-</span><span id="line-413">    <span class="n">routes</span> <span class="o">=</span> <span class="n">inspect_routes</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
-</span><span id="line-414">
-</span><span id="line-415">    <span class="k">if</span> <span class="ow">not</span> <span class="n">routes</span><span class="p">:</span>
-</span><span id="line-416">        <span class="nb">print</span><span class="p">(</span><span class="s2">"No routes found"</span><span class="p">)</span>
-</span><span id="line-417">        <span class="k">return</span>
-</span><span id="line-418">
-</span><span id="line-419">    <span class="c1"># Find max widths for formatting</span>
-</span><span id="line-420">    <span class="n">max_methods</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"methods"</span><span class="p">]))</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">)</span>
-</span><span id="line-421">    <span class="n">max_path</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"path"</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">)</span>
-</span><span id="line-422">
-</span><span id="line-423">    <span class="c1"># Print header</span>
-</span><span id="line-424">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'METHODS'</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_methods</span><span class="si">}}</span><span class="s2">  </span><span class="si">{</span><span class="s1">'PATH'</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_path</span><span class="si">}}</span><span class="s2">  ENDPOINT"</span><span class="p">)</span>
-</span><span id="line-425">    <span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="p">(</span><span class="n">max_methods</span> <span class="o">+</span> <span class="n">max_path</span> <span class="o">+</span> <span class="mi">50</span><span class="p">))</span>
-</span><span id="line-426">
-</span><span id="line-427">    <span class="c1"># Print routes</span>
-</span><span id="line-428">    <span class="k">for</span> <span class="n">route</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">:</span>
-</span><span id="line-429">        <span class="n">methods</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">route</span><span class="p">[</span><span class="s2">"methods"</span><span class="p">]))</span>
-</span><span id="line-430">        <span class="n">path</span> <span class="o">=</span> <span class="n">route</span><span class="p">[</span><span class="s2">"path"</span><span class="p">]</span>
-</span><span id="line-431">        <span class="n">name</span> <span class="o">=</span> <span class="n">route</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span>
-</span><span id="line-432">
-</span><span id="line-433">        <span class="c1"># Try to get endpoint signature</span>
-</span><span id="line-434">        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">route</span><span class="p">[</span><span class="s2">"endpoint"</span><span class="p">]</span>
-</span><span id="line-435">        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="s2">"__wrapped__"</span><span class="p">):</span>
-</span><span id="line-436">            <span class="n">endpoint</span> <span class="o">=</span> <span class="n">endpoint</span><span class="o">.</span><span class="n">__wrapped__</span>
-</span><span id="line-437">
-</span><span id="line-438">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">methods</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_methods</span><span class="si">}}</span><span class="s2">  </span><span class="si">{</span><span class="n">path</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_path</span><span class="si">}}</span><span class="s2">  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
-
+</span><span id="line-405"><span class="sd">    Examples:</span>
+</span><span id="line-406">
+</span><span id="line-407"><span class="sd">        &gt;&gt;&gt; from qh import mk_app, print_routes</span>
+</span><span id="line-408"><span class="sd">        &gt;&gt;&gt; def add(x: int, y: int) -&gt; int:</span>
+</span><span id="line-409"><span class="sd">        ...     return x + y</span>
+</span><span id="line-410"><span class="sd">        &gt;&gt;&gt; print_routes(mk_app([add], config={'docs_url': None, 'redoc_url': None, 'openapi_url': None}))</span>
+</span><span id="line-411"><span class="sd">        METHODS  PATH  ENDPOINT</span>
+</span><span id="line-412"><span class="sd">        ----------------------------------------------------------</span>
+</span><span id="line-413"><span class="sd">        POST  /add  add</span>
+</span><span id="line-414"><span class="sd">    """</span>
+</span><span id="line-415">    <span class="n">routes</span> <span class="o">=</span> <span class="n">inspect_routes</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+</span><span id="line-416">
+</span><span id="line-417">    <span class="k">if</span> <span class="ow">not</span> <span class="n">routes</span><span class="p">:</span>
+</span><span id="line-418">        <span class="nb">print</span><span class="p">(</span><span class="s2">"No routes found"</span><span class="p">)</span>
+</span><span id="line-419">        <span class="k">return</span>
+</span><span id="line-420">
+</span><span id="line-421">    <span class="c1"># Find max widths for formatting</span>
+</span><span id="line-422">    <span class="n">max_methods</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"methods"</span><span class="p">]))</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">)</span>
+</span><span id="line-423">    <span class="n">max_path</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="s2">"path"</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">)</span>
+</span><span id="line-424">
+</span><span id="line-425">    <span class="c1"># Print header</span>
+</span><span id="line-426">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'METHODS'</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_methods</span><span class="si">}}</span><span class="s2">  </span><span class="si">{</span><span class="s1">'PATH'</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_path</span><span class="si">}}</span><span class="s2">  ENDPOINT"</span><span class="p">)</span>
+</span><span id="line-427">    <span class="nb">print</span><span class="p">(</span><span class="s2">"-"</span> <span class="o">*</span> <span class="p">(</span><span class="n">max_methods</span> <span class="o">+</span> <span class="n">max_path</span> <span class="o">+</span> <span class="mi">50</span><span class="p">))</span>
+</span><span id="line-428">
+</span><span id="line-429">    <span class="c1"># Print routes</span>
+</span><span id="line-430">    <span class="k">for</span> <span class="n">route</span> <span class="ow">in</span> <span class="n">routes</span><span class="p">:</span>
+</span><span id="line-431">        <span class="n">methods</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">route</span><span class="p">[</span><span class="s2">"methods"</span><span class="p">]))</span>
+</span><span id="line-432">        <span class="n">path</span> <span class="o">=</span> <span class="n">route</span><span class="p">[</span><span class="s2">"path"</span><span class="p">]</span>
+</span><span id="line-433">        <span class="n">name</span> <span class="o">=</span> <span class="n">route</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span>
+</span><span id="line-434">
+</span><span id="line-435">        <span class="c1"># Try to get endpoint signature</span>
+</span><span id="line-436">        <span class="n">endpoint</span> <span class="o">=</span> <span class="n">route</span><span class="p">[</span><span class="s2">"endpoint"</span><span class="p">]</span>
+</span><span id="line-437">        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">endpoint</span><span class="p">,</span> <span class="s2">"__wrapped__"</span><span class="p">):</span>
+</span><span id="line-438">            <span class="n">endpoint</span> <span class="o">=</span> <span class="n">endpoint</span><span class="o">.</span><span class="n">__wrapped__</span>
 </span><span id="line-439">
-</span><span id="line-440">
-</span><span id="line-441"><span class="c1"># Convenience aliases</span>
-</span><span id="line-442"><span class="n">create_app</span> <span class="o">=</span> <span class="n">mk_app</span>
-</span><span id="line-443"><span class="n">make_app</span> <span class="o">=</span> <span class="n">mk_app</span>
+</span><span id="line-440">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">methods</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_methods</span><span class="si">}}</span><span class="s2">  </span><span class="si">{</span><span class="n">path</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">max_path</span><span class="si">}}</span><span class="s2">  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
+
+</span><span id="line-441">
+</span><span id="line-442">
+</span><span id="line-443"><span class="c1"># Convenience aliases</span>
+</span><span id="line-444"><span class="n">create_app</span> <span class="o">=</span> <span class="n">mk_app</span>
+</span><span id="line-445"><span class="n">make_app</span> <span class="o">=</span> <span class="n">mk_app</span>
 </span></code></pre></div>
     </div></div>
           </main>
@@ -641,7 +644,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=3294188c"></script>
+    <script src="../../_static/documentation_options.js?v=f91d8841"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

@@ -33,7 +33,7 @@ Rules are layered with first-match semantics, from specific to general.
 | [`TransformSpec`](#qh.rules.TransformSpec)([http_location, ingress, ...]) | Specification for how to transform a parameter.               |
 | [`TypeRule`](#qh.rules.TypeRule)(type_map)                           | Rule that matches based on parameter type.                    |
 
-### *class* qh.rules.CompositeRule(rules, combine_mode='all', spec=<factory>)
+### *class* qh.rules.CompositeRule(rules, combine_mode='all', spec=TransformSpec())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -161,7 +161,7 @@ Find first matching rule.
 * **Returns:**
   TransformSpec from first matching rule, or None if no match
 
-### *class* qh.rules.TransformSpec(http_location=HttpLocation.JSON_BODY, ingress=None, egress=None, http_name=None, metadata=<factory>)
+### *class* qh.rules.TransformSpec(http_location=HttpLocation.JSON_BODY, ingress=None, egress=None, http_name=None, metadata=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 

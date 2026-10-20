@@ -98,17 +98,29 @@ Information about a running service.
 
 Base URL of the service (e.g., ‘[http://localhost:8000](http://localhost:8000)’)
 
+* **Type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
 #### was_already_running
 
 True if service was already running, False if launched
+
+* **Type:**
+  [`bool`](https://docs.python.org/3/builtins/functions.html#bool)
 
 #### thread
 
 Thread object if service was launched in thread, None otherwise
 
+* **Type:**
+  [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Thread`](https://docs.python.org/3/library/threading.html#threading.Thread)]
+
 #### app
 
 The FastAPI app if one was provided, None otherwise
+
+* **Type:**
+  [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[`FastAPI`]
 
 ### qh.testing.app_runner(app, , use_server=False, \*\*kwargs)
 
@@ -121,7 +133,7 @@ A convenience wrapper around AppRunner.
   * **use_server** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – If True, runs real server; if False, uses TestClient
   * **\*\*kwargs** – Additional arguments passed to AppRunner
 * **Yields:**
-  TestClient or base URL string
+  [`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[`TestClient`, [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)] – TestClient or base URL string
 * **Return type:**
   [*Generator*](https://docs.python.org/3/library/typing.html#typing.Generator)[*TestClient* | [*str*](https://docs.python.org/3/builtins/stdtypes.html#str), *None*, *None*]
 
@@ -192,7 +204,7 @@ A convenience wrapper around AppRunner.
   * **use_server** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – If True, runs real server; if False, uses TestClient
   * **\*\*kwargs** – Additional arguments passed to AppRunner
 * **Yields:**
-  TestClient or base URL string
+  [`Union`](https://docs.python.org/3/library/typing.html#typing.Union)[`TestClient`, [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)] – TestClient or base URL string
 * **Return type:**
   [*Generator*](https://docs.python.org/3/library/typing.html#typing.Generator)[*TestClient* | [*str*](https://docs.python.org/3/builtins/stdtypes.html#str), *None*, *None*]
 
@@ -225,7 +237,7 @@ Convenience wrapper for integration testing with a real uvicorn server.
   * **port** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – Port to bind to
   * **host** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – Host to bind to
 * **Yields:**
-  Base URL string
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str) – Base URL string
 * **Return type:**
   [*Generator*](https://docs.python.org/3/library/typing.html#typing.Generator)[[*str*](https://docs.python.org/3/builtins/stdtypes.html#str), *None*, *None*]
 
@@ -324,7 +336,7 @@ process, a browser, a generated client pointed at a URL).
 * **Parameters:**
   **app** (`FastAPI`) – FastAPI application
 * **Yields:**
-  TestClient instance
+  `TestClient` – TestClient instance
 * **Return type:**
   [*Generator*](https://docs.python.org/3/library/typing.html#typing.Generator)[*TestClient*, *None*, *None*]
 
@@ -362,7 +374,7 @@ process, a browser, a generated client pointed at a URL).
 * **Parameters:**
   **app** (`FastAPI`) – FastAPI application
 * **Yields:**
-  TestClient instance
+  `TestClient` – TestClient instance
 * **Return type:**
   [*Generator*](https://docs.python.org/3/library/typing.html#typing.Generator)[*TestClient*, *None*, *None*]
 
