@@ -1566,6 +1566,7 @@ Use au’s ThreadBackend with filesystem storage.
 | [`errors`](qh.errors.html.md#module-qh.errors)                   | What HTTP clients learn about server-side exceptions.                                |
 | [`jsclient`](qh.jsclient.html.md#module-qh.jsclient)               | JavaScript and TypeScript client generation from OpenAPI specs.                      |
 | [`openapi`](qh.openapi.html.md#module-qh.openapi)                 | OpenAPI generation for qh — including JSON Schema derived from Python type hints.    |
+| [`paths`](qh.paths.html.md#module-qh.paths)                     | Route-path templates: `{name}` and `{name:converter}`, read as Starlette reads them. |
 | [`rules`](qh.rules.html.md#module-qh.rules)                     | Transformation rule system for qh.                                                   |
 | [`stores_qh`](qh.stores_qh.html.md#module-qh.stores_qh)             | FastAPI service for operating on stores objects.                                     |
 | [`testing`](qh.testing.html.md#module-qh.testing)                 | Run a qh (or any FastAPI) app for a test: in-process, or on a real port.             |

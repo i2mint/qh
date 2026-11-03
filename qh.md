@@ -1,4 +1,4 @@
-> built 2026-10-20 02:54 UTC from 96cfd2f (master) · qh 0.0.24. Details: build_info.json
+> built 2026-11-03 10:53 UTC from ae80d8b (master) · qh 0.0.25. Details: build_info.json
 
 # index.html.md
 
@@ -4024,6 +4024,7 @@ Use au’s ThreadBackend with filesystem storage.
 | [`errors`](_autosummary/qh.errors.html.md#module-qh.errors)                   | What HTTP clients learn about server-side exceptions.                                |
 | [`jsclient`](_autosummary/qh.jsclient.html.md#module-qh.jsclient)               | JavaScript and TypeScript client generation from OpenAPI specs.                      |
 | [`openapi`](_autosummary/qh.openapi.html.md#module-qh.openapi)                 | OpenAPI generation for qh — including JSON Schema derived from Python type hints.    |
+| [`paths`](_autosummary/qh.paths.html.md#module-qh.paths)                     | Route-path templates: `{name}` and `{name:converter}`, read as Starlette reads them. |
 | [`rules`](_autosummary/qh.rules.html.md#module-qh.rules)                     | Transformation rule system for qh.                                                   |
 | [`stores_qh`](_autosummary/qh.stores_qh.html.md#module-qh.stores_qh)             | FastAPI service for operating on stores objects.                                     |
 | [`testing`](_autosummary/qh.testing.html.md#module-qh.testing)                 | Run a qh (or any FastAPI) app for a test: in-process, or on a real port.             |
@@ -4452,6 +4453,68 @@ used in several places is described once.
 >>> python_type_to_json_schema(Optional[int], {})
 {'anyOf': [{'type': 'integer'}, {'type': 'null'}]}
 ```
+
+
+# _autosummary/qh.paths.html.md
+
+# qh.paths
+
+Route-path templates: `{name}` and `{name:converter}`, read as Starlette reads them.
+
+A route path such as `/environments/{environment:path}/ambient` names its
+parameters in braces, optionally with a Starlette converter after a colon
+(`path`, `int`, `float`, `uuid`, …). Every qh module that reads or fills
+a path template goes through these helpers, which are built on
+`starlette.routing.compile_path` – the parser the router itself uses – so qh and
+the router cannot disagree about a template. An unknown converter or a duplicated
+parameter name is rejected here exactly as the router would reject it.
+
+`None` and `""` are both the empty template: no parameters, empty format.
+
+```pycon
+>>> path_param_names('/environments/{environment:path}/ambient/{n}')
+['environment', 'n']
+>>> path_format('/n/{n:int}')
+'/n/{n}'
+>>> fill_path_params('/a/{x:path}/b/{y}', {'x': 'INT./EXT.', 'y': 'a?b#c/d'})
+'/a/INT./EXT./b/a%3Fb%23c%2Fd'
+>>> fill_path_params('/a/{x:path}/{y}', {'x': 'p q'})
+'/a/p%20q/{y}'
+```
+
+### Functions
+
+| [`fill_path_params`](_autosummary/qh.paths.html.md#qh.paths.fill_path_params)(path, values, \*[, quote])   | Replace each parameter of `path` that `values` names with its value.   |
+|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------|
+| [`path_format`](_autosummary/qh.paths.html.md#qh.paths.path_format)(path)                             | The template with converters removed: `/n/{n:int}` -> `/n/{n}`.        |
+| [`path_param_names`](_autosummary/qh.paths.html.md#qh.paths.path_param_names)(path)                        | The parameter names of a route path template, in order of appearance.  |
+
+### qh.paths.fill_path_params(path, values, , quote=True)
+
+Replace each parameter of `path` that `values` names with its value.
+
+Each value is `str()`-ed and, when `quote` is true, URL-encoded: `/` is
+kept only for a `path` converter, every other reserved character is encoded.
+Parameters `values` lacks are left as `{name}` (converter removed).
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### qh.paths.path_format(path)
+
+The template with converters removed: `/n/{n:int}` -> `/n/{n}`.
+
+This is the form FastAPI uses to key `openapi()["paths"]`.
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### qh.paths.path_param_names(path)
+
+The parameter names of a route path template, in order of appearance.
+
+* **Return type:**
+  [`List`](https://docs.python.org/3/library/typing.html#typing.List)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 
 # _autosummary/qh.rules.html.md
@@ -5455,18 +5518,18 @@ Register a type in the global registry.
 
 # About this build
 
-This documentation was built on **2026-10-20 02:54 UTC** from commit <a href="https://github.com/i2mint/qh/commit/96cfd2f83c890cda8808e5b6485c63ab0957c0fd"><code>96cfd2f</code></a> on branch <code>master</code>, for **qh 0.0.24** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-03 10:53 UTC** from commit <a href="https://github.com/i2mint/qh/commit/ae80d8b837917f1939f0c7909b4a78ed0037b029"><code>ae80d8b</code></a> on branch <code>master</code>, for **qh 0.0.25** (from <code>pyproject.toml</code>).
 
 #### WARNING
 The documentation and the package may be misaligned:
 
-- The documented version (0.0.24) is behind the latest release on PyPI (0.0.25): `pip install qh` gives newer code than these docs describe.
+- The documented version (0.0.25) is behind the latest release on PyPI (0.0.26): `pip install qh` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/qh/commit/96cfd2f83c890cda8808e5b6485c63ab0957c0fd"><code>96cfd2f83c890cda8808e5b6485c63ab0957c0fd</code></a> |
+| Commit              | <a href="https://github.com/i2mint/qh/commit/ae80d8b837917f1939f0c7909b4a78ed0037b029"><code>ae80d8b837917f1939f0c7909b4a78ed0037b029</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
 | Tags at this commit | none                                                                                                                                             |
 | Working tree        | clean                                                                                                                                            |
@@ -5477,15 +5540,15 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/qh</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/qh/actions/runs/39361310465">39361310465</a>            |
+| Run          | <a href="https://github.com/i2mint/qh/actions/runs/41622747592">41622747592</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>96cfd2f83c890cda8808e5b6485c63ab0957c0fd</code> (in the history of the built commit) |
+| Event commit | <code>ae80d8b837917f1939f0c7909b4a78ed0037b029</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.18  |
+| epythet  | 0.2.22  |
 | Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
 | Python   | 3.12.15 |
@@ -5504,14 +5567,14 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/qh/0.0.25/">0.0.25</a>, newer than the documented version (0.0.24).
+Latest release: <a href="https://pypi.org/project/qh/0.0.26/">0.0.26</a>, newer than the documented version (0.0.25).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/qh && cd qh
-git checkout 96cfd2f83c890cda8808e5b6485c63ab0957c0fd
-pip install "epythet==0.2.18"
+git checkout ae80d8b837917f1939f0c7909b4a78ed0037b029
+pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

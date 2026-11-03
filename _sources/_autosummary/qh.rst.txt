@@ -80,6 +80,7 @@
    errors
    jsclient
    openapi
+   paths
    rules
    stores_qh
    testing

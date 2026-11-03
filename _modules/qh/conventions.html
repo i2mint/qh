@@ -29,7 +29,7 @@
   <meta property="og:title" content="qh.conventions | qh" />
   <meta name="twitter:title" content="qh.conventions | qh" />
   <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=d75fae25" />
-  <link rel="stylesheet" type="text/css" href="../../_static/theme.css?v=d6d7c91b" />
+  <link rel="stylesheet" type="text/css" href="../../_static/theme.css?v=009055c6" />
   <link rel="stylesheet" type="text/css" href="../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
   <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
   <link rel="stylesheet" type="text/css" href="../../_static/epythet.css?v=4eca2ba3" />
@@ -126,6 +126,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.errors.html">qh.errors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.jsclient.html">qh.jsclient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.openapi.html">qh.openapi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.paths.html">qh.paths</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.rules.html">qh.rules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.stores_qh.html">qh.stores_qh</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/qh.testing.html">qh.testing</a></li>
@@ -193,336 +194,336 @@
 </span><span id="line-14">
 </span><span id="line-15"><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
 </span><span id="line-16"><span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
-</span><span id="line-17"><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-</span><span id="line-18"><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
-</span><span id="line-19">
+</span><span id="line-17"><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+</span><span id="line-18">
+</span><span id="line-19"><span class="kn">from</span><span class="w"> </span><span class="nn">qh.paths</span><span class="w"> </span><span class="kn">import</span> <span class="n">path_param_names</span>
 </span><span id="line-20">
-</span><span id="line-21"><span class="c1"># Common CRUD verb patterns</span>
-</span><span id="line-22"><span class="n">CRUD_VERBS</span> <span class="o">=</span> <span class="p">{</span>
-</span><span id="line-23">    <span class="s2">"get"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
-</span><span id="line-24">    <span class="s2">"fetch"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
-</span><span id="line-25">    <span class="s2">"retrieve"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
-</span><span id="line-26">    <span class="s2">"read"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
-</span><span id="line-27">    <span class="s2">"list"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
-</span><span id="line-28">    <span class="s2">"find"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
-</span><span id="line-29">    <span class="s2">"search"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
-</span><span id="line-30">    <span class="s2">"query"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
-</span><span id="line-31">    <span class="s2">"create"</span><span class="p">:</span> <span class="s2">"POST"</span><span class="p">,</span>
-</span><span id="line-32">    <span class="s2">"add"</span><span class="p">:</span> <span class="s2">"POST"</span><span class="p">,</span>
-</span><span id="line-33">    <span class="s2">"insert"</span><span class="p">:</span> <span class="s2">"POST"</span><span class="p">,</span>
-</span><span id="line-34">    <span class="s2">"new"</span><span class="p">:</span> <span class="s2">"POST"</span><span class="p">,</span>
-</span><span id="line-35">    <span class="s2">"update"</span><span class="p">:</span> <span class="s2">"PUT"</span><span class="p">,</span>
-</span><span id="line-36">    <span class="s2">"modify"</span><span class="p">:</span> <span class="s2">"PUT"</span><span class="p">,</span>
-</span><span id="line-37">    <span class="s2">"edit"</span><span class="p">:</span> <span class="s2">"PUT"</span><span class="p">,</span>
-</span><span id="line-38">    <span class="s2">"change"</span><span class="p">:</span> <span class="s2">"PUT"</span><span class="p">,</span>
-</span><span id="line-39">    <span class="s2">"set"</span><span class="p">:</span> <span class="s2">"PUT"</span><span class="p">,</span>
-</span><span id="line-40">    <span class="s2">"patch"</span><span class="p">:</span> <span class="s2">"PATCH"</span><span class="p">,</span>
-</span><span id="line-41">    <span class="s2">"delete"</span><span class="p">:</span> <span class="s2">"DELETE"</span><span class="p">,</span>
-</span><span id="line-42">    <span class="s2">"remove"</span><span class="p">:</span> <span class="s2">"DELETE"</span><span class="p">,</span>
-</span><span id="line-43">    <span class="s2">"destroy"</span><span class="p">:</span> <span class="s2">"DELETE"</span><span class="p">,</span>
-</span><span id="line-44"><span class="p">}</span>
-</span><span id="line-45">
+</span><span id="line-21">
+</span><span id="line-22"><span class="c1"># Common CRUD verb patterns</span>
+</span><span id="line-23"><span class="n">CRUD_VERBS</span> <span class="o">=</span> <span class="p">{</span>
+</span><span id="line-24">    <span class="s2">"get"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
+</span><span id="line-25">    <span class="s2">"fetch"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
+</span><span id="line-26">    <span class="s2">"retrieve"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
+</span><span id="line-27">    <span class="s2">"read"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
+</span><span id="line-28">    <span class="s2">"list"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
+</span><span id="line-29">    <span class="s2">"find"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
+</span><span id="line-30">    <span class="s2">"search"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
+</span><span id="line-31">    <span class="s2">"query"</span><span class="p">:</span> <span class="s2">"GET"</span><span class="p">,</span>
+</span><span id="line-32">    <span class="s2">"create"</span><span class="p">:</span> <span class="s2">"POST"</span><span class="p">,</span>
+</span><span id="line-33">    <span class="s2">"add"</span><span class="p">:</span> <span class="s2">"POST"</span><span class="p">,</span>
+</span><span id="line-34">    <span class="s2">"insert"</span><span class="p">:</span> <span class="s2">"POST"</span><span class="p">,</span>
+</span><span id="line-35">    <span class="s2">"new"</span><span class="p">:</span> <span class="s2">"POST"</span><span class="p">,</span>
+</span><span id="line-36">    <span class="s2">"update"</span><span class="p">:</span> <span class="s2">"PUT"</span><span class="p">,</span>
+</span><span id="line-37">    <span class="s2">"modify"</span><span class="p">:</span> <span class="s2">"PUT"</span><span class="p">,</span>
+</span><span id="line-38">    <span class="s2">"edit"</span><span class="p">:</span> <span class="s2">"PUT"</span><span class="p">,</span>
+</span><span id="line-39">    <span class="s2">"change"</span><span class="p">:</span> <span class="s2">"PUT"</span><span class="p">,</span>
+</span><span id="line-40">    <span class="s2">"set"</span><span class="p">:</span> <span class="s2">"PUT"</span><span class="p">,</span>
+</span><span id="line-41">    <span class="s2">"patch"</span><span class="p">:</span> <span class="s2">"PATCH"</span><span class="p">,</span>
+</span><span id="line-42">    <span class="s2">"delete"</span><span class="p">:</span> <span class="s2">"DELETE"</span><span class="p">,</span>
+</span><span id="line-43">    <span class="s2">"remove"</span><span class="p">:</span> <span class="s2">"DELETE"</span><span class="p">,</span>
+</span><span id="line-44">    <span class="s2">"destroy"</span><span class="p">:</span> <span class="s2">"DELETE"</span><span class="p">,</span>
+</span><span id="line-45"><span class="p">}</span>
 </span><span id="line-46">
+</span><span id="line-47">
 <div class="viewcode-block" id="ParsedFunctionName">
 <a class="viewcode-back" href="../../_autosummary/qh.conventions.html#qh.conventions.ParsedFunctionName">[docs]</a>
-</span><span id="line-47"><span class="nd">@dataclass</span>
-</span><span id="line-48"><span class="k">class</span><span class="w"> </span><span class="nc">ParsedFunctionName</span><span class="p">:</span>
-</span><span id="line-49"><span class="w">    </span><span class="sd">"""Result of parsing a function name."""</span>
-</span><span id="line-50">
-</span><span id="line-51">    <span class="n">verb</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># e.g., 'get', 'list', 'create'</span>
-</span><span id="line-52">    <span class="n">resource</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># e.g., 'user', 'users', 'order'</span>
-</span><span id="line-53">    <span class="n">is_plural</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># Whether resource is plural</span>
-</span><span id="line-54">    <span class="n">is_collection_operation</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># e.g., list_users vs get_user</span></div>
+</span><span id="line-48"><span class="nd">@dataclass</span>
+</span><span id="line-49"><span class="k">class</span><span class="w"> </span><span class="nc">ParsedFunctionName</span><span class="p">:</span>
+</span><span id="line-50"><span class="w">    </span><span class="sd">"""Result of parsing a function name."""</span>
+</span><span id="line-51">
+</span><span id="line-52">    <span class="n">verb</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># e.g., 'get', 'list', 'create'</span>
+</span><span id="line-53">    <span class="n">resource</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># e.g., 'user', 'users', 'order'</span>
+</span><span id="line-54">    <span class="n">is_plural</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># Whether resource is plural</span>
+</span><span id="line-55">    <span class="n">is_collection_operation</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># e.g., list_users vs get_user</span></div>
 
-</span><span id="line-55">
 </span><span id="line-56">
+</span><span id="line-57">
 <div class="viewcode-block" id="parse_function_name">
 <a class="viewcode-back" href="../../_autosummary/qh.conventions.html#qh.conventions.parse_function_name">[docs]</a>
-</span><span id="line-57"><span class="k">def</span><span class="w"> </span><span class="nf">parse_function_name</span><span class="p">(</span><span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ParsedFunctionName</span><span class="p">:</span>
-</span><span id="line-58"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-59"><span class="sd">    Parse a function name to extract verb and resource.</span>
-</span><span id="line-60">
-</span><span id="line-61"><span class="sd">    Args:</span>
-</span><span id="line-62"><span class="sd">        func_name: The function's name, e.g. ``'get_user'``.</span>
-</span><span id="line-63">
-</span><span id="line-64"><span class="sd">    Returns:</span>
-</span><span id="line-65"><span class="sd">        A ``ParsedFunctionName``. When the name is ``&lt;verb&gt;_&lt;rest&gt;`` and</span>
-</span><span id="line-66"><span class="sd">        ``verb`` is a known CRUD verb, ``resource`` is ``rest``; otherwise</span>
-</span><span id="line-67"><span class="sd">        the whole name is the resource and ``verb`` is ``""``.</span>
-</span><span id="line-68">
-</span><span id="line-69"><span class="sd">    Examples:</span>
-</span><span id="line-70">
-</span><span id="line-71"><span class="sd">        &gt;&gt;&gt; parse_function_name('get_user')</span>
-</span><span id="line-72"><span class="sd">        ParsedFunctionName(verb='get', resource='user', is_plural=False, is_collection_operation=False)</span>
-</span><span id="line-73">
-</span><span id="line-74"><span class="sd">        &gt;&gt;&gt; parse_function_name('list_users')</span>
-</span><span id="line-75"><span class="sd">        ParsedFunctionName(verb='list', resource='users', is_plural=True, is_collection_operation=True)</span>
-</span><span id="line-76">
-</span><span id="line-77"><span class="sd">        &gt;&gt;&gt; parse_function_name('create_order_item')</span>
-</span><span id="line-78"><span class="sd">        ParsedFunctionName(verb='create', resource='order_item', is_plural=True, is_collection_operation=True)</span>
-</span><span id="line-79"><span class="sd">    """</span>
-</span><span id="line-80">    <span class="c1"># Try to match verb_resource pattern</span>
-</span><span id="line-81">    <span class="n">parts</span> <span class="o">=</span> <span class="n">func_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"_"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-</span><span id="line-82">
-</span><span id="line-83">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-</span><span id="line-84">        <span class="n">verb</span><span class="p">,</span> <span class="n">resource</span> <span class="o">=</span> <span class="n">parts</span>
-</span><span id="line-85">        <span class="n">verb</span> <span class="o">=</span> <span class="n">verb</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-</span><span id="line-86">
-</span><span id="line-87">        <span class="c1"># Check if verb is in our known list</span>
-</span><span id="line-88">        <span class="k">if</span> <span class="n">verb</span> <span class="ow">in</span> <span class="n">CRUD_VERBS</span><span class="p">:</span>
-</span><span id="line-89">            <span class="c1"># Check if this is a collection operation</span>
-</span><span id="line-90">            <span class="n">is_collection</span> <span class="o">=</span> <span class="n">verb</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"list"</span><span class="p">,</span> <span class="s2">"create"</span><span class="p">,</span> <span class="s2">"search"</span><span class="p">,</span> <span class="s2">"query"</span><span class="p">)</span>
-</span><span id="line-91">
-</span><span id="line-92">            <span class="c1"># Check if resource is plural (simple heuristic)</span>
-</span><span id="line-93">            <span class="n">is_plural</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"s"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_collection</span>
-</span><span id="line-94">
-</span><span id="line-95">            <span class="k">return</span> <span class="n">ParsedFunctionName</span><span class="p">(</span>
-</span><span id="line-96">                <span class="n">verb</span><span class="o">=</span><span class="n">verb</span><span class="p">,</span>
-</span><span id="line-97">                <span class="n">resource</span><span class="o">=</span><span class="n">resource</span><span class="p">,</span>
-</span><span id="line-98">                <span class="n">is_plural</span><span class="o">=</span><span class="n">is_plural</span><span class="p">,</span>
-</span><span id="line-99">                <span class="n">is_collection_operation</span><span class="o">=</span><span class="n">is_collection</span><span class="p">,</span>
-</span><span id="line-100">            <span class="p">)</span>
-</span><span id="line-101">
-</span><span id="line-102">    <span class="c1"># Fallback: treat whole name as resource</span>
-</span><span id="line-103">    <span class="k">return</span> <span class="n">ParsedFunctionName</span><span class="p">(</span>
-</span><span id="line-104">        <span class="n">verb</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
-</span><span id="line-105">        <span class="n">resource</span><span class="o">=</span><span class="n">func_name</span><span class="p">,</span>
-</span><span id="line-106">        <span class="n">is_plural</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="line-107">        <span class="n">is_collection_operation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-</span><span id="line-108">    <span class="p">)</span></div>
+</span><span id="line-58"><span class="k">def</span><span class="w"> </span><span class="nf">parse_function_name</span><span class="p">(</span><span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ParsedFunctionName</span><span class="p">:</span>
+</span><span id="line-59"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-60"><span class="sd">    Parse a function name to extract verb and resource.</span>
+</span><span id="line-61">
+</span><span id="line-62"><span class="sd">    Args:</span>
+</span><span id="line-63"><span class="sd">        func_name: The function's name, e.g. ``'get_user'``.</span>
+</span><span id="line-64">
+</span><span id="line-65"><span class="sd">    Returns:</span>
+</span><span id="line-66"><span class="sd">        A ``ParsedFunctionName``. When the name is ``&lt;verb&gt;_&lt;rest&gt;`` and</span>
+</span><span id="line-67"><span class="sd">        ``verb`` is a known CRUD verb, ``resource`` is ``rest``; otherwise</span>
+</span><span id="line-68"><span class="sd">        the whole name is the resource and ``verb`` is ``""``.</span>
+</span><span id="line-69">
+</span><span id="line-70"><span class="sd">    Examples:</span>
+</span><span id="line-71">
+</span><span id="line-72"><span class="sd">        &gt;&gt;&gt; parse_function_name('get_user')</span>
+</span><span id="line-73"><span class="sd">        ParsedFunctionName(verb='get', resource='user', is_plural=False, is_collection_operation=False)</span>
+</span><span id="line-74">
+</span><span id="line-75"><span class="sd">        &gt;&gt;&gt; parse_function_name('list_users')</span>
+</span><span id="line-76"><span class="sd">        ParsedFunctionName(verb='list', resource='users', is_plural=True, is_collection_operation=True)</span>
+</span><span id="line-77">
+</span><span id="line-78"><span class="sd">        &gt;&gt;&gt; parse_function_name('create_order_item')</span>
+</span><span id="line-79"><span class="sd">        ParsedFunctionName(verb='create', resource='order_item', is_plural=True, is_collection_operation=True)</span>
+</span><span id="line-80"><span class="sd">    """</span>
+</span><span id="line-81">    <span class="c1"># Try to match verb_resource pattern</span>
+</span><span id="line-82">    <span class="n">parts</span> <span class="o">=</span> <span class="n">func_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"_"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span><span id="line-83">
+</span><span id="line-84">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+</span><span id="line-85">        <span class="n">verb</span><span class="p">,</span> <span class="n">resource</span> <span class="o">=</span> <span class="n">parts</span>
+</span><span id="line-86">        <span class="n">verb</span> <span class="o">=</span> <span class="n">verb</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span id="line-87">
+</span><span id="line-88">        <span class="c1"># Check if verb is in our known list</span>
+</span><span id="line-89">        <span class="k">if</span> <span class="n">verb</span> <span class="ow">in</span> <span class="n">CRUD_VERBS</span><span class="p">:</span>
+</span><span id="line-90">            <span class="c1"># Check if this is a collection operation</span>
+</span><span id="line-91">            <span class="n">is_collection</span> <span class="o">=</span> <span class="n">verb</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"list"</span><span class="p">,</span> <span class="s2">"create"</span><span class="p">,</span> <span class="s2">"search"</span><span class="p">,</span> <span class="s2">"query"</span><span class="p">)</span>
+</span><span id="line-92">
+</span><span id="line-93">            <span class="c1"># Check if resource is plural (simple heuristic)</span>
+</span><span id="line-94">            <span class="n">is_plural</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"s"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_collection</span>
+</span><span id="line-95">
+</span><span id="line-96">            <span class="k">return</span> <span class="n">ParsedFunctionName</span><span class="p">(</span>
+</span><span id="line-97">                <span class="n">verb</span><span class="o">=</span><span class="n">verb</span><span class="p">,</span>
+</span><span id="line-98">                <span class="n">resource</span><span class="o">=</span><span class="n">resource</span><span class="p">,</span>
+</span><span id="line-99">                <span class="n">is_plural</span><span class="o">=</span><span class="n">is_plural</span><span class="p">,</span>
+</span><span id="line-100">                <span class="n">is_collection_operation</span><span class="o">=</span><span class="n">is_collection</span><span class="p">,</span>
+</span><span id="line-101">            <span class="p">)</span>
+</span><span id="line-102">
+</span><span id="line-103">    <span class="c1"># Fallback: treat whole name as resource</span>
+</span><span id="line-104">    <span class="k">return</span> <span class="n">ParsedFunctionName</span><span class="p">(</span>
+</span><span id="line-105">        <span class="n">verb</span><span class="o">=</span><span class="s2">""</span><span class="p">,</span>
+</span><span id="line-106">        <span class="n">resource</span><span class="o">=</span><span class="n">func_name</span><span class="p">,</span>
+</span><span id="line-107">        <span class="n">is_plural</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="line-108">        <span class="n">is_collection_operation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+</span><span id="line-109">    <span class="p">)</span></div>
 
-</span><span id="line-109">
 </span><span id="line-110">
+</span><span id="line-111">
 <div class="viewcode-block" id="infer_http_method">
 <a class="viewcode-back" href="../../_autosummary/qh.conventions.html#qh.conventions.infer_http_method">[docs]</a>
-</span><span id="line-111"><span class="k">def</span><span class="w"> </span><span class="nf">infer_http_method</span><span class="p">(</span>
-</span><span id="line-112">    <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parsed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ParsedFunctionName</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="line-113"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-114"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-115"><span class="sd">    Infer HTTP method from function name.</span>
-</span><span id="line-116">
-</span><span id="line-117"><span class="sd">    Args:</span>
-</span><span id="line-118"><span class="sd">        func_name: Function name</span>
-</span><span id="line-119"><span class="sd">        parsed: Optional pre-parsed function name</span>
-</span><span id="line-120">
-</span><span id="line-121"><span class="sd">    Returns:</span>
-</span><span id="line-122"><span class="sd">        HTTP method ('GET', 'POST', 'PUT', 'PATCH', 'DELETE')</span>
-</span><span id="line-123">
-</span><span id="line-124"><span class="sd">    Examples:</span>
-</span><span id="line-125">
-</span><span id="line-126"><span class="sd">        &gt;&gt;&gt; infer_http_method('get_user')</span>
-</span><span id="line-127"><span class="sd">        'GET'</span>
-</span><span id="line-128"><span class="sd">        &gt;&gt;&gt; infer_http_method('create_user')</span>
-</span><span id="line-129"><span class="sd">        'POST'</span>
-</span><span id="line-130"><span class="sd">        &gt;&gt;&gt; infer_http_method('update_user')</span>
-</span><span id="line-131"><span class="sd">        'PUT'</span>
-</span><span id="line-132"><span class="sd">        &gt;&gt;&gt; infer_http_method('delete_user')</span>
-</span><span id="line-133"><span class="sd">        'DELETE'</span>
-</span><span id="line-134"><span class="sd">    """</span>
-</span><span id="line-135">    <span class="k">if</span> <span class="n">parsed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-136">        <span class="n">parsed</span> <span class="o">=</span> <span class="n">parse_function_name</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
-</span><span id="line-137">
-</span><span id="line-138">    <span class="k">if</span> <span class="n">parsed</span><span class="o">.</span><span class="n">verb</span> <span class="ow">in</span> <span class="n">CRUD_VERBS</span><span class="p">:</span>
-</span><span id="line-139">        <span class="k">return</span> <span class="n">CRUD_VERBS</span><span class="p">[</span><span class="n">parsed</span><span class="o">.</span><span class="n">verb</span><span class="p">]</span>
-</span><span id="line-140">
-</span><span id="line-141">    <span class="c1"># Default to POST for unknown verbs</span>
-</span><span id="line-142">    <span class="k">return</span> <span class="s2">"POST"</span></div>
+</span><span id="line-112"><span class="k">def</span><span class="w"> </span><span class="nf">infer_http_method</span><span class="p">(</span>
+</span><span id="line-113">    <span class="n">func_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">parsed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ParsedFunctionName</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span id="line-114"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-115"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-116"><span class="sd">    Infer HTTP method from function name.</span>
+</span><span id="line-117">
+</span><span id="line-118"><span class="sd">    Args:</span>
+</span><span id="line-119"><span class="sd">        func_name: Function name</span>
+</span><span id="line-120"><span class="sd">        parsed: Optional pre-parsed function name</span>
+</span><span id="line-121">
+</span><span id="line-122"><span class="sd">    Returns:</span>
+</span><span id="line-123"><span class="sd">        HTTP method ('GET', 'POST', 'PUT', 'PATCH', 'DELETE')</span>
+</span><span id="line-124">
+</span><span id="line-125"><span class="sd">    Examples:</span>
+</span><span id="line-126">
+</span><span id="line-127"><span class="sd">        &gt;&gt;&gt; infer_http_method('get_user')</span>
+</span><span id="line-128"><span class="sd">        'GET'</span>
+</span><span id="line-129"><span class="sd">        &gt;&gt;&gt; infer_http_method('create_user')</span>
+</span><span id="line-130"><span class="sd">        'POST'</span>
+</span><span id="line-131"><span class="sd">        &gt;&gt;&gt; infer_http_method('update_user')</span>
+</span><span id="line-132"><span class="sd">        'PUT'</span>
+</span><span id="line-133"><span class="sd">        &gt;&gt;&gt; infer_http_method('delete_user')</span>
+</span><span id="line-134"><span class="sd">        'DELETE'</span>
+</span><span id="line-135"><span class="sd">    """</span>
+</span><span id="line-136">    <span class="k">if</span> <span class="n">parsed</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-137">        <span class="n">parsed</span> <span class="o">=</span> <span class="n">parse_function_name</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
+</span><span id="line-138">
+</span><span id="line-139">    <span class="k">if</span> <span class="n">parsed</span><span class="o">.</span><span class="n">verb</span> <span class="ow">in</span> <span class="n">CRUD_VERBS</span><span class="p">:</span>
+</span><span id="line-140">        <span class="k">return</span> <span class="n">CRUD_VERBS</span><span class="p">[</span><span class="n">parsed</span><span class="o">.</span><span class="n">verb</span><span class="p">]</span>
+</span><span id="line-141">
+</span><span id="line-142">    <span class="c1"># Default to POST for unknown verbs</span>
+</span><span id="line-143">    <span class="k">return</span> <span class="s2">"POST"</span></div>
 
-</span><span id="line-143">
 </span><span id="line-144">
+</span><span id="line-145">
 <div class="viewcode-block" id="singularize">
 <a class="viewcode-back" href="../../_autosummary/qh.conventions.html#qh.conventions.singularize">[docs]</a>
-</span><span id="line-145"><span class="k">def</span><span class="w"> </span><span class="nf">singularize</span><span class="p">(</span><span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-146"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-147"><span class="sd">    Simple singularization (just removes trailing 's' for now).</span>
-</span><span id="line-148">
-</span><span id="line-149"><span class="sd">    More sophisticated rules can be added later.</span>
-</span><span id="line-150"><span class="sd">    """</span>
-</span><span id="line-151">    <span class="k">if</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"ies"</span><span class="p">):</span>
-</span><span id="line-152">        <span class="k">return</span> <span class="n">word</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s2">"y"</span>
-</span><span id="line-153">    <span class="k">elif</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"ses"</span><span class="p">):</span>
-</span><span id="line-154">        <span class="k">return</span> <span class="n">word</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
-</span><span id="line-155">    <span class="k">elif</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"s"</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"ss"</span><span class="p">):</span>
-</span><span id="line-156">        <span class="k">return</span> <span class="n">word</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-</span><span id="line-157">    <span class="k">return</span> <span class="n">word</span></div>
+</span><span id="line-146"><span class="k">def</span><span class="w"> </span><span class="nf">singularize</span><span class="p">(</span><span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-147"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-148"><span class="sd">    Simple singularization (just removes trailing 's' for now).</span>
+</span><span id="line-149">
+</span><span id="line-150"><span class="sd">    More sophisticated rules can be added later.</span>
+</span><span id="line-151"><span class="sd">    """</span>
+</span><span id="line-152">    <span class="k">if</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"ies"</span><span class="p">):</span>
+</span><span id="line-153">        <span class="k">return</span> <span class="n">word</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span> <span class="o">+</span> <span class="s2">"y"</span>
+</span><span id="line-154">    <span class="k">elif</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"ses"</span><span class="p">):</span>
+</span><span id="line-155">        <span class="k">return</span> <span class="n">word</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+</span><span id="line-156">    <span class="k">elif</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"s"</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"ss"</span><span class="p">):</span>
+</span><span id="line-157">        <span class="k">return</span> <span class="n">word</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span id="line-158">    <span class="k">return</span> <span class="n">word</span></div>
 
-</span><span id="line-158">
 </span><span id="line-159">
+</span><span id="line-160">
 <div class="viewcode-block" id="pluralize">
 <a class="viewcode-back" href="../../_autosummary/qh.conventions.html#qh.conventions.pluralize">[docs]</a>
-</span><span id="line-160"><span class="k">def</span><span class="w"> </span><span class="nf">pluralize</span><span class="p">(</span><span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-161"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-162"><span class="sd">    Simple pluralization.</span>
-</span><span id="line-163">
-</span><span id="line-164"><span class="sd">    More sophisticated rules can be added later.</span>
-</span><span id="line-165"><span class="sd">    """</span>
-</span><span id="line-166">    <span class="k">if</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"y"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">word</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s2">"aeiou"</span><span class="p">:</span>
-</span><span id="line-167">        <span class="k">return</span> <span class="n">word</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">"ies"</span>
-</span><span id="line-168">    <span class="k">elif</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"s"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"z"</span><span class="p">):</span>
-</span><span id="line-169">        <span class="k">return</span> <span class="n">word</span> <span class="o">+</span> <span class="s2">"es"</span>
-</span><span id="line-170">    <span class="k">else</span><span class="p">:</span>
-</span><span id="line-171">        <span class="k">return</span> <span class="n">word</span> <span class="o">+</span> <span class="s2">"s"</span></div>
+</span><span id="line-161"><span class="k">def</span><span class="w"> </span><span class="nf">pluralize</span><span class="p">(</span><span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-162"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-163"><span class="sd">    Simple pluralization.</span>
+</span><span id="line-164">
+</span><span id="line-165"><span class="sd">    More sophisticated rules can be added later.</span>
+</span><span id="line-166"><span class="sd">    """</span>
+</span><span id="line-167">    <span class="k">if</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"y"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">word</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s2">"aeiou"</span><span class="p">:</span>
+</span><span id="line-168">        <span class="k">return</span> <span class="n">word</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">"ies"</span>
+</span><span id="line-169">    <span class="k">elif</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"s"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"x"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">word</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"z"</span><span class="p">):</span>
+</span><span id="line-170">        <span class="k">return</span> <span class="n">word</span> <span class="o">+</span> <span class="s2">"es"</span>
+</span><span id="line-171">    <span class="k">else</span><span class="p">:</span>
+</span><span id="line-172">        <span class="k">return</span> <span class="n">word</span> <span class="o">+</span> <span class="s2">"s"</span></div>
 
-</span><span id="line-172">
 </span><span id="line-173">
+</span><span id="line-174">
 <div class="viewcode-block" id="get_id_params">
 <a class="viewcode-back" href="../../_autosummary/qh.conventions.html#qh.conventions.get_id_params">[docs]</a>
-</span><span id="line-174"><span class="k">def</span><span class="w"> </span><span class="nf">get_id_params</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-</span><span id="line-175"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-176"><span class="sd">    Extract parameters that look like IDs from function signature.</span>
-</span><span id="line-177">
-</span><span id="line-178"><span class="sd">    ID parameters typically:</span>
-</span><span id="line-179">
-</span><span id="line-180"><span class="sd">    - End with '_id'</span>
-</span><span id="line-181"><span class="sd">    - Are named 'id'</span>
-</span><span id="line-182"><span class="sd">    - Are the first parameter (for item operations)</span>
-</span><span id="line-183">
-</span><span id="line-184"><span class="sd">    Args:</span>
-</span><span id="line-185"><span class="sd">        func: Function to analyze</span>
-</span><span id="line-186">
-</span><span id="line-187"><span class="sd">    Returns:</span>
-</span><span id="line-188"><span class="sd">        List of parameter names that are likely IDs</span>
-</span><span id="line-189"><span class="sd">    """</span>
-</span><span id="line-190">    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-</span><span id="line-191">    <span class="n">id_params</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="line-192">
-</span><span id="line-193">    <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="line-194">        <span class="c1"># Check if it's an ID parameter</span>
-</span><span id="line-195">        <span class="k">if</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">"id"</span> <span class="ow">or</span> <span class="n">param_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"_id"</span><span class="p">):</span>
-</span><span id="line-196">            <span class="n">id_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
-</span><span id="line-197">        <span class="c1"># Check if it's a key parameter (for stores)</span>
-</span><span id="line-198">        <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">"key"</span><span class="p">:</span>
-</span><span id="line-199">            <span class="n">id_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
-</span><span id="line-200">
-</span><span id="line-201">    <span class="k">return</span> <span class="n">id_params</span></div>
+</span><span id="line-175"><span class="k">def</span><span class="w"> </span><span class="nf">get_id_params</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span id="line-176"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-177"><span class="sd">    Extract parameters that look like IDs from function signature.</span>
+</span><span id="line-178">
+</span><span id="line-179"><span class="sd">    ID parameters typically:</span>
+</span><span id="line-180">
+</span><span id="line-181"><span class="sd">    - End with '_id'</span>
+</span><span id="line-182"><span class="sd">    - Are named 'id'</span>
+</span><span id="line-183"><span class="sd">    - Are the first parameter (for item operations)</span>
+</span><span id="line-184">
+</span><span id="line-185"><span class="sd">    Args:</span>
+</span><span id="line-186"><span class="sd">        func: Function to analyze</span>
+</span><span id="line-187">
+</span><span id="line-188"><span class="sd">    Returns:</span>
+</span><span id="line-189"><span class="sd">        List of parameter names that are likely IDs</span>
+</span><span id="line-190"><span class="sd">    """</span>
+</span><span id="line-191">    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+</span><span id="line-192">    <span class="n">id_params</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-193">
+</span><span id="line-194">    <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="line-195">        <span class="c1"># Check if it's an ID parameter</span>
+</span><span id="line-196">        <span class="k">if</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">"id"</span> <span class="ow">or</span> <span class="n">param_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"_id"</span><span class="p">):</span>
+</span><span id="line-197">            <span class="n">id_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+</span><span id="line-198">        <span class="c1"># Check if it's a key parameter (for stores)</span>
+</span><span id="line-199">        <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s2">"key"</span><span class="p">:</span>
+</span><span id="line-200">            <span class="n">id_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+</span><span id="line-201">
+</span><span id="line-202">    <span class="k">return</span> <span class="n">id_params</span></div>
 
-</span><span id="line-202">
 </span><span id="line-203">
+</span><span id="line-204">
 <div class="viewcode-block" id="infer_path_from_function">
 <a class="viewcode-back" href="../../_autosummary/qh.conventions.html#qh.conventions.infer_path_from_function">[docs]</a>
-</span><span id="line-204"><span class="k">def</span><span class="w"> </span><span class="nf">infer_path_from_function</span><span class="p">(</span>
-</span><span id="line-205">    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
-</span><span id="line-206">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-207">    <span class="n">use_plurals</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-208">    <span class="n">base_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
-</span><span id="line-209"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="line-210"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-211"><span class="sd">    Infer RESTful path from function name and signature.</span>
-</span><span id="line-212">
-</span><span id="line-213"><span class="sd">    Args:</span>
-</span><span id="line-214"><span class="sd">        func: Function to analyze</span>
-</span><span id="line-215"><span class="sd">        use_plurals: Whether to use plural resource names for collections</span>
-</span><span id="line-216"><span class="sd">        base_path: Base path to prepend</span>
-</span><span id="line-217">
-</span><span id="line-218"><span class="sd">    Returns:</span>
-</span><span id="line-219"><span class="sd">        Inferred path</span>
-</span><span id="line-220">
-</span><span id="line-221"><span class="sd">    Examples:</span>
-</span><span id="line-222">
-</span><span id="line-223"><span class="sd">        &gt;&gt;&gt; def get_user(user_id: str): pass</span>
-</span><span id="line-224"><span class="sd">        &gt;&gt;&gt; infer_path_from_function(get_user)</span>
-</span><span id="line-225"><span class="sd">        '/users/{user_id}'</span>
-</span><span id="line-226">
-</span><span id="line-227"><span class="sd">        &gt;&gt;&gt; def list_users(limit: int = 100): pass</span>
-</span><span id="line-228"><span class="sd">        &gt;&gt;&gt; infer_path_from_function(list_users)</span>
-</span><span id="line-229"><span class="sd">        '/users'</span>
-</span><span id="line-230">
-</span><span id="line-231"><span class="sd">        &gt;&gt;&gt; def create_user(name: str, email: str): pass</span>
-</span><span id="line-232"><span class="sd">        &gt;&gt;&gt; infer_path_from_function(create_user)</span>
-</span><span id="line-233"><span class="sd">        '/users'</span>
-</span><span id="line-234">
-</span><span id="line-235"><span class="sd">        &gt;&gt;&gt; def update_user(user_id: str, name: str): pass</span>
-</span><span id="line-236"><span class="sd">        &gt;&gt;&gt; infer_path_from_function(update_user)</span>
-</span><span id="line-237"><span class="sd">        '/users/{user_id}'</span>
-</span><span id="line-238"><span class="sd">    """</span>
-</span><span id="line-239">    <span class="n">func_name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span>
-</span><span id="line-240">    <span class="n">parsed</span> <span class="o">=</span> <span class="n">parse_function_name</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
-</span><span id="line-241">    <span class="n">id_params</span> <span class="o">=</span> <span class="n">get_id_params</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-</span><span id="line-242">
-</span><span id="line-243">    <span class="c1"># For collection operations (list, create, search), don't include ID in path</span>
-</span><span id="line-244">    <span class="c1"># IDs for create operations go in the request body, not the path</span>
-</span><span id="line-245">    <span class="k">if</span> <span class="n">parsed</span><span class="o">.</span><span class="n">is_collection_operation</span><span class="p">:</span>
-</span><span id="line-246">        <span class="n">id_params</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span id="line-247">
-</span><span id="line-248">    <span class="c1"># Determine resource name (plural or singular)</span>
-</span><span id="line-249">    <span class="n">resource</span> <span class="o">=</span> <span class="n">parsed</span><span class="o">.</span><span class="n">resource</span>
-</span><span id="line-250">
-</span><span id="line-251">    <span class="k">if</span> <span class="n">use_plurals</span><span class="p">:</span>
-</span><span id="line-252">        <span class="c1"># Collection operations use plural</span>
-</span><span id="line-253">        <span class="k">if</span> <span class="n">parsed</span><span class="o">.</span><span class="n">is_collection_operation</span><span class="p">:</span>
-</span><span id="line-254">            <span class="n">resource</span> <span class="o">=</span> <span class="n">pluralize</span><span class="p">(</span><span class="n">singularize</span><span class="p">(</span><span class="n">resource</span><span class="p">))</span>  <span class="c1"># Normalize first</span>
-</span><span id="line-255">        <span class="c1"># Item operations use plural base + ID</span>
-</span><span id="line-256">        <span class="k">elif</span> <span class="n">id_params</span><span class="p">:</span>
-</span><span id="line-257">            <span class="n">resource</span> <span class="o">=</span> <span class="n">pluralize</span><span class="p">(</span><span class="n">singularize</span><span class="p">(</span><span class="n">resource</span><span class="p">))</span>
-</span><span id="line-258">        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-259">            <span class="c1"># No clear pattern, use as-is</span>
-</span><span id="line-260">            <span class="k">pass</span>
-</span><span id="line-261">
-</span><span id="line-262">    <span class="c1"># Build path</span>
-</span><span id="line-263">    <span class="n">path_parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">base_path</span><span class="p">]</span> <span class="k">if</span> <span class="n">base_path</span> <span class="k">else</span> <span class="p">[]</span>
-</span><span id="line-264">
-</span><span id="line-265">    <span class="c1"># Add resource</span>
-</span><span id="line-266">    <span class="n">path_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resource</span><span class="p">)</span>
-</span><span id="line-267">
-</span><span id="line-268">    <span class="c1"># Add ID parameters to path</span>
-</span><span id="line-269">    <span class="k">for</span> <span class="n">id_param</span> <span class="ow">in</span> <span class="n">id_params</span><span class="p">:</span>
-</span><span id="line-270">        <span class="n">path_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">{{</span><span class="si">{</span><span class="n">id_param</span><span class="si">}</span><span class="se">}}</span><span class="s2">"</span><span class="p">)</span>
-</span><span id="line-271">
-</span><span id="line-272">    <span class="n">path</span> <span class="o">=</span> <span class="s2">"/"</span> <span class="o">+</span> <span class="s2">"/"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">path_parts</span> <span class="k">if</span> <span class="n">p</span><span class="p">)</span>
-</span><span id="line-273">
-</span><span id="line-274">    <span class="k">return</span> <span class="n">path</span></div>
+</span><span id="line-205"><span class="k">def</span><span class="w"> </span><span class="nf">infer_path_from_function</span><span class="p">(</span>
+</span><span id="line-206">    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+</span><span id="line-207">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-208">    <span class="n">use_plurals</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-209">    <span class="n">base_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+</span><span id="line-210"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span id="line-211"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-212"><span class="sd">    Infer RESTful path from function name and signature.</span>
+</span><span id="line-213">
+</span><span id="line-214"><span class="sd">    Args:</span>
+</span><span id="line-215"><span class="sd">        func: Function to analyze</span>
+</span><span id="line-216"><span class="sd">        use_plurals: Whether to use plural resource names for collections</span>
+</span><span id="line-217"><span class="sd">        base_path: Base path to prepend</span>
+</span><span id="line-218">
+</span><span id="line-219"><span class="sd">    Returns:</span>
+</span><span id="line-220"><span class="sd">        Inferred path</span>
+</span><span id="line-221">
+</span><span id="line-222"><span class="sd">    Examples:</span>
+</span><span id="line-223">
+</span><span id="line-224"><span class="sd">        &gt;&gt;&gt; def get_user(user_id: str): pass</span>
+</span><span id="line-225"><span class="sd">        &gt;&gt;&gt; infer_path_from_function(get_user)</span>
+</span><span id="line-226"><span class="sd">        '/users/{user_id}'</span>
+</span><span id="line-227">
+</span><span id="line-228"><span class="sd">        &gt;&gt;&gt; def list_users(limit: int = 100): pass</span>
+</span><span id="line-229"><span class="sd">        &gt;&gt;&gt; infer_path_from_function(list_users)</span>
+</span><span id="line-230"><span class="sd">        '/users'</span>
+</span><span id="line-231">
+</span><span id="line-232"><span class="sd">        &gt;&gt;&gt; def create_user(name: str, email: str): pass</span>
+</span><span id="line-233"><span class="sd">        &gt;&gt;&gt; infer_path_from_function(create_user)</span>
+</span><span id="line-234"><span class="sd">        '/users'</span>
+</span><span id="line-235">
+</span><span id="line-236"><span class="sd">        &gt;&gt;&gt; def update_user(user_id: str, name: str): pass</span>
+</span><span id="line-237"><span class="sd">        &gt;&gt;&gt; infer_path_from_function(update_user)</span>
+</span><span id="line-238"><span class="sd">        '/users/{user_id}'</span>
+</span><span id="line-239"><span class="sd">    """</span>
+</span><span id="line-240">    <span class="n">func_name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span>
+</span><span id="line-241">    <span class="n">parsed</span> <span class="o">=</span> <span class="n">parse_function_name</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
+</span><span id="line-242">    <span class="n">id_params</span> <span class="o">=</span> <span class="n">get_id_params</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+</span><span id="line-243">
+</span><span id="line-244">    <span class="c1"># For collection operations (list, create, search), don't include ID in path</span>
+</span><span id="line-245">    <span class="c1"># IDs for create operations go in the request body, not the path</span>
+</span><span id="line-246">    <span class="k">if</span> <span class="n">parsed</span><span class="o">.</span><span class="n">is_collection_operation</span><span class="p">:</span>
+</span><span id="line-247">        <span class="n">id_params</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="line-248">
+</span><span id="line-249">    <span class="c1"># Determine resource name (plural or singular)</span>
+</span><span id="line-250">    <span class="n">resource</span> <span class="o">=</span> <span class="n">parsed</span><span class="o">.</span><span class="n">resource</span>
+</span><span id="line-251">
+</span><span id="line-252">    <span class="k">if</span> <span class="n">use_plurals</span><span class="p">:</span>
+</span><span id="line-253">        <span class="c1"># Collection operations use plural</span>
+</span><span id="line-254">        <span class="k">if</span> <span class="n">parsed</span><span class="o">.</span><span class="n">is_collection_operation</span><span class="p">:</span>
+</span><span id="line-255">            <span class="n">resource</span> <span class="o">=</span> <span class="n">pluralize</span><span class="p">(</span><span class="n">singularize</span><span class="p">(</span><span class="n">resource</span><span class="p">))</span>  <span class="c1"># Normalize first</span>
+</span><span id="line-256">        <span class="c1"># Item operations use plural base + ID</span>
+</span><span id="line-257">        <span class="k">elif</span> <span class="n">id_params</span><span class="p">:</span>
+</span><span id="line-258">            <span class="n">resource</span> <span class="o">=</span> <span class="n">pluralize</span><span class="p">(</span><span class="n">singularize</span><span class="p">(</span><span class="n">resource</span><span class="p">))</span>
+</span><span id="line-259">        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-260">            <span class="c1"># No clear pattern, use as-is</span>
+</span><span id="line-261">            <span class="k">pass</span>
+</span><span id="line-262">
+</span><span id="line-263">    <span class="c1"># Build path</span>
+</span><span id="line-264">    <span class="n">path_parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">base_path</span><span class="p">]</span> <span class="k">if</span> <span class="n">base_path</span> <span class="k">else</span> <span class="p">[]</span>
+</span><span id="line-265">
+</span><span id="line-266">    <span class="c1"># Add resource</span>
+</span><span id="line-267">    <span class="n">path_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resource</span><span class="p">)</span>
+</span><span id="line-268">
+</span><span id="line-269">    <span class="c1"># Add ID parameters to path</span>
+</span><span id="line-270">    <span class="k">for</span> <span class="n">id_param</span> <span class="ow">in</span> <span class="n">id_params</span><span class="p">:</span>
+</span><span id="line-271">        <span class="n">path_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">{{</span><span class="si">{</span><span class="n">id_param</span><span class="si">}</span><span class="se">}}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="line-272">
+</span><span id="line-273">    <span class="n">path</span> <span class="o">=</span> <span class="s2">"/"</span> <span class="o">+</span> <span class="s2">"/"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"/"</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">path_parts</span> <span class="k">if</span> <span class="n">p</span><span class="p">)</span>
+</span><span id="line-274">
+</span><span id="line-275">    <span class="k">return</span> <span class="n">path</span></div>
 
-</span><span id="line-275">
 </span><span id="line-276">
+</span><span id="line-277">
 <div class="viewcode-block" id="infer_route_config">
 <a class="viewcode-back" href="../../_autosummary/qh.conventions.html#qh.conventions.infer_route_config">[docs]</a>
-</span><span id="line-277"><span class="k">def</span><span class="w"> </span><span class="nf">infer_route_config</span><span class="p">(</span>
-</span><span id="line-278">    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
-</span><span id="line-279">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-280">    <span class="n">use_conventions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-281">    <span class="n">base_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
-</span><span id="line-282">    <span class="n">use_plurals</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span id="line-283"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-</span><span id="line-284"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-285"><span class="sd">    Infer complete route configuration from function.</span>
-</span><span id="line-286">
-</span><span id="line-287"><span class="sd">    Args:</span>
-</span><span id="line-288"><span class="sd">        func: Function to analyze</span>
-</span><span id="line-289"><span class="sd">        use_conventions: Whether to use conventions (if False, returns empty dict)</span>
-</span><span id="line-290"><span class="sd">        base_path: Base path to prepend</span>
-</span><span id="line-291"><span class="sd">        use_plurals: Whether to use plural resource names</span>
-</span><span id="line-292">
-</span><span id="line-293"><span class="sd">    Returns:</span>
-</span><span id="line-294"><span class="sd">        Route configuration dict</span>
-</span><span id="line-295"><span class="sd">    """</span>
-</span><span id="line-296">    <span class="k">if</span> <span class="ow">not</span> <span class="n">use_conventions</span><span class="p">:</span>
-</span><span id="line-297">        <span class="k">return</span> <span class="p">{}</span>
-</span><span id="line-298">
-</span><span id="line-299">    <span class="n">func_name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span>
-</span><span id="line-300">    <span class="n">parsed</span> <span class="o">=</span> <span class="n">parse_function_name</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
-</span><span id="line-301">
-</span><span id="line-302">    <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="line-303">
-</span><span id="line-304">    <span class="c1"># Infer path</span>
-</span><span id="line-305">    <span class="n">config</span><span class="p">[</span><span class="s2">"path"</span><span class="p">]</span> <span class="o">=</span> <span class="n">infer_path_from_function</span><span class="p">(</span>
-</span><span id="line-306">        <span class="n">func</span><span class="p">,</span>
-</span><span id="line-307">        <span class="n">use_plurals</span><span class="o">=</span><span class="n">use_plurals</span><span class="p">,</span>
-</span><span id="line-308">        <span class="n">base_path</span><span class="o">=</span><span class="n">base_path</span><span class="p">,</span>
-</span><span id="line-309">    <span class="p">)</span>
-</span><span id="line-310">
-</span><span id="line-311">    <span class="c1"># Infer HTTP method</span>
-</span><span id="line-312">    <span class="n">http_method</span> <span class="o">=</span> <span class="n">infer_http_method</span><span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="n">parsed</span><span class="p">)</span>
-</span><span id="line-313">    <span class="n">config</span><span class="p">[</span><span class="s2">"methods"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">http_method</span><span class="p">]</span>
-</span><span id="line-314">
-</span><span id="line-315">    <span class="c1"># For GET requests, non-path parameters should come from query string</span>
-</span><span id="line-316">    <span class="k">if</span> <span class="n">http_method</span> <span class="o">==</span> <span class="s2">"GET"</span><span class="p">:</span>
-</span><span id="line-317">        <span class="kn">from</span><span class="w"> </span><span class="nn">qh.rules</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransformSpec</span><span class="p">,</span> <span class="n">HttpLocation</span>
-</span><span id="line-318">        <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
-</span><span id="line-319">        <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</span><span id="line-278"><span class="k">def</span><span class="w"> </span><span class="nf">infer_route_config</span><span class="p">(</span>
+</span><span id="line-279">    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+</span><span id="line-280">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-281">    <span class="n">use_conventions</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-282">    <span class="n">base_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+</span><span id="line-283">    <span class="n">use_plurals</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span id="line-284"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+</span><span id="line-285"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-286"><span class="sd">    Infer complete route configuration from function.</span>
+</span><span id="line-287">
+</span><span id="line-288"><span class="sd">    Args:</span>
+</span><span id="line-289"><span class="sd">        func: Function to analyze</span>
+</span><span id="line-290"><span class="sd">        use_conventions: Whether to use conventions (if False, returns empty dict)</span>
+</span><span id="line-291"><span class="sd">        base_path: Base path to prepend</span>
+</span><span id="line-292"><span class="sd">        use_plurals: Whether to use plural resource names</span>
+</span><span id="line-293">
+</span><span id="line-294"><span class="sd">    Returns:</span>
+</span><span id="line-295"><span class="sd">        Route configuration dict</span>
+</span><span id="line-296"><span class="sd">    """</span>
+</span><span id="line-297">    <span class="k">if</span> <span class="ow">not</span> <span class="n">use_conventions</span><span class="p">:</span>
+</span><span id="line-298">        <span class="k">return</span> <span class="p">{}</span>
+</span><span id="line-299">
+</span><span id="line-300">    <span class="n">func_name</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span>
+</span><span id="line-301">    <span class="n">parsed</span> <span class="o">=</span> <span class="n">parse_function_name</span><span class="p">(</span><span class="n">func_name</span><span class="p">)</span>
+</span><span id="line-302">
+</span><span id="line-303">    <span class="n">config</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="line-304">
+</span><span id="line-305">    <span class="c1"># Infer path</span>
+</span><span id="line-306">    <span class="n">config</span><span class="p">[</span><span class="s2">"path"</span><span class="p">]</span> <span class="o">=</span> <span class="n">infer_path_from_function</span><span class="p">(</span>
+</span><span id="line-307">        <span class="n">func</span><span class="p">,</span>
+</span><span id="line-308">        <span class="n">use_plurals</span><span class="o">=</span><span class="n">use_plurals</span><span class="p">,</span>
+</span><span id="line-309">        <span class="n">base_path</span><span class="o">=</span><span class="n">base_path</span><span class="p">,</span>
+</span><span id="line-310">    <span class="p">)</span>
+</span><span id="line-311">
+</span><span id="line-312">    <span class="c1"># Infer HTTP method</span>
+</span><span id="line-313">    <span class="n">http_method</span> <span class="o">=</span> <span class="n">infer_http_method</span><span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="n">parsed</span><span class="p">)</span>
+</span><span id="line-314">    <span class="n">config</span><span class="p">[</span><span class="s2">"methods"</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">http_method</span><span class="p">]</span>
+</span><span id="line-315">
+</span><span id="line-316">    <span class="c1"># For GET requests, non-path parameters should come from query string</span>
+</span><span id="line-317">    <span class="k">if</span> <span class="n">http_method</span> <span class="o">==</span> <span class="s2">"GET"</span><span class="p">:</span>
+</span><span id="line-318">        <span class="kn">from</span><span class="w"> </span><span class="nn">qh.rules</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransformSpec</span><span class="p">,</span> <span class="n">HttpLocation</span>
+</span><span id="line-319">        <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
 </span><span id="line-320">        <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_type_hints</span>
 </span><span id="line-321">
 </span><span id="line-322">        <span class="c1"># Get path parameters</span>
-</span><span id="line-323">        <span class="n">path_params</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\{(\w+)\}"</span><span class="p">,</span> <span class="n">config</span><span class="p">[</span><span class="s2">"path"</span><span class="p">]))</span>
+</span><span id="line-323">        <span class="n">path_params</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">path_param_names</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">"path"</span><span class="p">]))</span>
 </span><span id="line-324">
 </span><span id="line-325">        <span class="c1"># Get function parameters and their types</span>
 </span><span id="line-326">        <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
@@ -641,12 +642,12 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=f91d8841"></script>
+    <script src="../../_static/documentation_options.js?v=5d650c58"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="../../_static/copybutton.js?v=fd10adb8"></script>
-    <script defer="defer" src="../../_static/theme.js?v=5db23cf8"></script>
+    <script defer="defer" src="../../_static/theme.js?v=49cc6205"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 

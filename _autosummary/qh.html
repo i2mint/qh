@@ -29,7 +29,7 @@
 <meta content="qh" property="og:title"/>
 <meta content="qh" name="twitter:title"/>
 <link href="../_static/pygments.css?v=d75fae25" rel="stylesheet" type="text/css"/>
-<link href="../_static/theme.css?v=d6d7c91b" rel="stylesheet" type="text/css"/>
+<link href="../_static/theme.css?v=009055c6" rel="stylesheet" type="text/css"/>
 <link href="../_static/sphinx_autodoc_typehints.css?v=057ac668" rel="stylesheet" type="text/css"/>
 <link href="../_static/copybutton.css?v=76b2166b" rel="stylesheet" type="text/css"/>
 <link href="../_static/epythet.css?v=4eca2ba3" rel="stylesheet" type="text/css"/>
@@ -96,6 +96,7 @@
 <li class="toctree-l3"><a class="reference internal" href="qh.errors.html">qh.errors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qh.jsclient.html">qh.jsclient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qh.openapi.html">qh.openapi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qh.paths.html">qh.paths</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qh.rules.html">qh.rules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qh.stores_qh.html">qh.stores_qh</a></li>
 <li class="toctree-l3"><a class="reference internal" href="qh.testing.html">qh.testing</a></li>
@@ -2120,16 +2121,19 @@ If None, uses au’s default from config</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="qh.openapi.html#module-qh.openapi" title="qh.openapi"><code class="xref py py-obj docutils literal notranslate"><span class="pre">openapi</span></code></a></p></td>
 <td><p>OpenAPI generation for qh — including JSON Schema derived from Python type hints.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="qh.rules.html#module-qh.rules" title="qh.rules"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rules</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="qh.paths.html#module-qh.paths" title="qh.paths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">paths</span></code></a></p></td>
+<td><p>Route-path templates: <code class="docutils literal notranslate"><span class="pre">{name}</span></code> and <code class="docutils literal notranslate"><span class="pre">{name:converter}</span></code>, read as Starlette reads them.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="qh.rules.html#module-qh.rules" title="qh.rules"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rules</span></code></a></p></td>
 <td><p>Transformation rule system for qh.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="qh.stores_qh.html#module-qh.stores_qh" title="qh.stores_qh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stores_qh</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="qh.stores_qh.html#module-qh.stores_qh" title="qh.stores_qh"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stores_qh</span></code></a></p></td>
 <td><p>FastAPI service for operating on stores objects.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="qh.testing.html#module-qh.testing" title="qh.testing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">testing</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="qh.testing.html#module-qh.testing" title="qh.testing"><code class="xref py py-obj docutils literal notranslate"><span class="pre">testing</span></code></a></p></td>
 <td><p>Run a qh (or any FastAPI) app for a test: in-process, or on a real port.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="qh.types.html#module-qh.types" title="qh.types"><code class="xref py py-obj docutils literal notranslate"><span class="pre">types</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="qh.types.html#module-qh.types" title="qh.types"><code class="xref py py-obj docutils literal notranslate"><span class="pre">types</span></code></a></p></td>
 <td><p>Type registry for qh - automatic serialization/deserialization for custom types.</p></td>
 </tr>
 </tbody>
@@ -2298,11 +2302,11 @@ If None, uses au’s default from config</p></li>
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=f91d8841"></script>
+<script src="../_static/documentation_options.js?v=5d650c58"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
 <script src="../_static/copybutton.js?v=fd10adb8"></script>
-<script defer="defer" src="../_static/theme.js?v=5db23cf8"></script>
+<script defer="defer" src="../_static/theme.js?v=49cc6205"></script>
 </body>
 </html>

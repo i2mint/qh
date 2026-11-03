@@ -29,7 +29,7 @@
   <meta property="og:title" content="Index | qh" />
   <meta name="twitter:title" content="Index | qh" />
   <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d75fae25" />
-  <link rel="stylesheet" type="text/css" href="_static/theme.css?v=d6d7c91b" />
+  <link rel="stylesheet" type="text/css" href="_static/theme.css?v=009055c6" />
   <link rel="stylesheet" type="text/css" href="_static/sphinx_autodoc_typehints.css?v=057ac668" />
   <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
   <link rel="stylesheet" type="text/css" href="_static/epythet.css?v=4eca2ba3" />
@@ -126,6 +126,7 @@
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.errors.html">qh.errors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.jsclient.html">qh.jsclient</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.openapi.html">qh.openapi</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.paths.html">qh.paths</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.rules.html">qh.rules</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.stores_qh.html">qh.stores_qh</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/qh.testing.html">qh.testing</a></li>
@@ -391,6 +392,8 @@
   <h2 id="F">F</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
+      <li><a href="_autosummary/qh.paths.html#qh.paths.fill_path_params">fill_path_params() (in module qh.paths)</a>
+</li>
       <li><a href="_autosummary/qh.config.html#qh.config.ConfigBuilder.for_function">for_function() (qh.config.ConfigBuilder method)</a>
 
       <ul style="list-style-type:none">
@@ -648,14 +651,14 @@
         <li><a href="_autosummary/qh.client.html#qh.client.mk_client_from_openapi">(in module qh.client)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="_autosummary/qh.html#qh.mk_client_from_url">mk_client_from_url() (in module qh)</a>
 
       <ul style="list-style-type:none">
         <li><a href="_autosummary/qh.client.html#qh.client.mk_client_from_url">(in module qh.client)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="_autosummary/qh.base.html#qh.base.mk_fastapi_app">mk_fastapi_app() (in module qh.base)</a>
 </li>
       <li><a href="_autosummary/qh.base.html#qh.base.mk_json_egress">mk_json_egress() (in module qh.base)</a>
@@ -696,6 +699,8 @@
 </li>
         <li><a href="_autosummary/qh.openapi.html#module-qh.openapi">qh.openapi</a>
 </li>
+        <li><a href="_autosummary/qh.paths.html#module-qh.paths">qh.paths</a>
+</li>
         <li><a href="_autosummary/qh.rules.html#module-qh.rules">qh.rules</a>
 </li>
         <li><a href="_autosummary/qh.stores_qh.html#module-qh.stores_qh">qh.stores_qh</a>
@@ -735,6 +740,10 @@
 </li>
       <li><a href="_autosummary/qh.conventions.html#qh.conventions.ParsedFunctionName">ParsedFunctionName (class in qh.conventions)</a>
 </li>
+      <li><a href="_autosummary/qh.paths.html#qh.paths.path_format">path_format() (in module qh.paths)</a>
+</li>
+      <li><a href="_autosummary/qh.paths.html#qh.paths.path_param_names">path_param_names() (in module qh.paths)</a>
+</li>
       <li><a href="_autosummary/qh.conventions.html#qh.conventions.pluralize">pluralize() (in module qh.conventions)</a>
 </li>
       <li><a href="_autosummary/qh.html#qh.print_routes">print_routes() (in module qh)</a>
@@ -743,14 +752,14 @@
         <li><a href="_autosummary/qh.app.html#qh.app.print_routes">(in module qh.app)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="_autosummary/qh.html#qh.ProcessPoolTaskExecutor">ProcessPoolTaskExecutor (class in qh)</a>
 
       <ul style="list-style-type:none">
         <li><a href="_autosummary/qh.async_tasks.html#qh.async_tasks.ProcessPoolTaskExecutor">(class in qh.async_tasks)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li><a href="_autosummary/qh.types.html#qh.types.public_jsonable">public_jsonable() (in module qh.types)</a>
 </li>
       <li><a href="_autosummary/qh.types.html#qh.types.TypeHandler.python_type">python_type (qh.types.TypeHandler attribute)</a>
@@ -833,8 +842,6 @@
         <li><a href="_autosummary/qh.conventions.html#module-qh.conventions">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li>
     qh.endpoint
 
@@ -842,6 +849,8 @@
         <li><a href="_autosummary/qh.endpoint.html#module-qh.endpoint">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul style="margin-left:0;list-style-type:none">
       <li>
     qh.errors
 
@@ -861,6 +870,13 @@
 
       <ul style="list-style-type:none">
         <li><a href="_autosummary/qh.openapi.html#module-qh.openapi">module</a>
+</li>
+      </ul></li>
+      <li>
+    qh.paths
+
+      <ul style="list-style-type:none">
+        <li><a href="_autosummary/qh.paths.html#module-qh.paths">module</a>
 </li>
       </ul></li>
       <li>
@@ -1259,12 +1275,12 @@
 </footer>
     </div>
     
-    <script src="_static/documentation_options.js?v=f91d8841"></script>
+    <script src="_static/documentation_options.js?v=5d650c58"></script>
     <script src="_static/doctools.js?v=fd6eb6e6"></script>
     <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="_static/clipboard.min.js?v=a7894cd8"></script>
     <script src="_static/copybutton.js?v=fd10adb8"></script>
-    <script defer="defer" src="_static/theme.js?v=5db23cf8"></script>
+    <script defer="defer" src="_static/theme.js?v=49cc6205"></script>
     <script type="module">import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.12.1/dist/mermaid.esm.min.mjs";
 
 

@@ -20,12 +20,13 @@
 - [qh.errors](_autosummary/qh.errors.html.md): What HTTP clients learn about server-side exceptions.
 - [qh.jsclient](_autosummary/qh.jsclient.html.md): JavaScript and TypeScript client generation from OpenAPI specs.
 - [qh.openapi](_autosummary/qh.openapi.html.md): OpenAPI generation for qh — including JSON Schema derived from Python type hints.
+- [qh.paths](_autosummary/qh.paths.html.md): Route-path templates: &#96;{name}&#96; and &#96;{name:converter}&#96;, read as Starlette reads them.
 - [qh.rules](_autosummary/qh.rules.html.md): Transformation rule system for qh.
 - [qh.stores_qh](_autosummary/qh.stores_qh.html.md): FastAPI service for operating on stores objects.
 - [qh.testing](_autosummary/qh.testing.html.md): Run a qh (or any FastAPI) app for a test: in-process, or on a real port.
 - [qh.types](_autosummary/qh.types.html.md): Type registry for qh - automatic serialization/deserialization for custom types.
 - [For AI agents](ai-agents.html.md): &#96;qh&#96; ships artifacts for coding agents alongside its code. This page lists
-- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-20 02:54 UTC&#42;&#42; from commit &lt;a href="https://github.com/i2m...
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-11-03 10:53 UTC&#42;&#42; from commit &lt;a href="https://github.com/i2m...
 
 ## Optional
 

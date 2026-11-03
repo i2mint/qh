@@ -18,6 +18,7 @@
 - [qh.errors](qh.errors.html.md): What HTTP clients learn about server-side exceptions.
 - [qh.jsclient](qh.jsclient.html.md): JavaScript and TypeScript client generation from OpenAPI specs.
 - [qh.openapi](qh.openapi.html.md): OpenAPI generation for qh — including JSON Schema derived from Python type hints.
+- [qh.paths](qh.paths.html.md): Route-path templates: &#96;{name}&#96; and &#96;{name:converter}&#96;, read as Starlette reads them.
 - [qh.rules](qh.rules.html.md): Transformation rule system for qh.
 - [qh.stores_qh](qh.stores_qh.html.md): FastAPI service for operating on stores objects.
 - [qh.testing](qh.testing.html.md): Run a qh (or any FastAPI) app for a test: in-process, or on a real port.

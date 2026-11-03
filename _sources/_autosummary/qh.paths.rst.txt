@@ -1,0 +1,14 @@
+qh.paths
+========
+
+.. automodule:: qh.paths
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      fill_path_params
+      path_format
+      path_param_names
+   
