@@ -7,6 +7,8 @@ Generates client code for calling qh HTTP services from JavaScript/TypeScript ap
 from typing import Any, Dict, List, Optional
 import json
 
+from qh.paths import fill_path_params, path_param_names
+
 
 #: Origin names whose parameterised form becomes a TypeScript array.
 _SEQUENCE_ORIGINS = frozenset(
@@ -188,9 +190,9 @@ def generate_js_function(
     method_lower = method.lower()
 
     # Extract path parameters
-    import re
 
-    path_params = re.findall(r"\{(\w+)\}", path)
+    path_params = path_param_names(path)
+    path = fill_path_params(path, lambda name: "{" + name + "}")
 
     # Generate function signature
     if signature_info:
@@ -334,10 +336,10 @@ def generate_ts_method(
     Returns:
         TypeScript method source, indented for a class body
     """
-    import re
 
     method_lower = method.lower()
-    path_params = re.findall(r"\{(\w+)\}", path)
+    path_params = path_param_names(path)
+    path = fill_path_params(path, lambda name: "{" + name + "}")
     params = signature_info.get("parameters", []) if signature_info else []
     return_type = python_type_to_ts_type(
         (signature_info or {}).get("return_type", "any")

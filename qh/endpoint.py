@@ -18,6 +18,7 @@ from i2.wrapper import Wrap
 
 from qh.rules import RuleChain, TransformSpec, HttpLocation, resolve_transform
 from qh.config import RouteConfig
+from qh.paths import path_param_names
 from qh.errors import DFLT_EXPOSE_ERRORS, error_detail
 
 logger = logging.getLogger("qh")
@@ -193,12 +194,9 @@ def make_endpoint(
     is_async = inspect.iscoroutinefunction(func)
 
     # Detect path parameters from route path
-    import re
     from typing import get_type_hints
 
-    path_param_names = set()
-    if route_config.path:
-        path_param_names = set(re.findall(r"\{(\w+)\}", route_config.path))
+    route_path_params = set(path_param_names(route_config.path))
 
     # Check if this uses query params (GET-only routes without POST/PUT/PATCH)
     # Routes with POST/PUT/PATCH should use JSON body even if GET is also supported
@@ -222,7 +220,7 @@ def make_endpoint(
                 specs[param_name] = route_config.param_overrides[param_name]
             # Path parameters are extracted from the URL path, converted to their
             # annotation (a value that doesn't convert is a 422)
-            elif param_name in path_param_names:
+            elif param_name in route_path_params:
                 specs[param_name] = TransformSpec(
                     http_location=HttpLocation.PATH,
                     ingress=_mk_converter(param_name, type_hints.get(param_name, str)),
@@ -433,9 +431,8 @@ def validate_route_config(func: Callable, config: RouteConfig) -> None:
     # Validate path parameters are in function signature
     if config.path:
         # Extract {param} from path
-        import re
 
-        path_params = re.findall(r"\{(\w+)\}", config.path)
+        path_params = path_param_names(config.path)
         for param in path_params:
             if param not in param_names:
                 raise ValueError(

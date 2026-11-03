@@ -19,7 +19,6 @@ from typing import (
 )
 import inspect
 import logging
-import re
 from collections.abc import ItemsView, KeysView, ValuesView
 
 from fastapi import Body, Depends, FastAPI, HTTPException, Path, Query, Request
@@ -29,6 +28,7 @@ from starlette.concurrency import run_in_threadpool
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from qh.errors import DFLT_EXPOSE_ERRORS, error_detail
+from qh.paths import path_param_names
 
 logger = logging.getLogger("qh")
 
@@ -415,8 +415,7 @@ def _create_generic_method_endpoint(
     ``item_key`` is not among them it is an optional query parameter, passed as
     the single argument when present.
     """
-    _params = lambda text: re.findall(r"\{(\w+)(?::\w+)?\}", text)  # noqa: E731
-    route_params = _params(config.get("path", ""))
+    route_params = path_param_names(config.get("path", ""))
     extra_params = [name for name in route_params if name not in path_params]
     if len(set(path_params)) != len(path_params):
         raise ValueError(f"Duplicate path params: {path_params}")
@@ -433,7 +432,7 @@ def _create_generic_method_endpoint(
     has_item_key_query = "item_key" not in [
         *path_params,
         *extra_params,
-        *_params(base_path),
+        *path_param_names(base_path),
     ]
     if has_item_key_query:
         parameters.append(
@@ -524,7 +523,7 @@ def add_store_access(
         path_params = get_obj_dispatch["path_params"]
     else:
         # Extract from base_path
-        path_params = re.findall(r"\{(\w+)(?::\w+)?\}", base_path)
+        path_params = path_param_names(base_path)
 
     # Process methods dict to apply defaults
     for method_name, config in list(methods.items()):
