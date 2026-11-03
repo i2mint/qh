@@ -7,6 +7,8 @@ Generates client code for calling qh HTTP services from JavaScript/TypeScript ap
 from typing import Any, Dict, List, Optional
 import json
 
+from qh.paths import path_format, path_param_names
+
 
 #: Origin names whose parameterised form becomes a TypeScript array.
 _SEQUENCE_ORIGINS = frozenset(
@@ -187,10 +189,8 @@ def generate_js_function(
     """
     method_lower = method.lower()
 
-    # Extract path parameters
-    import re
-
-    path_params = re.findall(r"\{(\w+)\}", path)
+    path_params = path_param_names(path)
+    path = path_format(path)
 
     # Generate function signature
     if signature_info:
@@ -218,7 +218,7 @@ def generate_js_function(
     # Build URL with path parameters
     func += f"    let url = `${{this.baseUrl}}{path}`;\n"
     for param in path_params:
-        func += f"    url = url.replace('{{{param}}}', {param});\n"
+        func += f"    url = url.replace('{{{param}}}', () => encodeURIComponent({param}));\n"
 
     # Separate path params from body/query params
     body_params = [p for p in param_names if p not in path_params]
@@ -334,10 +334,9 @@ def generate_ts_method(
     Returns:
         TypeScript method source, indented for a class body
     """
-    import re
-
     method_lower = method.lower()
-    path_params = re.findall(r"\{(\w+)\}", path)
+    path_params = path_param_names(path)
+    path = path_format(path)
     params = signature_info.get("parameters", []) if signature_info else []
     return_type = python_type_to_ts_type(
         (signature_info or {}).get("return_type", "any")
@@ -350,7 +349,10 @@ def generate_ts_method(
 
     func += f"    let url = `${{this.baseUrl}}{path}`;\n"
     for param in path_params:
-        func += f"    url = url.replace('{{{param}}}', String({param}));\n"
+        func += (
+            f"    url = url.replace('{{{param}}}', "
+            f"() => encodeURIComponent(String({param})));\n"
+        )
 
     body_params = [p["name"] for p in params if p["name"] not in path_params]
     # An omitted optional parameter is `undefined`. JSON.stringify drops undefined

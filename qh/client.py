@@ -9,7 +9,8 @@ from typing import Any, Callable, Dict, Optional, get_type_hints
 import inspect
 import requests
 from urllib.parse import urljoin
-import re
+
+from qh.paths import fill_path_params, path_param_names
 
 
 class HttpClient:
@@ -64,7 +65,7 @@ class HttpClient:
         """Create a client function that makes HTTP requests."""
 
         # Extract path parameters
-        path_params = set(re.findall(r"\{(\w+)\}", path))
+        path_params = set(path_param_names(path))
 
         # Build function signature if we have metadata
         if signature_info:
@@ -75,16 +76,10 @@ class HttpClient:
         def client_function(**kwargs):
             """Client function that makes HTTP request."""
             # Separate path params from body/query params
-            actual_path = path
-            request_data = {}
-
-            for key, value in kwargs.items():
-                if key in path_params:
-                    # Replace in path
-                    actual_path = actual_path.replace(f"{{{key}}}", str(value))
-                else:
-                    # Add to request data
-                    request_data[key] = value
+            actual_path = fill_path_params(
+                path, {k: v for k, v in kwargs.items() if k in path_params}
+            )
+            request_data = {k: v for k, v in kwargs.items() if k not in path_params}
 
             # Make the HTTP request
             url = urljoin(self.base_url, actual_path)

@@ -14,8 +14,9 @@ Supports patterns like:
 
 from typing import Callable, Optional, List, Dict, Tuple, Any
 import inspect
-import re
 from dataclasses import dataclass
+
+from qh.paths import path_param_names
 
 
 # Common CRUD verb patterns
@@ -316,11 +317,10 @@ def infer_route_config(
     if http_method == "GET":
         from qh.rules import TransformSpec, HttpLocation
         import inspect
-        import re
         from typing import get_type_hints
 
         # Get path parameters
-        path_params = set(re.findall(r"\{(\w+)\}", config["path"]))
+        path_params = set(path_param_names(config["path"]))
 
         # Get function parameters and their types
         sig = inspect.signature(func)
