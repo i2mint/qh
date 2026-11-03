@@ -14,9 +14,9 @@ Supports patterns like:
 
 from typing import Callable, Optional, List, Dict, Tuple, Any
 import inspect
+from dataclasses import dataclass
 
 from qh.paths import path_param_names
-from dataclasses import dataclass
 
 
 # Common CRUD verb patterns

@@ -54,6 +54,8 @@ from typing import (
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 
+from qh.paths import path_format
+
 try:  # PEP 604 unions (``int | None``) — Python 3.10+
     from types import UnionType  # type: ignore
 except ImportError:  # pragma: no cover - Python < 3.10
@@ -723,14 +725,17 @@ def enhance_openapi_schema(
         if not func:
             continue
 
-        path = route_info["path"]
+        # FastAPI keys ``paths`` by the converter-free template (``/n/{n}``).
+        path = path_format(route_info["path"])
         methods = route_info.get("methods", ["POST"])
         param_specs = route_info.get("param_specs", {}) or {}
 
         if path in ["/openapi.json", "/docs", "/redoc"]:
             continue
 
-        path_item = schema.get("paths", {}).get(path, {})
+        path_item = schema.get("paths", {}).get(path)
+        if not path_item:
+            continue
 
         for method in methods:
             method_lower = method.lower()
@@ -765,10 +770,6 @@ def enhance_openapi_schema(
                 operation["x-python-transformers"] = {
                     "note": "Type transformation metadata would go here"
                 }
-
-            path_item[method_lower] = operation
-
-        schema["paths"][path] = path_item
 
     if include_schemas and component_schemas:
         components = schema.setdefault("components", {})

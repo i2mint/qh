@@ -431,7 +431,6 @@ def validate_route_config(func: Callable, config: RouteConfig) -> None:
     # Validate path parameters are in function signature
     if config.path:
         # Extract {param} from path
-
         path_params = path_param_names(config.path)
         for param in path_params:
             if param not in param_names:
