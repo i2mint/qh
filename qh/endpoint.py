@@ -169,6 +169,23 @@ def _status_phrase(status: int) -> str:
         return "Error"
 
 
+async def require_json_content_type(request: Request) -> None:
+    """Route dependency: 415 unless a request that has a body is ``application/json``
+    (or ``application/<x>+json``)."""
+    has_body = request.headers.get("content-length", "0") not in ("", "0") or (
+        "transfer-encoding" in request.headers
+    )
+    if not has_body:
+        return
+    media_type = request.headers.get("content-type", "").split(";")[0].strip().lower()
+    if media_type != "application/json" and not (
+        media_type.startswith("application/") and media_type.endswith("+json")
+    ):
+        raise HTTPException(
+            status_code=415, detail="Content-Type must be application/json"
+        )
+
+
 def make_endpoint(
     func: Callable,
     route_config: RouteConfig,
