@@ -24,7 +24,7 @@ Main entry points:
 
 from dataclasses import replace
 from typing import Any, Callable, Dict, List, Optional, Union
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
 
 from qh.async_tasks import TaskConfig
 from qh.config import (
@@ -34,7 +34,7 @@ from qh.config import (
     normalize_funcs_input,
     resolve_route_config,
 )
-from qh.endpoint import make_endpoint, validate_route_config
+from qh.endpoint import make_endpoint, require_json_content_type, validate_route_config
 from qh.rules import RuleChain
 from qh.conventions import (
     apply_conventions_to_funcs,
@@ -291,6 +291,9 @@ def mk_app(
             route_kwargs["tags"] = resolved_config.tags
         if resolved_config.response_model:
             route_kwargs["response_model"] = resolved_config.response_model
+
+        if resolved_config.require_json_content_type:
+            route_kwargs["dependencies"] = [Depends(require_json_content_type)]
 
         route_kwargs["include_in_schema"] = resolved_config.include_in_schema
         route_kwargs["deprecated"] = resolved_config.deprecated

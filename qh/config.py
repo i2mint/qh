@@ -52,6 +52,11 @@ class RouteConfig:
     # type in the exception's MRO wins). Merged over the app-level ``error_map``.
     error_map: Optional[Dict[type, int]] = None
 
+    # Answer 415 to a request with a body whose Content-Type is not
+    # ``application/json`` (None: inherit the app's ``require_json_content_type``).
+    # Closes the cross-site "simple request" hole (a ``text/plain`` form POST).
+    require_json_content_type: Optional[bool] = None
+
     # Advanced options
     include_in_schema: bool = True
     deprecated: bool = False
@@ -80,6 +85,11 @@ class RouteConfig:
                 {**(self.error_map or {}), **(other.error_map or {})}
                 if self.error_map or other.error_map
                 else None
+            ),
+            require_json_content_type=(
+                other.require_json_content_type
+                if other.require_json_content_type is not None
+                else self.require_json_content_type
             ),
             include_in_schema=other.include_in_schema,
             deprecated=other.deprecated or self.deprecated,
@@ -117,6 +127,13 @@ class AppConfig:
     # exceptions stay a 500. A mapped error's text reaches the client only with
     # ``expose_errors``; otherwise it gets the status phrase.
     error_map: Dict[type, int] = field(default_factory=dict)
+
+    # Answer 415 to a request with a body whose Content-Type is not
+    # ``application/json``, on every route (a route's own setting wins). A browser
+    # then needs a CORS preflight to send such a request cross-site, so a ``text/plain``
+    # HTML form can no longer call a write route with a cookie-authenticated user.
+    # Off by default so existing callers that send JSON with another type keep working.
+    require_json_content_type: bool = False
 
     # FastAPI app kwargs
     title: str = "qh API"
@@ -167,6 +184,7 @@ def resolve_route_config(
         methods=app_config.default_methods,
         rule_chain=app_config.rule_chain,
         error_map=dict(app_config.error_map) or None,
+        require_json_content_type=app_config.require_json_content_type,
     )
     config = config.merge_with(app_level)
 
