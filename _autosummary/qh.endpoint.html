@@ -149,7 +149,10 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#qh.endpoint.make_endpoint" title="qh.endpoint.make_endpoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">make_endpoint</span></code></a>(func, route_config, *[, ...])</p></td>
 <td><p>Create FastAPI endpoint from a function using i2.Wrap.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#qh.endpoint.validate_route_config" title="qh.endpoint.validate_route_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_route_config</span></code></a>(func, config)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#qh.endpoint.require_json_content_type" title="qh.endpoint.require_json_content_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">require_json_content_type</span></code></a>(request)</p></td>
+<td><p>Route dependency: 415 unless a request that has a body is <code class="docutils literal notranslate"><span class="pre">application/json</span></code> (or <code class="docutils literal notranslate"><span class="pre">application/&lt;x&gt;+json</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#qh.endpoint.validate_route_config" title="qh.endpoint.validate_route_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_route_config</span></code></a>(func, config)</p></td>
 <td><p>Validate that route configuration is compatible with function.</p></td>
 </tr>
 </tbody>
@@ -217,6 +220,17 @@ gets a generic message with an error id, and the exception is logged
 </dl>
 </dd></dl>
 <dl class="py function">
+<dt class="sig sig-object py" id="qh.endpoint.require_json_content_type">
+<span class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">qh.endpoint.</span></span><span class="sig-name descname"><span class="pre">require_json_content_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/endpoint.html#require_json_content_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.endpoint.require_json_content_type" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.endpoint.require_json_content_type'">¶</a></dt>
+<dd><p>Route dependency: 415 unless a request that has a body is <code class="docutils literal notranslate"><span class="pre">application/json</span></code>
+(or <code class="docutils literal notranslate"><span class="pre">application/&lt;x&gt;+json</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" rel="nofollow noopener" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code><svg fill="currentColor" height="1em" stroke="none" viewbox="0 96 960 960" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M188 868q-11-11-11-28t11-28l436-436H400q-17 0-28.5-11.5T360 336q0-17 11.5-28.5T400 296h320q17 0 28.5 11.5T760 336v320q0 17-11.5 28.5T720 696q-17 0-28.5-11.5T680 656V432L244 868q-11 11-28 11t-28-11Z"></path></svg></a></span></span></p>
+</dd>
+</dl>
+</dd></dl>
+<dl class="py function">
 <dt class="sig sig-object py" id="qh.endpoint.validate_route_config">
 <span class="sig-prename descclassname"><span class="pre">qh.endpoint.</span></span><span class="sig-name descname"><span class="pre">validate_route_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qh/endpoint.html#validate_route_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#qh.endpoint.validate_route_config" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#qh.endpoint.validate_route_config'">¶</a></dt>
 <dd><p>Validate that route configuration is compatible with function.</p>
@@ -243,6 +257,7 @@ gets a generic message with an error id, and the exception is logged
 <li><a :data-current="activeSection === '#qh.endpoint.apply_ingress_transforms'" class="reference internal" href="#qh.endpoint.apply_ingress_transforms"><code class="docutils literal notranslate"><span class="pre">apply_ingress_transforms()</span></code></a></li>
 <li><a :data-current="activeSection === '#qh.endpoint.extract_http_params'" class="reference internal" href="#qh.endpoint.extract_http_params"><code class="docutils literal notranslate"><span class="pre">extract_http_params()</span></code></a></li>
 <li><a :data-current="activeSection === '#qh.endpoint.make_endpoint'" class="reference internal" href="#qh.endpoint.make_endpoint"><code class="docutils literal notranslate"><span class="pre">make_endpoint()</span></code></a></li>
+<li><a :data-current="activeSection === '#qh.endpoint.require_json_content_type'" class="reference internal" href="#qh.endpoint.require_json_content_type"><code class="docutils literal notranslate"><span class="pre">require_json_content_type()</span></code></a></li>
 <li><a :data-current="activeSection === '#qh.endpoint.validate_route_config'" class="reference internal" href="#qh.endpoint.validate_route_config"><code class="docutils literal notranslate"><span class="pre">validate_route_config()</span></code></a></li>
 </ul>
 </div>
@@ -257,7 +272,7 @@ gets a generic message with an error id, and the exception is logged
 </div>
 </footer>
 </div>
-<script src="../_static/documentation_options.js?v=5d650c58"></script>
+<script src="../_static/documentation_options.js?v=6a9d8632"></script>
 <script src="../_static/doctools.js?v=fd6eb6e6"></script>
 <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
 <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

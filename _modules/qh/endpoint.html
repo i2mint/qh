@@ -358,281 +358,301 @@
 </span><span id="line-169">        <span class="k">return</span> <span class="s2">"Error"</span>
 </span><span id="line-170">
 </span><span id="line-171">
+<div class="viewcode-block" id="require_json_content_type">
+<a class="viewcode-back" href="../../_autosummary/qh.endpoint.html#qh.endpoint.require_json_content_type">[docs]</a>
+</span><span id="line-172"><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">require_json_content_type</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-173"><span class="w">    </span><span class="sd">"""Route dependency: 415 unless a request that has a body is ``application/json``</span>
+</span><span id="line-174"><span class="sd">    (or ``application/&lt;x&gt;+json``)."""</span>
+</span><span id="line-175">    <span class="n">has_body</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"content-length"</span><span class="p">,</span> <span class="s2">"0"</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="s2">"0"</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+</span><span id="line-176">        <span class="s2">"transfer-encoding"</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span>
+</span><span id="line-177">    <span class="p">)</span>
+</span><span id="line-178">    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_body</span><span class="p">:</span>
+</span><span id="line-179">        <span class="k">return</span>
+</span><span id="line-180">    <span class="n">media_type</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"content-type"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">";"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span id="line-181">    <span class="k">if</span> <span class="n">media_type</span> <span class="o">!=</span> <span class="s2">"application/json"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
+</span><span id="line-182">        <span class="n">media_type</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"application/"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">media_type</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"+json"</span><span class="p">)</span>
+</span><span id="line-183">    <span class="p">):</span>
+</span><span id="line-184">        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+</span><span id="line-185">            <span class="n">status_code</span><span class="o">=</span><span class="mi">415</span><span class="p">,</span> <span class="n">detail</span><span class="o">=</span><span class="s2">"Content-Type must be application/json"</span>
+</span><span id="line-186">        <span class="p">)</span></div>
+
+</span><span id="line-187">
+</span><span id="line-188">
 <div class="viewcode-block" id="make_endpoint">
 <a class="viewcode-back" href="../../_autosummary/qh.endpoint.html#qh.endpoint.make_endpoint">[docs]</a>
-</span><span id="line-172"><span class="k">def</span><span class="w"> </span><span class="nf">make_endpoint</span><span class="p">(</span>
-</span><span id="line-173">    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
-</span><span id="line-174">    <span class="n">route_config</span><span class="p">:</span> <span class="n">RouteConfig</span><span class="p">,</span>
-</span><span id="line-175">    <span class="o">*</span><span class="p">,</span>
-</span><span id="line-176">    <span class="n">expose_errors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">DFLT_EXPOSE_ERRORS</span><span class="p">,</span>
-</span><span id="line-177"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-</span><span id="line-178"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-179"><span class="sd">    Create FastAPI endpoint from a function using i2.Wrap.</span>
-</span><span id="line-180">
-</span><span id="line-181"><span class="sd">    Args:</span>
-</span><span id="line-182"><span class="sd">        func: The Python function to wrap</span>
-</span><span id="line-183"><span class="sd">        route_config: Configuration for this route</span>
-</span><span id="line-184"><span class="sd">        expose_errors: If True, an exception raised by ``func`` is sent to the</span>
-</span><span id="line-185"><span class="sd">            client as ``"Error in &lt;func&gt;: &lt;exception&gt;"``. By default the client</span>
-</span><span id="line-186"><span class="sd">            gets a generic message with an error id, and the exception is logged</span>
-</span><span id="line-187"><span class="sd">            (see ``qh.errors``).</span>
-</span><span id="line-188">
-</span><span id="line-189"><span class="sd">    Returns:</span>
-</span><span id="line-190"><span class="sd">        Async endpoint function compatible with FastAPI</span>
-</span><span id="line-191"><span class="sd">    """</span>
-</span><span id="line-192">    <span class="c1"># Get function signature</span>
-</span><span id="line-193">    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-</span><span id="line-194">    <span class="n">is_async</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">iscoroutinefunction</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-</span><span id="line-195">
-</span><span id="line-196">    <span class="c1"># Detect path parameters from route path</span>
-</span><span id="line-197">    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_type_hints</span>
-</span><span id="line-198">
-</span><span id="line-199">    <span class="n">route_path_params</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">path_param_names</span><span class="p">(</span><span class="n">route_config</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
-</span><span id="line-200">
-</span><span id="line-201">    <span class="c1"># Check if this uses query params (GET-only routes without POST/PUT/PATCH)</span>
-</span><span id="line-202">    <span class="c1"># Routes with POST/PUT/PATCH should use JSON body even if GET is also supported</span>
-</span><span id="line-203">    <span class="n">methods</span> <span class="o">=</span> <span class="n">route_config</span><span class="o">.</span><span class="n">methods</span> <span class="ow">or</span> <span class="p">[]</span>
-</span><span id="line-204">    <span class="n">has_body_methods</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">m</span> <span class="ow">in</span> <span class="n">methods</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">,</span> <span class="s2">"PUT"</span><span class="p">,</span> <span class="s2">"PATCH"</span><span class="p">])</span>
-</span><span id="line-205">    <span class="n">use_query_params</span> <span class="o">=</span> <span class="s2">"GET"</span> <span class="ow">in</span> <span class="n">methods</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_body_methods</span>
-</span><span id="line-206">
-</span><span id="line-207">    <span class="c1"># Resolve transformation specs for each parameter</span>
-</span><span id="line-208">    <span class="n">rule_chain</span> <span class="o">=</span> <span class="n">route_config</span><span class="o">.</span><span class="n">rule_chain</span>
-</span><span id="line-209">
-</span><span id="line-210">    <span class="c1"># Get type hints for type conversion</span>
-</span><span id="line-211">    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s2">"__annotations__"</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+</span><span id="line-189"><span class="k">def</span><span class="w"> </span><span class="nf">make_endpoint</span><span class="p">(</span>
+</span><span id="line-190">    <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+</span><span id="line-191">    <span class="n">route_config</span><span class="p">:</span> <span class="n">RouteConfig</span><span class="p">,</span>
+</span><span id="line-192">    <span class="o">*</span><span class="p">,</span>
+</span><span id="line-193">    <span class="n">expose_errors</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">DFLT_EXPOSE_ERRORS</span><span class="p">,</span>
+</span><span id="line-194"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+</span><span id="line-195"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-196"><span class="sd">    Create FastAPI endpoint from a function using i2.Wrap.</span>
+</span><span id="line-197">
+</span><span id="line-198"><span class="sd">    Args:</span>
+</span><span id="line-199"><span class="sd">        func: The Python function to wrap</span>
+</span><span id="line-200"><span class="sd">        route_config: Configuration for this route</span>
+</span><span id="line-201"><span class="sd">        expose_errors: If True, an exception raised by ``func`` is sent to the</span>
+</span><span id="line-202"><span class="sd">            client as ``"Error in &lt;func&gt;: &lt;exception&gt;"``. By default the client</span>
+</span><span id="line-203"><span class="sd">            gets a generic message with an error id, and the exception is logged</span>
+</span><span id="line-204"><span class="sd">            (see ``qh.errors``).</span>
+</span><span id="line-205">
+</span><span id="line-206"><span class="sd">    Returns:</span>
+</span><span id="line-207"><span class="sd">        Async endpoint function compatible with FastAPI</span>
+</span><span id="line-208"><span class="sd">    """</span>
+</span><span id="line-209">    <span class="c1"># Get function signature</span>
+</span><span id="line-210">    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+</span><span id="line-211">    <span class="n">is_async</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">iscoroutinefunction</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
 </span><span id="line-212">
-</span><span id="line-213">    <span class="k">def</span><span class="w"> </span><span class="nf">mk_param_specs</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TransformSpec</span><span class="p">]:</span>
-</span><span id="line-214"><span class="w">        </span><span class="sd">"""Where each parameter is read from; ``query`` puts the non-path ones in the</span>
-</span><span id="line-215"><span class="sd">        query string (a GET), else the rule chain decides (typically the JSON body)."""</span>
-</span><span id="line-216">        <span class="n">specs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TransformSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span id="line-217">        <span class="k">for</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
-</span><span id="line-218">            <span class="c1"># Check for parameter-specific override</span>
-</span><span id="line-219">            <span class="k">if</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">route_config</span><span class="o">.</span><span class="n">param_overrides</span><span class="p">:</span>
-</span><span id="line-220">                <span class="n">specs</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">route_config</span><span class="o">.</span><span class="n">param_overrides</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span>
-</span><span id="line-221">            <span class="c1"># Path parameters are extracted from the URL path, converted to their</span>
-</span><span id="line-222">            <span class="c1"># annotation (a value that doesn't convert is a 422)</span>
-</span><span id="line-223">            <span class="k">elif</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">route_path_params</span><span class="p">:</span>
-</span><span id="line-224">                <span class="n">specs</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">TransformSpec</span><span class="p">(</span>
-</span><span id="line-225">                    <span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">PATH</span><span class="p">,</span>
-</span><span id="line-226">                    <span class="n">ingress</span><span class="o">=</span><span class="n">_mk_converter</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)),</span>
-</span><span id="line-227">                <span class="p">)</span>
-</span><span id="line-228">            <span class="c1"># For GET requests, non-path parameters come from the query string</span>
-</span><span id="line-229">            <span class="k">elif</span> <span class="n">query</span><span class="p">:</span>
-</span><span id="line-230">                <span class="n">specs</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">TransformSpec</span><span class="p">(</span>
-</span><span id="line-231">                    <span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">QUERY</span><span class="p">,</span>
-</span><span id="line-232">                    <span class="n">ingress</span><span class="o">=</span><span class="n">_mk_converter</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)),</span>
-</span><span id="line-233">                <span class="p">)</span>
-</span><span id="line-234">            <span class="k">else</span><span class="p">:</span>
-</span><span id="line-235">                <span class="c1"># Resolve from rule chain</span>
-</span><span id="line-236">                <span class="n">specs</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">resolve_transform</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">rule_chain</span><span class="p">)</span>
-</span><span id="line-237">        <span class="k">return</span> <span class="n">specs</span>
-</span><span id="line-238">
-</span><span id="line-239">    <span class="n">param_specs</span> <span class="o">=</span> <span class="n">mk_param_specs</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">use_query_params</span><span class="p">)</span>
-</span><span id="line-240">    <span class="c1"># A GET on a route that also has body methods can't carry a body: read its</span>
-</span><span id="line-241">    <span class="c1"># parameters from the query string instead.</span>
-</span><span id="line-242">    <span class="n">get_param_specs</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="line-243">        <span class="n">mk_param_specs</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="line-244">        <span class="k">if</span> <span class="s2">"GET"</span> <span class="ow">in</span> <span class="n">methods</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">use_query_params</span>
-</span><span id="line-245">        <span class="k">else</span> <span class="n">param_specs</span>
-</span><span id="line-246">    <span class="p">)</span>
-</span><span id="line-247">    <span class="n">error_map</span> <span class="o">=</span> <span class="n">route_config</span><span class="o">.</span><span class="n">error_map</span> <span class="ow">or</span> <span class="p">{}</span>
-</span><span id="line-248">
-</span><span id="line-249">    <span class="c1"># Determine if we need egress transformation for output</span>
-</span><span id="line-250">    <span class="c1"># For now, we'll use a simple JSON serializer</span>
-</span><span id="line-251">    <span class="kn">from</span><span class="w"> </span><span class="nn">qh.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_type_handler</span><span class="p">,</span> <span class="n">public_jsonable</span>
-</span><span id="line-252">
-</span><span id="line-253">    <span class="k">def</span><span class="w"> </span><span class="nf">default_egress</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-</span><span id="line-254"><span class="w">        </span><span class="sd">"""Default output transformation.</span>
+</span><span id="line-213">    <span class="c1"># Detect path parameters from route path</span>
+</span><span id="line-214">    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_type_hints</span>
+</span><span id="line-215">
+</span><span id="line-216">    <span class="n">route_path_params</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">path_param_names</span><span class="p">(</span><span class="n">route_config</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+</span><span id="line-217">
+</span><span id="line-218">    <span class="c1"># Check if this uses query params (GET-only routes without POST/PUT/PATCH)</span>
+</span><span id="line-219">    <span class="c1"># Routes with POST/PUT/PATCH should use JSON body even if GET is also supported</span>
+</span><span id="line-220">    <span class="n">methods</span> <span class="o">=</span> <span class="n">route_config</span><span class="o">.</span><span class="n">methods</span> <span class="ow">or</span> <span class="p">[]</span>
+</span><span id="line-221">    <span class="n">has_body_methods</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">m</span> <span class="ow">in</span> <span class="n">methods</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"POST"</span><span class="p">,</span> <span class="s2">"PUT"</span><span class="p">,</span> <span class="s2">"PATCH"</span><span class="p">])</span>
+</span><span id="line-222">    <span class="n">use_query_params</span> <span class="o">=</span> <span class="s2">"GET"</span> <span class="ow">in</span> <span class="n">methods</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_body_methods</span>
+</span><span id="line-223">
+</span><span id="line-224">    <span class="c1"># Resolve transformation specs for each parameter</span>
+</span><span id="line-225">    <span class="n">rule_chain</span> <span class="o">=</span> <span class="n">route_config</span><span class="o">.</span><span class="n">rule_chain</span>
+</span><span id="line-226">
+</span><span id="line-227">    <span class="c1"># Get type hints for type conversion</span>
+</span><span id="line-228">    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">func</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="s2">"__annotations__"</span><span class="p">)</span> <span class="k">else</span> <span class="p">{}</span>
+</span><span id="line-229">
+</span><span id="line-230">    <span class="k">def</span><span class="w"> </span><span class="nf">mk_param_specs</span><span class="p">(</span><span class="o">*</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TransformSpec</span><span class="p">]:</span>
+</span><span id="line-231"><span class="w">        </span><span class="sd">"""Where each parameter is read from; ``query`` puts the non-path ones in the</span>
+</span><span id="line-232"><span class="sd">        query string (a GET), else the rule chain decides (typically the JSON body)."""</span>
+</span><span id="line-233">        <span class="n">specs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TransformSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span id="line-234">        <span class="k">for</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+</span><span id="line-235">            <span class="c1"># Check for parameter-specific override</span>
+</span><span id="line-236">            <span class="k">if</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">route_config</span><span class="o">.</span><span class="n">param_overrides</span><span class="p">:</span>
+</span><span id="line-237">                <span class="n">specs</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">route_config</span><span class="o">.</span><span class="n">param_overrides</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span>
+</span><span id="line-238">            <span class="c1"># Path parameters are extracted from the URL path, converted to their</span>
+</span><span id="line-239">            <span class="c1"># annotation (a value that doesn't convert is a 422)</span>
+</span><span id="line-240">            <span class="k">elif</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">route_path_params</span><span class="p">:</span>
+</span><span id="line-241">                <span class="n">specs</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">TransformSpec</span><span class="p">(</span>
+</span><span id="line-242">                    <span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">PATH</span><span class="p">,</span>
+</span><span id="line-243">                    <span class="n">ingress</span><span class="o">=</span><span class="n">_mk_converter</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)),</span>
+</span><span id="line-244">                <span class="p">)</span>
+</span><span id="line-245">            <span class="c1"># For GET requests, non-path parameters come from the query string</span>
+</span><span id="line-246">            <span class="k">elif</span> <span class="n">query</span><span class="p">:</span>
+</span><span id="line-247">                <span class="n">specs</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">TransformSpec</span><span class="p">(</span>
+</span><span id="line-248">                    <span class="n">http_location</span><span class="o">=</span><span class="n">HttpLocation</span><span class="o">.</span><span class="n">QUERY</span><span class="p">,</span>
+</span><span id="line-249">                    <span class="n">ingress</span><span class="o">=</span><span class="n">_mk_converter</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)),</span>
+</span><span id="line-250">                <span class="p">)</span>
+</span><span id="line-251">            <span class="k">else</span><span class="p">:</span>
+</span><span id="line-252">                <span class="c1"># Resolve from rule chain</span>
+</span><span id="line-253">                <span class="n">specs</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">resolve_transform</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">rule_chain</span><span class="p">)</span>
+</span><span id="line-254">        <span class="k">return</span> <span class="n">specs</span>
 </span><span id="line-255">
-</span><span id="line-256"><span class="sd">        Never exposes ``_private`` attributes, at any depth (``public_jsonable``):</span>
-</span><span id="line-257"><span class="sd">        register a type handler (``qh.types.register_type``) to serialize a type</span>
-</span><span id="line-258"><span class="sd">        differently.</span>
-</span><span id="line-259"><span class="sd">        """</span>
-</span><span id="line-260">        <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
-</span><span id="line-261">
-</span><span id="line-262">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
-</span><span id="line-263">            <span class="k">return</span> <span class="n">public_jsonable</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-</span><span id="line-264">        <span class="c1"># Consult the type registry (numpy arrays, pandas frames, user-registered types)</span>
-</span><span id="line-265">        <span class="n">handler</span> <span class="o">=</span> <span class="n">get_type_handler</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
-</span><span id="line-266">        <span class="k">if</span> <span class="n">handler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-267">            <span class="k">return</span> <span class="n">handler</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-</span><span id="line-268">        <span class="c1"># Fall back to the object's public attributes (or dataclass fields)</span>
-</span><span id="line-269">        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__dict__"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
-</span><span id="line-270">            <span class="k">if</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__dict__"</span><span class="p">):</span>
-</span><span id="line-271">                <span class="k">return</span> <span class="n">public_jsonable</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-</span><span id="line-272">            <span class="k">return</span> <span class="p">{</span>
-</span><span id="line-273">                <span class="n">k</span><span class="p">:</span> <span class="n">public_jsonable</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-</span><span id="line-274">                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-</span><span id="line-275">                <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)</span>
-</span><span id="line-276">            <span class="p">}</span>
-</span><span id="line-277">        <span class="c1"># Otherwise convert to string</span>
-</span><span id="line-278">        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-</span><span id="line-279">
-</span><span id="line-280">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">endpoint</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
-</span><span id="line-281"><span class="w">        </span><span class="sd">"""FastAPI endpoint that wraps the original function."""</span>
-</span><span id="line-282">        <span class="k">try</span><span class="p">:</span>
-</span><span id="line-283">            <span class="c1"># Extract parameters from HTTP request</span>
-</span><span id="line-284">            <span class="n">specs</span> <span class="o">=</span> <span class="p">(</span>
-</span><span id="line-285">                <span class="n">get_param_specs</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"GET"</span><span class="p">,</span> <span class="s2">"HEAD"</span><span class="p">)</span> <span class="k">else</span> <span class="n">param_specs</span>
-</span><span id="line-286">            <span class="p">)</span>
-</span><span id="line-287">            <span class="n">http_params</span> <span class="o">=</span> <span class="k">await</span> <span class="n">extract_http_params</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">specs</span><span class="p">)</span>
-</span><span id="line-288">
-</span><span id="line-289">            <span class="c1"># Apply ingress transformations</span>
-</span><span id="line-290">            <span class="n">transformed_params</span> <span class="o">=</span> <span class="n">apply_ingress_transforms</span><span class="p">(</span><span class="n">http_params</span><span class="p">,</span> <span class="n">specs</span><span class="p">)</span>
-</span><span id="line-291">
-</span><span id="line-292">            <span class="c1"># Validate required parameters</span>
-</span><span id="line-293">            <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span id="line-294">                <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-</span><span id="line-295">                    <span class="c1"># Required parameter</span>
-</span><span id="line-296">                    <span class="k">if</span> <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">transformed_params</span><span class="p">:</span>
-</span><span id="line-297">                        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
-</span><span id="line-298">                            <span class="n">status_code</span><span class="o">=</span><span class="mi">422</span><span class="p">,</span>
-</span><span id="line-299">                            <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Missing required parameter: </span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-</span><span id="line-300">                        <span class="p">)</span>
-</span><span id="line-301">                <span class="k">else</span><span class="p">:</span>
-</span><span id="line-302">                    <span class="c1"># Optional parameter - use default if not provided</span>
-</span><span id="line-303">                    <span class="k">if</span> <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">transformed_params</span><span class="p">:</span>
-</span><span id="line-304">                        <span class="n">transformed_params</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span>
+</span><span id="line-256">    <span class="n">param_specs</span> <span class="o">=</span> <span class="n">mk_param_specs</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">use_query_params</span><span class="p">)</span>
+</span><span id="line-257">    <span class="c1"># A GET on a route that also has body methods can't carry a body: read its</span>
+</span><span id="line-258">    <span class="c1"># parameters from the query string instead.</span>
+</span><span id="line-259">    <span class="n">get_param_specs</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="line-260">        <span class="n">mk_param_specs</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="line-261">        <span class="k">if</span> <span class="s2">"GET"</span> <span class="ow">in</span> <span class="n">methods</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">use_query_params</span>
+</span><span id="line-262">        <span class="k">else</span> <span class="n">param_specs</span>
+</span><span id="line-263">    <span class="p">)</span>
+</span><span id="line-264">    <span class="n">error_map</span> <span class="o">=</span> <span class="n">route_config</span><span class="o">.</span><span class="n">error_map</span> <span class="ow">or</span> <span class="p">{}</span>
+</span><span id="line-265">
+</span><span id="line-266">    <span class="c1"># Determine if we need egress transformation for output</span>
+</span><span id="line-267">    <span class="c1"># For now, we'll use a simple JSON serializer</span>
+</span><span id="line-268">    <span class="kn">from</span><span class="w"> </span><span class="nn">qh.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_type_handler</span><span class="p">,</span> <span class="n">public_jsonable</span>
+</span><span id="line-269">
+</span><span id="line-270">    <span class="k">def</span><span class="w"> </span><span class="nf">default_egress</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+</span><span id="line-271"><span class="w">        </span><span class="sd">"""Default output transformation.</span>
+</span><span id="line-272">
+</span><span id="line-273"><span class="sd">        Never exposes ``_private`` attributes, at any depth (``public_jsonable``):</span>
+</span><span id="line-274"><span class="sd">        register a type handler (``qh.types.register_type``) to serialize a type</span>
+</span><span id="line-275"><span class="sd">        differently.</span>
+</span><span id="line-276"><span class="sd">        """</span>
+</span><span id="line-277">        <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+</span><span id="line-278">
+</span><span id="line-279">        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+</span><span id="line-280">            <span class="k">return</span> <span class="n">public_jsonable</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+</span><span id="line-281">        <span class="c1"># Consult the type registry (numpy arrays, pandas frames, user-registered types)</span>
+</span><span id="line-282">        <span class="n">handler</span> <span class="o">=</span> <span class="n">get_type_handler</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+</span><span id="line-283">        <span class="k">if</span> <span class="n">handler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-284">            <span class="k">return</span> <span class="n">handler</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+</span><span id="line-285">        <span class="c1"># Fall back to the object's public attributes (or dataclass fields)</span>
+</span><span id="line-286">        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__dict__"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+</span><span id="line-287">            <span class="k">if</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">"__dict__"</span><span class="p">):</span>
+</span><span id="line-288">                <span class="k">return</span> <span class="n">public_jsonable</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+</span><span id="line-289">            <span class="k">return</span> <span class="p">{</span>
+</span><span id="line-290">                <span class="n">k</span><span class="p">:</span> <span class="n">public_jsonable</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+</span><span id="line-291">                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+</span><span id="line-292">                <span class="k">if</span> <span class="ow">not</span> <span class="n">k</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)</span>
+</span><span id="line-293">            <span class="p">}</span>
+</span><span id="line-294">        <span class="c1"># Otherwise convert to string</span>
+</span><span id="line-295">        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+</span><span id="line-296">
+</span><span id="line-297">    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">endpoint</span><span class="p">(</span><span class="n">request</span><span class="p">:</span> <span class="n">Request</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+</span><span id="line-298"><span class="w">        </span><span class="sd">"""FastAPI endpoint that wraps the original function."""</span>
+</span><span id="line-299">        <span class="k">try</span><span class="p">:</span>
+</span><span id="line-300">            <span class="c1"># Extract parameters from HTTP request</span>
+</span><span id="line-301">            <span class="n">specs</span> <span class="o">=</span> <span class="p">(</span>
+</span><span id="line-302">                <span class="n">get_param_specs</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"GET"</span><span class="p">,</span> <span class="s2">"HEAD"</span><span class="p">)</span> <span class="k">else</span> <span class="n">param_specs</span>
+</span><span id="line-303">            <span class="p">)</span>
+</span><span id="line-304">            <span class="n">http_params</span> <span class="o">=</span> <span class="k">await</span> <span class="n">extract_http_params</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">specs</span><span class="p">)</span>
 </span><span id="line-305">
-</span><span id="line-306">            <span class="c1"># Check if this should be executed as an async task</span>
-</span><span id="line-307">            <span class="k">if</span> <span class="n">route_config</span><span class="o">.</span><span class="n">async_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-308">                <span class="kn">from</span><span class="w"> </span><span class="nn">qh.async_tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_task_manager</span><span class="p">,</span> <span class="n">should_run_async</span>
-</span><span id="line-309">
-</span><span id="line-310">                <span class="k">if</span> <span class="n">should_run_async</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">route_config</span><span class="o">.</span><span class="n">async_config</span><span class="p">):</span>
-</span><span id="line-311">                    <span class="c1"># Execute asynchronously and return task ID</span>
-</span><span id="line-312">                    <span class="n">task_manager</span> <span class="o">=</span> <span class="n">get_task_manager</span><span class="p">(</span>
-</span><span id="line-313">                        <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">route_config</span><span class="o">.</span><span class="n">async_config</span>
-</span><span id="line-314">                    <span class="p">)</span>
-</span><span id="line-315">
-</span><span id="line-316">                    <span class="c1"># Create wrapper that handles sync/async functions</span>
-</span><span id="line-317">                    <span class="k">def</span><span class="w"> </span><span class="nf">task_wrapper</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-</span><span id="line-318">                        <span class="k">if</span> <span class="n">is_async</span><span class="p">:</span>
-</span><span id="line-319">                            <span class="c1"># For async functions, we need to run them in an event loop</span>
-</span><span id="line-320">                            <span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
-</span><span id="line-321">
-</span><span id="line-322">                            <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">new_event_loop</span><span class="p">()</span>
-</span><span id="line-323">                            <span class="k">try</span><span class="p">:</span>
-</span><span id="line-324">                                <span class="k">return</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
-</span><span id="line-325">                            <span class="k">finally</span><span class="p">:</span>
-</span><span id="line-326">                                <span class="n">loop</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-</span><span id="line-327">                        <span class="k">else</span><span class="p">:</span>
-</span><span id="line-328">                            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</span><span id="line-329">
-</span><span id="line-330">                    <span class="n">task_owner</span> <span class="o">=</span> <span class="n">route_config</span><span class="o">.</span><span class="n">async_config</span><span class="o">.</span><span class="n">task_owner</span>
-</span><span id="line-331">                    <span class="n">task_id</span> <span class="o">=</span> <span class="n">task_manager</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
-</span><span id="line-332">                        <span class="n">task_wrapper</span><span class="p">,</span>
-</span><span id="line-333">                        <span class="n">kwargs</span><span class="o">=</span><span class="n">transformed_params</span><span class="p">,</span>
-</span><span id="line-334">                        <span class="n">owner</span><span class="o">=</span><span class="n">task_owner</span><span class="p">(</span><span class="n">request</span><span class="p">)</span> <span class="k">if</span> <span class="n">task_owner</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="line-335">                    <span class="p">)</span>
-</span><span id="line-336">
-</span><span id="line-337">                    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
-</span><span id="line-338">                        <span class="n">content</span><span class="o">=</span><span class="p">{</span><span class="s2">"task_id"</span><span class="p">:</span> <span class="n">task_id</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"submitted"</span><span class="p">},</span>
-</span><span id="line-339">                        <span class="n">status_code</span><span class="o">=</span><span class="mi">202</span><span class="p">,</span>  <span class="c1"># Accepted</span>
-</span><span id="line-340">                    <span class="p">)</span>
-</span><span id="line-341">
-</span><span id="line-342">            <span class="c1"># Call the wrapped function synchronously</span>
-</span><span id="line-343">            <span class="k">if</span> <span class="n">is_async</span><span class="p">:</span>
-</span><span id="line-344">                <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">func</span><span class="p">(</span><span class="o">**</span><span class="n">transformed_params</span><span class="p">)</span>
-</span><span id="line-345">            <span class="k">else</span><span class="p">:</span>
-</span><span id="line-346">                <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">**</span><span class="n">transformed_params</span><span class="p">)</span>
-</span><span id="line-347">
-</span><span id="line-348">            <span class="c1"># If the function returns a Response (or any subclass —</span>
-</span><span id="line-349">            <span class="c1"># StreamingResponse, FileResponse, PlainTextResponse, …),</span>
-</span><span id="line-350">            <span class="c1"># pass it through unchanged. This lets endpoints emit non-</span>
-</span><span id="line-351">            <span class="c1"># JSON payloads (PDFs, file downloads, streams) without</span>
-</span><span id="line-352">            <span class="c1"># having to bypass qh.</span>
-</span><span id="line-353">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">Response</span><span class="p">):</span>
-</span><span id="line-354">                <span class="k">return</span> <span class="n">result</span>
-</span><span id="line-355">
-</span><span id="line-356">            <span class="c1"># Apply egress transformation</span>
-</span><span id="line-357">            <span class="n">output</span> <span class="o">=</span> <span class="n">apply_egress_transform</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">default_egress</span><span class="p">)</span>
+</span><span id="line-306">            <span class="c1"># Apply ingress transformations</span>
+</span><span id="line-307">            <span class="n">transformed_params</span> <span class="o">=</span> <span class="n">apply_ingress_transforms</span><span class="p">(</span><span class="n">http_params</span><span class="p">,</span> <span class="n">specs</span><span class="p">)</span>
+</span><span id="line-308">
+</span><span id="line-309">            <span class="c1"># Validate required parameters</span>
+</span><span id="line-310">            <span class="k">for</span> <span class="n">param_name</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span id="line-311">                <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+</span><span id="line-312">                    <span class="c1"># Required parameter</span>
+</span><span id="line-313">                    <span class="k">if</span> <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">transformed_params</span><span class="p">:</span>
+</span><span id="line-314">                        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+</span><span id="line-315">                            <span class="n">status_code</span><span class="o">=</span><span class="mi">422</span><span class="p">,</span>
+</span><span id="line-316">                            <span class="n">detail</span><span class="o">=</span><span class="sa">f</span><span class="s2">"Missing required parameter: </span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+</span><span id="line-317">                        <span class="p">)</span>
+</span><span id="line-318">                <span class="k">else</span><span class="p">:</span>
+</span><span id="line-319">                    <span class="c1"># Optional parameter - use default if not provided</span>
+</span><span id="line-320">                    <span class="k">if</span> <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">transformed_params</span><span class="p">:</span>
+</span><span id="line-321">                        <span class="n">transformed_params</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span>
+</span><span id="line-322">
+</span><span id="line-323">            <span class="c1"># Check if this should be executed as an async task</span>
+</span><span id="line-324">            <span class="k">if</span> <span class="n">route_config</span><span class="o">.</span><span class="n">async_config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-325">                <span class="kn">from</span><span class="w"> </span><span class="nn">qh.async_tasks</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_task_manager</span><span class="p">,</span> <span class="n">should_run_async</span>
+</span><span id="line-326">
+</span><span id="line-327">                <span class="k">if</span> <span class="n">should_run_async</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">route_config</span><span class="o">.</span><span class="n">async_config</span><span class="p">):</span>
+</span><span id="line-328">                    <span class="c1"># Execute asynchronously and return task ID</span>
+</span><span id="line-329">                    <span class="n">task_manager</span> <span class="o">=</span> <span class="n">get_task_manager</span><span class="p">(</span>
+</span><span id="line-330">                        <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">route_config</span><span class="o">.</span><span class="n">async_config</span>
+</span><span id="line-331">                    <span class="p">)</span>
+</span><span id="line-332">
+</span><span id="line-333">                    <span class="c1"># Create wrapper that handles sync/async functions</span>
+</span><span id="line-334">                    <span class="k">def</span><span class="w"> </span><span class="nf">task_wrapper</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+</span><span id="line-335">                        <span class="k">if</span> <span class="n">is_async</span><span class="p">:</span>
+</span><span id="line-336">                            <span class="c1"># For async functions, we need to run them in an event loop</span>
+</span><span id="line-337">                            <span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+</span><span id="line-338">
+</span><span id="line-339">                            <span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">new_event_loop</span><span class="p">()</span>
+</span><span id="line-340">                            <span class="k">try</span><span class="p">:</span>
+</span><span id="line-341">                                <span class="k">return</span> <span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>
+</span><span id="line-342">                            <span class="k">finally</span><span class="p">:</span>
+</span><span id="line-343">                                <span class="n">loop</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span><span id="line-344">                        <span class="k">else</span><span class="p">:</span>
+</span><span id="line-345">                            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</span><span id="line-346">
+</span><span id="line-347">                    <span class="n">task_owner</span> <span class="o">=</span> <span class="n">route_config</span><span class="o">.</span><span class="n">async_config</span><span class="o">.</span><span class="n">task_owner</span>
+</span><span id="line-348">                    <span class="n">task_id</span> <span class="o">=</span> <span class="n">task_manager</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span>
+</span><span id="line-349">                        <span class="n">task_wrapper</span><span class="p">,</span>
+</span><span id="line-350">                        <span class="n">kwargs</span><span class="o">=</span><span class="n">transformed_params</span><span class="p">,</span>
+</span><span id="line-351">                        <span class="n">owner</span><span class="o">=</span><span class="n">task_owner</span><span class="p">(</span><span class="n">request</span><span class="p">)</span> <span class="k">if</span> <span class="n">task_owner</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="line-352">                    <span class="p">)</span>
+</span><span id="line-353">
+</span><span id="line-354">                    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span>
+</span><span id="line-355">                        <span class="n">content</span><span class="o">=</span><span class="p">{</span><span class="s2">"task_id"</span><span class="p">:</span> <span class="n">task_id</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"submitted"</span><span class="p">},</span>
+</span><span id="line-356">                        <span class="n">status_code</span><span class="o">=</span><span class="mi">202</span><span class="p">,</span>  <span class="c1"># Accepted</span>
+</span><span id="line-357">                    <span class="p">)</span>
 </span><span id="line-358">
-</span><span id="line-359">            <span class="c1"># Return JSON response. Run the output through FastAPI's</span>
-</span><span id="line-360">            <span class="c1"># jsonable_encoder first: JSONResponse serializes with the stdlib</span>
-</span><span id="line-361">            <span class="c1"># json encoder, which only handles dict/list/scalar. jsonable_encoder</span>
-</span><span id="line-362">            <span class="c1"># recursively converts dataclasses, pydantic models, datetime, Enum,</span>
-</span><span id="line-363">            <span class="c1"># set, UUID, Decimal, … into JSON-compatible primitives. Plain</span>
-</span><span id="line-364">            <span class="c1"># dict/list/scalar outputs pass through unchanged.</span>
-</span><span id="line-365">            <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="n">jsonable_encoder</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
-</span><span id="line-366">
-</span><span id="line-367">        <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
-</span><span id="line-368">            <span class="c1"># Re-raise HTTP exceptions</span>
-</span><span id="line-369">            <span class="k">raise</span>
-</span><span id="line-370">
-</span><span id="line-371">        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span id="line-372">            <span class="n">status</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
-</span><span id="line-373">                <span class="p">(</span><span class="n">error_map</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__mro__</span> <span class="k">if</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">error_map</span><span class="p">),</span> <span class="kc">None</span>
-</span><span id="line-374">            <span class="p">)</span>
-</span><span id="line-375">            <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-376">                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-</span><span id="line-377">                    <span class="s2">"</span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2"> mapped to </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">status</span>
-</span><span id="line-378">                <span class="p">)</span>
-</span><span id="line-379">                <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
-</span><span id="line-380">                    <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="p">,</span>
-</span><span id="line-381">                    <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">if</span> <span class="n">expose_errors</span> <span class="k">else</span> <span class="n">_status_phrase</span><span class="p">(</span><span class="n">status</span><span class="p">),</span>
-</span><span id="line-382">                <span class="p">)</span>
-</span><span id="line-383">            <span class="c1"># Wrap other exceptions; the client only sees the exception text if</span>
-</span><span id="line-384">            <span class="c1"># expose_errors (it is always logged server-side)</span>
-</span><span id="line-385">            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
-</span><span id="line-386">                <span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
-</span><span id="line-387">                <span class="n">detail</span><span class="o">=</span><span class="n">error_detail</span><span class="p">(</span>
-</span><span id="line-388">                    <span class="n">e</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">expose_errors</span><span class="o">=</span><span class="n">expose_errors</span>
-</span><span id="line-389">                <span class="p">),</span>
-</span><span id="line-390">            <span class="p">)</span>
-</span><span id="line-391">
-</span><span id="line-392">    <span class="c1"># Set endpoint metadata</span>
-</span><span id="line-393">    <span class="n">endpoint</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">_endpoint"</span>
-</span><span id="line-394">    <span class="n">endpoint</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span>
-</span><span id="line-395">    <span class="c1"># Store original function for OpenAPI/client generation</span>
-</span><span id="line-396">    <span class="n">endpoint</span><span class="o">.</span><span class="n">_qh_original_func</span> <span class="o">=</span> <span class="n">func</span>  <span class="c1"># type: ignore</span>
-</span><span id="line-397">    <span class="c1"># Store the resolved param -&gt; TransformSpec map (the single source of truth</span>
-</span><span id="line-398">    <span class="c1"># for which HTTP location each parameter is read from). OpenAPI generation</span>
-</span><span id="line-399">    <span class="c1"># (qh.openapi) consumes this to classify body/path/query parameters without</span>
-</span><span id="line-400">    <span class="c1"># re-deriving the logic.</span>
-</span><span id="line-401">    <span class="n">endpoint</span><span class="o">.</span><span class="n">_qh_param_specs</span> <span class="o">=</span> <span class="n">param_specs</span>  <span class="c1"># type: ignore</span>
-</span><span id="line-402">    <span class="c1"># What a GET reads when it differs (a GET+POST route): the query string.</span>
-</span><span id="line-403">    <span class="n">endpoint</span><span class="o">.</span><span class="n">_qh_get_param_specs</span> <span class="o">=</span> <span class="n">get_param_specs</span>  <span class="c1"># type: ignore</span>
-</span><span id="line-404">    <span class="n">endpoint</span><span class="o">.</span><span class="n">_qh_route_config</span> <span class="o">=</span> <span class="n">route_config</span>  <span class="c1"># type: ignore</span>
-</span><span id="line-405">
-</span><span id="line-406">    <span class="k">return</span> <span class="n">endpoint</span></div>
-
-</span><span id="line-407">
+</span><span id="line-359">            <span class="c1"># Call the wrapped function synchronously</span>
+</span><span id="line-360">            <span class="k">if</span> <span class="n">is_async</span><span class="p">:</span>
+</span><span id="line-361">                <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">func</span><span class="p">(</span><span class="o">**</span><span class="n">transformed_params</span><span class="p">)</span>
+</span><span id="line-362">            <span class="k">else</span><span class="p">:</span>
+</span><span id="line-363">                <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">**</span><span class="n">transformed_params</span><span class="p">)</span>
+</span><span id="line-364">
+</span><span id="line-365">            <span class="c1"># If the function returns a Response (or any subclass —</span>
+</span><span id="line-366">            <span class="c1"># StreamingResponse, FileResponse, PlainTextResponse, …),</span>
+</span><span id="line-367">            <span class="c1"># pass it through unchanged. This lets endpoints emit non-</span>
+</span><span id="line-368">            <span class="c1"># JSON payloads (PDFs, file downloads, streams) without</span>
+</span><span id="line-369">            <span class="c1"># having to bypass qh.</span>
+</span><span id="line-370">            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">Response</span><span class="p">):</span>
+</span><span id="line-371">                <span class="k">return</span> <span class="n">result</span>
+</span><span id="line-372">
+</span><span id="line-373">            <span class="c1"># Apply egress transformation</span>
+</span><span id="line-374">            <span class="n">output</span> <span class="o">=</span> <span class="n">apply_egress_transform</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">default_egress</span><span class="p">)</span>
+</span><span id="line-375">
+</span><span id="line-376">            <span class="c1"># Return JSON response. Run the output through FastAPI's</span>
+</span><span id="line-377">            <span class="c1"># jsonable_encoder first: JSONResponse serializes with the stdlib</span>
+</span><span id="line-378">            <span class="c1"># json encoder, which only handles dict/list/scalar. jsonable_encoder</span>
+</span><span id="line-379">            <span class="c1"># recursively converts dataclasses, pydantic models, datetime, Enum,</span>
+</span><span id="line-380">            <span class="c1"># set, UUID, Decimal, … into JSON-compatible primitives. Plain</span>
+</span><span id="line-381">            <span class="c1"># dict/list/scalar outputs pass through unchanged.</span>
+</span><span id="line-382">            <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">content</span><span class="o">=</span><span class="n">jsonable_encoder</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
+</span><span id="line-383">
+</span><span id="line-384">        <span class="k">except</span> <span class="n">HTTPException</span><span class="p">:</span>
+</span><span id="line-385">            <span class="c1"># Re-raise HTTP exceptions</span>
+</span><span id="line-386">            <span class="k">raise</span>
+</span><span id="line-387">
+</span><span id="line-388">        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span id="line-389">            <span class="n">status</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+</span><span id="line-390">                <span class="p">(</span><span class="n">error_map</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__mro__</span> <span class="k">if</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">error_map</span><span class="p">),</span> <span class="kc">None</span>
+</span><span id="line-391">            <span class="p">)</span>
+</span><span id="line-392">            <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-393">                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+</span><span id="line-394">                    <span class="s2">"</span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2"> mapped to </span><span class="si">%s</span><span class="s2">"</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">status</span>
+</span><span id="line-395">                <span class="p">)</span>
+</span><span id="line-396">                <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+</span><span id="line-397">                    <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="p">,</span>
+</span><span id="line-398">                    <span class="n">detail</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="k">if</span> <span class="n">expose_errors</span> <span class="k">else</span> <span class="n">_status_phrase</span><span class="p">(</span><span class="n">status</span><span class="p">),</span>
+</span><span id="line-399">                <span class="p">)</span>
+</span><span id="line-400">            <span class="c1"># Wrap other exceptions; the client only sees the exception text if</span>
+</span><span id="line-401">            <span class="c1"># expose_errors (it is always logged server-side)</span>
+</span><span id="line-402">            <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+</span><span id="line-403">                <span class="n">status_code</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+</span><span id="line-404">                <span class="n">detail</span><span class="o">=</span><span class="n">error_detail</span><span class="p">(</span>
+</span><span id="line-405">                    <span class="n">e</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">expose_errors</span><span class="o">=</span><span class="n">expose_errors</span>
+</span><span id="line-406">                <span class="p">),</span>
+</span><span id="line-407">            <span class="p">)</span>
 </span><span id="line-408">
+</span><span id="line-409">    <span class="c1"># Set endpoint metadata</span>
+</span><span id="line-410">    <span class="n">endpoint</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">_endpoint"</span>
+</span><span id="line-411">    <span class="n">endpoint</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span>
+</span><span id="line-412">    <span class="c1"># Store original function for OpenAPI/client generation</span>
+</span><span id="line-413">    <span class="n">endpoint</span><span class="o">.</span><span class="n">_qh_original_func</span> <span class="o">=</span> <span class="n">func</span>  <span class="c1"># type: ignore</span>
+</span><span id="line-414">    <span class="c1"># Store the resolved param -&gt; TransformSpec map (the single source of truth</span>
+</span><span id="line-415">    <span class="c1"># for which HTTP location each parameter is read from). OpenAPI generation</span>
+</span><span id="line-416">    <span class="c1"># (qh.openapi) consumes this to classify body/path/query parameters without</span>
+</span><span id="line-417">    <span class="c1"># re-deriving the logic.</span>
+</span><span id="line-418">    <span class="n">endpoint</span><span class="o">.</span><span class="n">_qh_param_specs</span> <span class="o">=</span> <span class="n">param_specs</span>  <span class="c1"># type: ignore</span>
+</span><span id="line-419">    <span class="c1"># What a GET reads when it differs (a GET+POST route): the query string.</span>
+</span><span id="line-420">    <span class="n">endpoint</span><span class="o">.</span><span class="n">_qh_get_param_specs</span> <span class="o">=</span> <span class="n">get_param_specs</span>  <span class="c1"># type: ignore</span>
+</span><span id="line-421">    <span class="n">endpoint</span><span class="o">.</span><span class="n">_qh_route_config</span> <span class="o">=</span> <span class="n">route_config</span>  <span class="c1"># type: ignore</span>
+</span><span id="line-422">
+</span><span id="line-423">    <span class="k">return</span> <span class="n">endpoint</span></div>
+
+</span><span id="line-424">
+</span><span id="line-425">
 <div class="viewcode-block" id="validate_route_config">
 <a class="viewcode-back" href="../../_autosummary/qh.endpoint.html#qh.endpoint.validate_route_config">[docs]</a>
-</span><span id="line-409"><span class="k">def</span><span class="w"> </span><span class="nf">validate_route_config</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">RouteConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="line-410"><span class="w">    </span><span class="sd">"""</span>
-</span><span id="line-411"><span class="sd">    Validate that route configuration is compatible with function.</span>
-</span><span id="line-412">
-</span><span id="line-413"><span class="sd">    Args:</span>
-</span><span id="line-414"><span class="sd">        func: The function the route is for.</span>
-</span><span id="line-415"><span class="sd">        config: The route configuration to check against ``func``'s signature.</span>
-</span><span id="line-416">
-</span><span id="line-417"><span class="sd">    Raises:</span>
-</span><span id="line-418"><span class="sd">        ValueError: If configuration is invalid</span>
-</span><span id="line-419"><span class="sd">    """</span>
-</span><span id="line-420">    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-</span><span id="line-421">    <span class="n">param_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-</span><span id="line-422">
-</span><span id="line-423">    <span class="c1"># Check that param_overrides reference actual parameters</span>
-</span><span id="line-424">    <span class="k">for</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">param_overrides</span><span class="p">:</span>
-</span><span id="line-425">        <span class="k">if</span> <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">param_names</span><span class="p">:</span>
-</span><span id="line-426">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span id="line-427">                <span class="sa">f</span><span class="s2">"Parameter override '</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s2">' not found in function </span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. "</span>
-</span><span id="line-428">                <span class="sa">f</span><span class="s2">"Available parameters: </span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s2">"</span>
-</span><span id="line-429">            <span class="p">)</span>
-</span><span id="line-430">
-</span><span id="line-431">    <span class="c1"># Validate path parameters are in function signature</span>
-</span><span id="line-432">    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
-</span><span id="line-433">        <span class="c1"># Extract {param} from path</span>
-</span><span id="line-434">        <span class="n">path_params</span> <span class="o">=</span> <span class="n">path_param_names</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-</span><span id="line-435">        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">path_params</span><span class="p">:</span>
-</span><span id="line-436">            <span class="k">if</span> <span class="n">param</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">param_names</span><span class="p">:</span>
-</span><span id="line-437">                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span id="line-438">                    <span class="sa">f</span><span class="s2">"Path parameter '</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">' in route '</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">' "</span>
-</span><span id="line-439">                    <span class="sa">f</span><span class="s2">"not found in function </span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. "</span>
-</span><span id="line-440">                    <span class="sa">f</span><span class="s2">"Available parameters: </span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s2">"</span>
-</span><span id="line-441">                <span class="p">)</span></div>
+</span><span id="line-426"><span class="k">def</span><span class="w"> </span><span class="nf">validate_route_config</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">RouteConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="line-427"><span class="w">    </span><span class="sd">"""</span>
+</span><span id="line-428"><span class="sd">    Validate that route configuration is compatible with function.</span>
+</span><span id="line-429">
+</span><span id="line-430"><span class="sd">    Args:</span>
+</span><span id="line-431"><span class="sd">        func: The function the route is for.</span>
+</span><span id="line-432"><span class="sd">        config: The route configuration to check against ``func``'s signature.</span>
+</span><span id="line-433">
+</span><span id="line-434"><span class="sd">    Raises:</span>
+</span><span id="line-435"><span class="sd">        ValueError: If configuration is invalid</span>
+</span><span id="line-436"><span class="sd">    """</span>
+</span><span id="line-437">    <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+</span><span id="line-438">    <span class="n">param_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+</span><span id="line-439">
+</span><span id="line-440">    <span class="c1"># Check that param_overrides reference actual parameters</span>
+</span><span id="line-441">    <span class="k">for</span> <span class="n">param_name</span> <span class="ow">in</span> <span class="n">config</span><span class="o">.</span><span class="n">param_overrides</span><span class="p">:</span>
+</span><span id="line-442">        <span class="k">if</span> <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">param_names</span><span class="p">:</span>
+</span><span id="line-443">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span id="line-444">                <span class="sa">f</span><span class="s2">"Parameter override '</span><span class="si">{</span><span class="n">param_name</span><span class="si">}</span><span class="s2">' not found in function </span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. "</span>
+</span><span id="line-445">                <span class="sa">f</span><span class="s2">"Available parameters: </span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s2">"</span>
+</span><span id="line-446">            <span class="p">)</span>
+</span><span id="line-447">
+</span><span id="line-448">    <span class="c1"># Validate path parameters are in function signature</span>
+</span><span id="line-449">    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+</span><span id="line-450">        <span class="c1"># Extract {param} from path</span>
+</span><span id="line-451">        <span class="n">path_params</span> <span class="o">=</span> <span class="n">path_param_names</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+</span><span id="line-452">        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">path_params</span><span class="p">:</span>
+</span><span id="line-453">            <span class="k">if</span> <span class="n">param</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">param_names</span><span class="p">:</span>
+</span><span id="line-454">                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span id="line-455">                    <span class="sa">f</span><span class="s2">"Path parameter '</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s2">' in route '</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">' "</span>
+</span><span id="line-456">                    <span class="sa">f</span><span class="s2">"not found in function </span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">. "</span>
+</span><span id="line-457">                    <span class="sa">f</span><span class="s2">"Available parameters: </span><span class="si">{</span><span class="n">param_names</span><span class="si">}</span><span class="s2">"</span>
+</span><span id="line-458">                <span class="p">)</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -647,7 +667,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=5d650c58"></script>
+    <script src="../../_static/documentation_options.js?v=6a9d8632"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

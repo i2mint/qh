@@ -85,7 +85,7 @@ Main entry points:
 | [`AuTaskStore`](#qh.AuTaskStore)(au_store)                              | Adapter to use au's ComputationStore as qh's TaskStore.                       |
 | [`AuTaskExecutor`](#qh.AuTaskExecutor)(au_backend, au_store)               | Adapter to use au's ComputationBackend as qh's TaskExecutor.                  |
 
-### *class* qh.AppConfig(default_methods=<factory>, path_template='/{func_name}', path_prefix='', rule_chain=<factory>, expose_errors=False, error_map=dict(), title='qh API', version='0.1.0', docs_url='/docs', redoc_url='/redoc', openapi_url='/openapi.json', fastapi_kwargs=dict())
+### *class* qh.AppConfig(default_methods=<factory>, path_template='/{func_name}', path_prefix='', rule_chain=<factory>, expose_errors=False, error_map=dict(), require_json_content_type=False, title='qh API', version='0.1.0', docs_url='/docs', redoc_url='/redoc', openapi_url='/openapi.json', fastapi_kwargs=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -395,7 +395,7 @@ Execute tasks using a process pool (good for CPU-bound tasks).
 * **Return type:**
   [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
-### *class* qh.RouteConfig(path=None, methods=None, rule_chain=None, param_overrides=dict(), async_config=None, summary=None, description=None, tags=None, response_model=None, error_map=None, include_in_schema=True, deprecated=False)
+### *class* qh.RouteConfig(path=None, methods=None, rule_chain=None, param_overrides=dict(), async_config=None, summary=None, description=None, tags=None, response_model=None, error_map=None, require_json_content_type=None, include_in_schema=True, deprecated=False)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 

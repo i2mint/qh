@@ -1,4 +1,4 @@
-> built 2026-11-03 10:53 UTC from ae80d8b (master) · qh 0.0.25. Details: build_info.json
+> built 2026-11-13 12:18 UTC from d203059 (master) · qh 0.0.26. Details: build_info.json
 
 # index.html.md
 
@@ -1964,7 +1964,7 @@ Configuration flows from general to specific:
 | [`FunctionConfigBuilder`](_autosummary/qh.config.html.md#qh.config.FunctionConfigBuilder)(parent, func)                | Fluent interface for building function-specific configuration. |
 | [`RouteConfig`](_autosummary/qh.config.html.md#qh.config.RouteConfig)([path, methods, rule_chain, ...])      | Configuration for a single route (function endpoint).          |
 
-### *class* qh.config.AppConfig(default_methods=<factory>, path_template='/{func_name}', path_prefix='', rule_chain=<factory>, expose_errors=False, error_map=dict(), title='qh API', version='0.1.0', docs_url='/docs', redoc_url='/redoc', openapi_url='/openapi.json', fastapi_kwargs=dict())
+### *class* qh.config.AppConfig(default_methods=<factory>, path_template='/{func_name}', path_prefix='', rule_chain=<factory>, expose_errors=False, error_map=dict(), require_json_content_type=False, title='qh API', version='0.1.0', docs_url='/docs', redoc_url='/redoc', openapi_url='/openapi.json', fastapi_kwargs=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -2072,7 +2072,7 @@ Set OpenAPI tags.
 * **Return type:**
   [`FunctionConfigBuilder`](_autosummary/qh.config.html.md#qh.config.FunctionConfigBuilder)
 
-### *class* qh.config.RouteConfig(path=None, methods=None, rule_chain=None, param_overrides=dict(), async_config=None, summary=None, description=None, tags=None, response_model=None, error_map=None, include_in_schema=True, deprecated=False)
+### *class* qh.config.RouteConfig(path=None, methods=None, rule_chain=None, param_overrides=dict(), async_config=None, summary=None, description=None, tags=None, response_model=None, error_map=None, require_json_content_type=None, include_in_schema=True, deprecated=False)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -2349,12 +2349,13 @@ This module bridges Python functions and HTTP endpoints via transformation rules
 
 ### Functions
 
-| [`apply_egress_transform`](_autosummary/qh.endpoint.html.md#qh.endpoint.apply_egress_transform)(result, egress)        | Apply egress transformation to function result.                     |
-|------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
-| [`apply_ingress_transforms`](_autosummary/qh.endpoint.html.md#qh.endpoint.apply_ingress_transforms)(params, param_specs) | Apply ingress transformations to extracted parameters.              |
-| [`extract_http_params`](_autosummary/qh.endpoint.html.md#qh.endpoint.extract_http_params)(request, param_specs)     | Extract parameters from HTTP request based on transformation specs. |
-| [`make_endpoint`](_autosummary/qh.endpoint.html.md#qh.endpoint.make_endpoint)(func, route_config, \*[, ...])  | Create FastAPI endpoint from a function using i2.Wrap.              |
-| [`validate_route_config`](_autosummary/qh.endpoint.html.md#qh.endpoint.validate_route_config)(func, config)           | Validate that route configuration is compatible with function.      |
+| [`apply_egress_transform`](_autosummary/qh.endpoint.html.md#qh.endpoint.apply_egress_transform)(result, egress)        | Apply egress transformation to function result.                                                           |
+|------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| [`apply_ingress_transforms`](_autosummary/qh.endpoint.html.md#qh.endpoint.apply_ingress_transforms)(params, param_specs) | Apply ingress transformations to extracted parameters.                                                    |
+| [`extract_http_params`](_autosummary/qh.endpoint.html.md#qh.endpoint.extract_http_params)(request, param_specs)     | Extract parameters from HTTP request based on transformation specs.                                       |
+| [`make_endpoint`](_autosummary/qh.endpoint.html.md#qh.endpoint.make_endpoint)(func, route_config, \*[, ...])  | Create FastAPI endpoint from a function using i2.Wrap.                                                    |
+| [`require_json_content_type`](_autosummary/qh.endpoint.html.md#qh.endpoint.require_json_content_type)(request)            | Route dependency: 415 unless a request that has a body is `application/json` (or `application/<x>+json`). |
+| [`validate_route_config`](_autosummary/qh.endpoint.html.md#qh.endpoint.validate_route_config)(func, config)           | Validate that route configuration is compatible with function.                                            |
 
 ### qh.endpoint.apply_egress_transform(result, egress)
 
@@ -2397,6 +2398,14 @@ Create FastAPI endpoint from a function using i2.Wrap.
   [`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)
 * **Returns:**
   Async endpoint function compatible with FastAPI
+
+### *async* qh.endpoint.require_json_content_type(request)
+
+Route dependency: 415 unless a request that has a body is `application/json`
+(or `application/<x>+json`).
+
+* **Return type:**
+  [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
 ### qh.endpoint.validate_route_config(func, config)
 
@@ -2543,7 +2552,7 @@ Main entry points:
 | [`AuTaskStore`](_autosummary/qh.html.md#qh.AuTaskStore)(au_store)                              | Adapter to use au's ComputationStore as qh's TaskStore.                       |
 | [`AuTaskExecutor`](_autosummary/qh.html.md#qh.AuTaskExecutor)(au_backend, au_store)               | Adapter to use au's ComputationBackend as qh's TaskExecutor.                  |
 
-### *class* qh.AppConfig(default_methods=<factory>, path_template='/{func_name}', path_prefix='', rule_chain=<factory>, expose_errors=False, error_map=dict(), title='qh API', version='0.1.0', docs_url='/docs', redoc_url='/redoc', openapi_url='/openapi.json', fastapi_kwargs=dict())
+### *class* qh.AppConfig(default_methods=<factory>, path_template='/{func_name}', path_prefix='', rule_chain=<factory>, expose_errors=False, error_map=dict(), require_json_content_type=False, title='qh API', version='0.1.0', docs_url='/docs', redoc_url='/redoc', openapi_url='/openapi.json', fastapi_kwargs=dict())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -2853,7 +2862,7 @@ Execute tasks using a process pool (good for CPU-bound tasks).
 * **Return type:**
   [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
-### *class* qh.RouteConfig(path=None, methods=None, rule_chain=None, param_overrides=dict(), async_config=None, summary=None, description=None, tags=None, response_model=None, error_map=None, include_in_schema=True, deprecated=False)
+### *class* qh.RouteConfig(path=None, methods=None, rule_chain=None, param_overrides=dict(), async_config=None, summary=None, description=None, tags=None, response_model=None, error_map=None, require_json_content_type=None, include_in_schema=True, deprecated=False)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -5518,18 +5527,16 @@ Register a type in the global registry.
 
 # About this build
 
-This documentation was built on **2026-11-03 10:53 UTC** from commit <a href="https://github.com/i2mint/qh/commit/ae80d8b837917f1939f0c7909b4a78ed0037b029"><code>ae80d8b</code></a> on branch <code>master</code>, for **qh 0.0.25** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-13 12:18 UTC** from commit <a href="https://github.com/i2mint/qh/commit/d2030595296d9a5d599754150c826634397da103"><code>d203059</code></a> on branch <code>master</code>, for **qh 0.0.26** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.25) is behind the latest release on PyPI (0.0.26): `pip install qh` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/qh/commit/ae80d8b837917f1939f0c7909b4a78ed0037b029"><code>ae80d8b837917f1939f0c7909b4a78ed0037b029</code></a> |
+| Commit              | <a href="https://github.com/i2mint/qh/commit/d2030595296d9a5d599754150c826634397da103"><code>d2030595296d9a5d599754150c826634397da103</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
 | Tags at this commit | none                                                                                                                                             |
 | Working tree        | clean                                                                                                                                            |
@@ -5540,9 +5547,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/qh</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/qh/actions/runs/41622747592">41622747592</a>            |
+| Run          | <a href="https://github.com/i2mint/qh/actions/runs/43423830795">43423830795</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>ae80d8b837917f1939f0c7909b4a78ed0037b029</code> (in the history of the built commit) |
+| Event commit | <code>d2030595296d9a5d599754150c826634397da103</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5551,7 +5558,7 @@ The documentation and the package may be misaligned:
 | epythet  | 0.2.22  |
 | Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
-| Python   | 3.12.15 |
+| Python   | 3.12.16 |
 
 ## Configuration as resolved
 
@@ -5567,13 +5574,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/qh/0.0.26/">0.0.26</a>, newer than the documented version (0.0.25).
+Latest release: <a href="https://pypi.org/project/qh/0.0.26/">0.0.26</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/qh && cd qh
-git checkout ae80d8b837917f1939f0c7909b4a78ed0037b029
+git checkout d2030595296d9a5d599754150c826634397da103
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

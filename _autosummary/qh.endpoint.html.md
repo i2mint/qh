@@ -6,12 +6,13 @@ This module bridges Python functions and HTTP endpoints via transformation rules
 
 ### Functions
 
-| [`apply_egress_transform`](#qh.endpoint.apply_egress_transform)(result, egress)        | Apply egress transformation to function result.                     |
-|------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
-| [`apply_ingress_transforms`](#qh.endpoint.apply_ingress_transforms)(params, param_specs) | Apply ingress transformations to extracted parameters.              |
-| [`extract_http_params`](#qh.endpoint.extract_http_params)(request, param_specs)     | Extract parameters from HTTP request based on transformation specs. |
-| [`make_endpoint`](#qh.endpoint.make_endpoint)(func, route_config, \*[, ...])  | Create FastAPI endpoint from a function using i2.Wrap.              |
-| [`validate_route_config`](#qh.endpoint.validate_route_config)(func, config)           | Validate that route configuration is compatible with function.      |
+| [`apply_egress_transform`](#qh.endpoint.apply_egress_transform)(result, egress)        | Apply egress transformation to function result.                                                           |
+|------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| [`apply_ingress_transforms`](#qh.endpoint.apply_ingress_transforms)(params, param_specs) | Apply ingress transformations to extracted parameters.                                                    |
+| [`extract_http_params`](#qh.endpoint.extract_http_params)(request, param_specs)     | Extract parameters from HTTP request based on transformation specs.                                       |
+| [`make_endpoint`](#qh.endpoint.make_endpoint)(func, route_config, \*[, ...])  | Create FastAPI endpoint from a function using i2.Wrap.                                                    |
+| [`require_json_content_type`](#qh.endpoint.require_json_content_type)(request)            | Route dependency: 415 unless a request that has a body is `application/json` (or `application/<x>+json`). |
+| [`validate_route_config`](#qh.endpoint.validate_route_config)(func, config)           | Validate that route configuration is compatible with function.                                            |
 
 ### qh.endpoint.apply_egress_transform(result, egress)
 
@@ -54,6 +55,14 @@ Create FastAPI endpoint from a function using i2.Wrap.
   [`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)
 * **Returns:**
   Async endpoint function compatible with FastAPI
+
+### *async* qh.endpoint.require_json_content_type(request)
+
+Route dependency: 415 unless a request that has a body is `application/json`
+(or `application/<x>+json`).
+
+* **Return type:**
+  [`None`](https://docs.python.org/3/builtins/constants.html#None)
 
 ### qh.endpoint.validate_route_config(func, config)
 

@@ -12,5 +12,6 @@ qh.endpoint
       apply_ingress_transforms
       extract_http_params
       make_endpoint
+      require_json_content_type
       validate_route_config
    
