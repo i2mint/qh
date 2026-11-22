@@ -40,7 +40,7 @@ Extract parameters from HTTP request based on transformation specs.
 * **Returns:**
   Dict of parameter name to extracted value
 
-### qh.endpoint.make_endpoint(func, route_config, , expose_errors=False)
+### qh.endpoint.make_endpoint(func, route_config, \*, expose_errors=False, sync_runner=<function run_in_threadpool>)
 
 Create FastAPI endpoint from a function using i2.Wrap.
 
@@ -51,6 +51,10 @@ Create FastAPI endpoint from a function using i2.Wrap.
     client as `"Error in <func>: <exception>"`. By default the client
     gets a generic message with an error id, and the exception is logged
     (see `qh.errors`).
+  * **sync_runner** ([`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)]) – How a plain `def` function is called: an awaitable
+    `runner(func, **kwargs)`. Defaults to Starlette’s threadpool, so a slow
+    sync function doesn’t block the event loop (as FastAPI does for `def`
+    endpoints). `None` calls it inline on the event loop.
 * **Return type:**
   [`Callable`](https://docs.python.org/3/library/typing.html#typing.Callable)
 * **Returns:**

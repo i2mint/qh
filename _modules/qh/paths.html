@@ -268,9 +268,11 @@
 </span><span id="line-80">        <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">name</span><span class="p">])</span>
 </span><span id="line-81">        <span class="k">if</span> <span class="ow">not</span> <span class="n">quote</span><span class="p">:</span>
 </span><span id="line-82">            <span class="k">return</span> <span class="n">text</span>
-</span><span id="line-83">        <span class="k">return</span> <span class="n">_url_quote</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="s2">"/"</span> <span class="k">if</span> <span class="n">keeps_slash</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
-</span><span id="line-84">
-</span><span id="line-85">    <span class="k">return</span> <span class="n">PARAM_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">_render</span><span class="p">,</span> <span class="n">fmt</span><span class="p">)</span></div>
+</span><span id="line-83">        <span class="n">quoted</span> <span class="o">=</span> <span class="n">_url_quote</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="s2">"/"</span> <span class="k">if</span> <span class="n">keeps_slash</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+</span><span id="line-84">        <span class="c1"># '.'/'..' as a whole value would be resolved as dot segments by a client/proxy</span>
+</span><span id="line-85">        <span class="k">return</span> <span class="n">quoted</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="s2">"</span><span class="si">%2E</span><span class="s2">"</span><span class="p">)</span> <span class="k">if</span> <span class="n">quoted</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"."</span><span class="p">,</span> <span class="s2">".."</span><span class="p">)</span> <span class="k">else</span> <span class="n">quoted</span>
+</span><span id="line-86">
+</span><span id="line-87">    <span class="k">return</span> <span class="n">PARAM_REGEX</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">_render</span><span class="p">,</span> <span class="n">fmt</span><span class="p">)</span></div>
 
 </span></code></pre></div>
     </div></div>
@@ -285,7 +287,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=6a9d8632"></script>
+    <script src="../../_static/documentation_options.js?v=cee5022b"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
