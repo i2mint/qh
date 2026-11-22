@@ -5,7 +5,16 @@ This module bridges Python functions and HTTP endpoints via transformation rules
 """
 
 import types
-from typing import Any, Callable, Dict, Optional, Union, get_args, get_origin, get_type_hints
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Optional,
+    Union,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 from starlette.concurrency import run_in_threadpool
 from fastapi import Request, Response, HTTPException
 from fastapi.responses import JSONResponse
