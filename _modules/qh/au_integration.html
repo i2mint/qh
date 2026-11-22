@@ -232,7 +232,7 @@
 </span><span id="line-50"><span class="sd">    Maps between qh's TaskInfo and au's computation results.</span>
 </span><span id="line-51"><span class="sd">    """</span>
 </span><span id="line-52">
-</span><span id="line-53">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">au_store</span><span class="p">:</span> <span class="s2">"ComputationStore"</span><span class="p">):</span>
+</span><span id="line-53">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">au_store</span><span class="p">:</span> <span class="s2">"ComputationStore"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-54">        <span class="k">if</span> <span class="ow">not</span> <span class="n">HAS_AU</span><span class="p">:</span>
 </span><span id="line-55">            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">"au is required. Install with: pip install au"</span><span class="p">)</span>
 </span><span id="line-56">        <span class="bp">self</span><span class="o">.</span><span class="n">au_store</span> <span class="o">=</span> <span class="n">au_store</span>
@@ -351,7 +351,7 @@
 </span><span id="line-151">        <span class="bp">self</span><span class="p">,</span>
 </span><span id="line-152">        <span class="n">au_backend</span><span class="p">:</span> <span class="s2">"ComputationBackend"</span><span class="p">,</span>
 </span><span id="line-153">        <span class="n">au_store</span><span class="p">:</span> <span class="s2">"ComputationStore"</span><span class="p">,</span>
-</span><span id="line-154">    <span class="p">):</span>
+</span><span id="line-154">    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-155">        <span class="k">if</span> <span class="ow">not</span> <span class="n">HAS_AU</span><span class="p">:</span>
 </span><span id="line-156">            <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s2">"au is required. Install with: pip install au"</span><span class="p">)</span>
 </span><span id="line-157">        <span class="bp">self</span><span class="o">.</span><span class="n">au_backend</span> <span class="o">=</span> <span class="n">au_backend</span>
@@ -540,7 +540,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=cee5022b"></script>
+    <script src="../../_static/documentation_options.js?v=26ffa1e9"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

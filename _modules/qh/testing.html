@@ -381,7 +381,7 @@
 </span><span id="line-196">            <span class="p">)</span>
 </span><span id="line-197">            <span class="n">server</span> <span class="o">=</span> <span class="n">uvicorn</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </span><span id="line-198">
-</span><span id="line-199">            <span class="k">def</span><span class="w"> </span><span class="nf">run_server</span><span class="p">():</span>
+</span><span id="line-199">            <span class="k">def</span><span class="w"> </span><span class="nf">run_server</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-200">                <span class="n">server</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </span><span id="line-201">
 </span><span id="line-202">            <span class="n">thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">run_server</span><span class="p">,</span> <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -461,7 +461,7 @@
 </span><span id="line-273">        <span class="n">host</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"127.0.0.1"</span><span class="p">,</span>
 </span><span id="line-274">        <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">8000</span><span class="p">,</span>
 </span><span id="line-275">        <span class="n">server_timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.0</span><span class="p">,</span>
-</span><span id="line-276">    <span class="p">):</span>
+</span><span id="line-276">    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-277"><span class="w">        </span><span class="sd">"""</span>
 </span><span id="line-278"><span class="sd">        Initialize the app runner.</span>
 </span><span id="line-279">
@@ -513,7 +513,7 @@
 </span><span id="line-325">        <span class="bp">self</span><span class="o">.</span><span class="n">_client</span> <span class="o">=</span> <span class="n">TestClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="p">)</span>
 </span><span id="line-326">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span>
 </span><span id="line-327">
-</span><span id="line-328">    <span class="k">def</span><span class="w"> </span><span class="nf">_stop_test_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-328">    <span class="k">def</span><span class="w"> </span><span class="nf">_stop_test_client</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-329"><span class="w">        </span><span class="sd">"""Stop TestClient and clean up."""</span>
 </span><span id="line-330">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_client</span><span class="p">:</span>
 </span><span id="line-331">            <span class="c1"># TestClient cleanup is automatic, but we can explicitly close</span>
@@ -541,7 +541,7 @@
 </span><span id="line-353">        <span class="n">server</span> <span class="o">=</span> <span class="n">uvicorn</span><span class="o">.</span><span class="n">Server</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </span><span id="line-354">
 </span><span id="line-355">        <span class="c1"># Run server in background thread</span>
-</span><span id="line-356">        <span class="k">def</span><span class="w"> </span><span class="nf">run_server</span><span class="p">():</span>
+</span><span id="line-356">        <span class="k">def</span><span class="w"> </span><span class="nf">run_server</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-357">            <span class="n">server</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </span><span id="line-358">
 </span><span id="line-359">        <span class="bp">self</span><span class="o">.</span><span class="n">_server_thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">run_server</span><span class="p">,</span> <span class="n">daemon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -563,7 +563,7 @@
 </span><span id="line-375">            <span class="sa">f</span><span class="s2">"Server failed to start within </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">server_timeout</span><span class="si">}</span><span class="s2"> seconds"</span>
 </span><span id="line-376">        <span class="p">)</span>
 </span><span id="line-377">
-</span><span id="line-378">    <span class="k">def</span><span class="w"> </span><span class="nf">_stop_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-378">    <span class="k">def</span><span class="w"> </span><span class="nf">_stop_server</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-379"><span class="w">        </span><span class="sd">"""Forget the server thread; the daemon thread itself keeps running until the process exits."""</span>
 </span><span id="line-380">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_server_running</span><span class="p">:</span>
 </span><span id="line-381">            <span class="c1"># Server will stop when thread is terminated</span>
@@ -762,7 +762,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=cee5022b"></script>
+    <script src="../../_static/documentation_options.js?v=26ffa1e9"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

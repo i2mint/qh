@@ -260,11 +260,11 @@
 </span><span id="line-72"><span class="sd">    True</span>
 </span><span id="line-73"><span class="sd">    """</span>
 </span><span id="line-74">
-</span><span id="line-75">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-75">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-76">        <span class="bp">self</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">TypeHandler</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 </span><span id="line-77">        <span class="bp">self</span><span class="o">.</span><span class="n">_init_builtin_handlers</span><span class="p">()</span>
 </span><span id="line-78">
-</span><span id="line-79">    <span class="k">def</span><span class="w"> </span><span class="nf">_init_builtin_handlers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-79">    <span class="k">def</span><span class="w"> </span><span class="nf">_init_builtin_handlers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-80"><span class="w">        </span><span class="sd">"""Initialize handlers for Python builtins."""</span>
 </span><span id="line-81">        <span class="c1"># Builtins pass through (FastAPI handles them)</span>
 </span><span id="line-82">        <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)]:</span>
@@ -680,7 +680,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=cee5022b"></script>
+    <script src="../../_static/documentation_options.js?v=26ffa1e9"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

@@ -1,4 +1,4 @@
-> built 2026-11-22 11:37 UTC from e32861f (master) · qh 0.0.27. Details: build_info.json
+> built 2026-11-22 20:38 UTC from 3a7d7a8 (master) · qh 0.0.28. Details: build_info.json
 
 # index.html.md
 
@@ -2907,6 +2907,9 @@ True
 
 Add a rule with optional priority (higher = evaluated earlier).
 
+* **Return type:**
+  [`None`](https://docs.python.org/3/builtins/constants.html#None)
+
 #### match(\*, param_name, param_type=<class 'NoneType'>, param_default, func=None, func_name='')
 
 Find first matching rule.
@@ -4680,6 +4683,9 @@ True
 
 Add a rule with optional priority (higher = evaluated earlier).
 
+* **Return type:**
+  [`None`](https://docs.python.org/3/builtins/constants.html#None)
+
 #### match(\*, param_name, param_type=<class 'NoneType'>, param_default, func=None, func_name='')
 
 Find first matching rule.
@@ -5531,18 +5537,16 @@ Register a type in the global registry.
 
 # About this build
 
-This documentation was built on **2026-11-22 11:37 UTC** from commit <a href="https://github.com/i2mint/qh/commit/e32861f84d8725435c298fd00129762cd224cd42"><code>e32861f</code></a> on branch <code>master</code>, for **qh 0.0.27** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-22 20:38 UTC** from commit <a href="https://github.com/i2mint/qh/commit/3a7d7a8d1cf5d329df25a477ae7cb9caeb1ca80c"><code>3a7d7a8</code></a> on branch <code>master</code>, for **qh 0.0.28** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.27) is behind the latest release on PyPI (0.0.28): `pip install qh` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/qh/commit/e32861f84d8725435c298fd00129762cd224cd42"><code>e32861f84d8725435c298fd00129762cd224cd42</code></a> |
+| Commit              | <a href="https://github.com/i2mint/qh/commit/3a7d7a8d1cf5d329df25a477ae7cb9caeb1ca80c"><code>3a7d7a8d1cf5d329df25a477ae7cb9caeb1ca80c</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
 | Tags at this commit | none                                                                                                                                             |
 | Working tree        | clean                                                                                                                                            |
@@ -5553,9 +5557,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/qh</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/qh/actions/runs/45018036413">45018036413</a>            |
+| Run          | <a href="https://github.com/i2mint/qh/actions/runs/45067360524">45067360524</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>e32861f84d8725435c298fd00129762cd224cd42</code> (in the history of the built commit) |
+| Event commit | <code>3a7d7a8d1cf5d329df25a477ae7cb9caeb1ca80c</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5580,13 +5584,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/qh/0.0.28/">0.0.28</a>, newer than the documented version (0.0.27).
+Latest release: <a href="https://pypi.org/project/qh/0.0.28/">0.0.28</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/qh && cd qh
-git checkout e32861f84d8725435c298fd00129762cd224cd42
+git checkout 3a7d7a8d1cf5d329df25a477ae7cb9caeb1ca80c
 pip install "epythet==0.2.23"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

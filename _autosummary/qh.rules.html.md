@@ -146,6 +146,9 @@ True
 
 Add a rule with optional priority (higher = evaluated earlier).
 
+* **Return type:**
+  [`None`](https://docs.python.org/3/builtins/constants.html#None)
+
 #### match(\*, param_name, param_type=<class 'NoneType'>, param_default, func=None, func_name='')
 
 Find first matching rule.

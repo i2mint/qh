@@ -314,7 +314,7 @@
 </span><span id="line-105"><span class="k">class</span><span class="w"> </span><span class="nc">InMemoryTaskStore</span><span class="p">(</span><span class="n">TaskStore</span><span class="p">):</span>
 </span><span id="line-106"><span class="w">    </span><span class="sd">"""Simple in-memory task storage (not persistent, single-process only)."""</span>
 </span><span id="line-107">
-</span><span id="line-108">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+</span><span id="line-108">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ttl</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-109"><span class="w">        </span><span class="sd">"""</span>
 </span><span id="line-110"><span class="sd">        Initialize in-memory store.</span>
 </span><span id="line-111">
@@ -325,7 +325,7 @@
 </span><span id="line-116">        <span class="bp">self</span><span class="o">.</span><span class="n">_lock</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">RLock</span><span class="p">()</span>
 </span><span id="line-117">        <span class="bp">self</span><span class="o">.</span><span class="n">ttl</span> <span class="o">=</span> <span class="n">ttl</span>
 </span><span id="line-118">
-</span><span id="line-119">    <span class="k">def</span><span class="w"> </span><span class="nf">_cleanup_expired</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+</span><span id="line-119">    <span class="k">def</span><span class="w"> </span><span class="nf">_cleanup_expired</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-120"><span class="w">        </span><span class="sd">"""Remove expired tasks."""</span>
 </span><span id="line-121">        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ttl</span><span class="p">:</span>
 </span><span id="line-122">            <span class="k">return</span>
@@ -443,7 +443,7 @@
 </span><span id="line-207"><span class="k">class</span><span class="w"> </span><span class="nc">ThreadPoolTaskExecutor</span><span class="p">(</span><span class="n">TaskExecutor</span><span class="p">):</span>
 </span><span id="line-208"><span class="w">    </span><span class="sd">"""Execute tasks using a thread pool (good for I/O-bound tasks)."""</span>
 </span><span id="line-209">
-</span><span id="line-210">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_workers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+</span><span id="line-210">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_workers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-211"><span class="w">        </span><span class="sd">"""</span>
 </span><span id="line-212"><span class="sd">        Initialize thread pool executor.</span>
 </span><span id="line-213">
@@ -465,7 +465,7 @@
 </span><span id="line-227"><span class="w">        </span><span class="sd">"""``TaskExecutor.submit_task``: run ``func`` on the thread pool, calling</span>
 </span><span id="line-228"><span class="sd">        ``callback`` with its result or exception when it finishes."""</span>
 </span><span id="line-229">
-</span><span id="line-230">        <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">():</span>
+</span><span id="line-230">        <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-231">            <span class="k">try</span><span class="p">:</span>
 </span><span id="line-232">                <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </span><span id="line-233">                <span class="n">callback</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -489,7 +489,7 @@
 </span><span id="line-244"><span class="k">class</span><span class="w"> </span><span class="nc">ProcessPoolTaskExecutor</span><span class="p">(</span><span class="n">TaskExecutor</span><span class="p">):</span>
 </span><span id="line-245"><span class="w">    </span><span class="sd">"""Execute tasks using a process pool (good for CPU-bound tasks)."""</span>
 </span><span id="line-246">
-</span><span id="line-247">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_workers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+</span><span id="line-247">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_workers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-248"><span class="w">        </span><span class="sd">"""</span>
 </span><span id="line-249"><span class="sd">        Initialize process pool executor.</span>
 </span><span id="line-250">
@@ -516,7 +516,7 @@
 </span><span id="line-269">
 </span><span id="line-270">        <span class="n">future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">wrapper</span><span class="p">)</span>
 </span><span id="line-271">
-</span><span id="line-272">        <span class="k">def</span><span class="w"> </span><span class="nf">done_callback</span><span class="p">(</span><span class="n">fut</span><span class="p">):</span>
+</span><span id="line-272">        <span class="k">def</span><span class="w"> </span><span class="nf">done_callback</span><span class="p">(</span><span class="n">fut</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-273">            <span class="k">try</span><span class="p">:</span>
 </span><span id="line-274">                <span class="n">result</span> <span class="o">=</span> <span class="n">fut</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
 </span><span id="line-275">                <span class="n">callback</span><span class="p">(</span><span class="n">task_id</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -643,7 +643,7 @@
 </span><span id="line-377"><span class="sd">    This is the main coordinator between stores, executors, and HTTP handlers.</span>
 </span><span id="line-378"><span class="sd">    """</span>
 </span><span id="line-379">
-</span><span id="line-380">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TaskConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+</span><span id="line-380">    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TaskConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 </span><span id="line-381"><span class="w">        </span><span class="sd">"""</span>
 </span><span id="line-382"><span class="sd">        Initialize task manager.</span>
 </span><span id="line-383">
@@ -918,7 +918,7 @@
 </footer>
     </div>
     
-    <script src="../../_static/documentation_options.js?v=cee5022b"></script>
+    <script src="../../_static/documentation_options.js?v=26ffa1e9"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
