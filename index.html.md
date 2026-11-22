@@ -79,7 +79,7 @@ app = mk_app([expensive_computation], async_funcs=["expensive_computation"])
 
 Now clients can choose sync or async execution:
 
-```python
+```http
 # Synchronous (blocks for 5 seconds)
 POST /expensive_computation?n=10
 → 20
@@ -99,6 +99,7 @@ GET /tasks/abc-123/result?wait=true&timeout=10
 
 **Advanced async configuration:**
 
+<!-- wads-docs: skip fragment; uses functions defined by the reader (placeholders) -->
 ```python
 from qh import mk_app, TaskConfig, ProcessPoolTaskExecutor
 
@@ -235,7 +236,7 @@ def greet(name: str) -> str:
 app = mk_app([greet])
 
 # Export OpenAPI spec
-export_openapi(app, "api.json")
+export_openapi(app, output_file="api.json")
 
 # Generate Python client
 client = mk_client_from_app(app)
@@ -244,7 +245,8 @@ result = client.greet(name="World")  # "Hello, World!"
 # Generate TypeScript client
 from qh import export_ts_client
 
-export_ts_client(app, "client.ts")
+ts_source = export_ts_client(export_openapi(app))  # a string of TypeScript
+open("client.ts", "w").write(ts_source)
 ```
 
 ### 🎨 Custom Types
@@ -262,7 +264,7 @@ def custom_deserializer(s: str) -> datetime:
     return datetime.fromisoformat(s)
 
 
-register_type(datetime, serialize=custom_serializer, deserialize=custom_deserializer)
+register_type(datetime, to_json=custom_serializer, from_json=custom_deserializer)
 
 
 def get_event_time(event_id: str) -> datetime:
@@ -274,6 +276,7 @@ app = mk_app([get_event_time])
 
 ### ⚙️ Global Configuration
 
+<!-- wads-docs: skip fragment; add, multiply, divide are the reader's functions -->
 ```python
 from qh import mk_app, AppConfig
 
@@ -290,6 +293,7 @@ app = mk_app(
 
 ### 🧪 Testing Utilities
 
+<!-- wads-docs: skip fragment; needs the app of the example above -->
 ```python
 from qh import test_app, serve_app, quick_test
 
@@ -478,8 +482,10 @@ The built-in async functionality is perfect for most use cases, but if you need 
 pip install au
 ```
 
+<!-- wads-docs: skip needs the rq and redis packages and a Redis server -->
 ```python
-from au import async_compute, RQBackend
+from au import async_compute
+from au.backends.rq_backend import RQBackend
 from qh import mk_app, TaskConfig
 
 
@@ -496,6 +502,7 @@ app = mk_app([heavy_computation])
 
 ### Custom Task Executors
 
+<!-- wads-docs: skip fragment; uses functions defined by the reader (placeholders) -->
 ```python
 from qh import TaskExecutor, TaskConfig
 from concurrent.futures import ThreadPoolExecutor
@@ -531,6 +538,7 @@ app = mk_app(
 
 Since `qh` creates a FastAPI app, you can use all FastAPI features:
 
+<!-- wads-docs: skip fragment; uses functions defined by the reader (placeholders) -->
 ```python
 from qh import mk_app
 from fastapi.middleware.cors import CORSMiddleware
@@ -569,6 +577,7 @@ Clients now see less by default; each old behaviour is one keyword away:
 
 To restrict tasks to the caller that created them, give the `TaskConfig` a `task_owner(request) -> str`; anyone else gets a 404 from the task endpoints:
 
+<!-- wads-docs: skip fragment; uses functions defined by the reader (placeholders) -->
 ```python
 from fastapi import HTTPException
 
@@ -593,6 +602,7 @@ The async task feature is fully backward compatible. Existing apps will work wit
 
 To enable async:
 
+<!-- wads-docs: skip fragment; uses functions defined by the reader (placeholders) -->
 ```python
 # Old (still works)
 app = mk_app([my_func])

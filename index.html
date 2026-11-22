@@ -184,24 +184,25 @@
 </span></code></pre></div>
 </div>
 <p>Now clients can choose sync or async execution:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="c1"># Synchronous (blocks for 5 seconds)</span>
-</span><span id="line-2"><span class="n">POST</span> <span class="o">/</span><span class="n">expensive_computation</span><span class="err">?</span><span class="n">n</span><span class="o">=</span><span class="mi">10</span>
-</span><span id="line-3"><span class="err">→</span> <span class="mi">20</span>
+<div class="highlight-http notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="err"># Synchronous (blocks for 5 seconds)</span>
+</span><span id="line-2"><span class="err">POST /expensive_computation?n=10</span>
+</span><span id="line-3"><span class="err">→ 20</span>
 </span><span id="line-4">
-</span><span id="line-5"><span class="c1"># Asynchronous (returns immediately)</span>
-</span><span id="line-6"><span class="n">POST</span> <span class="o">/</span><span class="n">expensive_computation</span><span class="err">?</span><span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="o">&amp;</span><span class="k">async</span><span class="o">=</span><span class="n">true</span>
-</span><span id="line-7"><span class="err">→</span> <span class="p">{</span><span class="s2">"task_id"</span><span class="p">:</span> <span class="s2">"abc-123"</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="s2">"submitted"</span><span class="p">}</span>
+</span><span id="line-5"><span class="err"># Asynchronous (returns immediately)</span>
+</span><span id="line-6"><span class="err">POST /expensive_computation?n=10&amp;async=true</span>
+</span><span id="line-7"><span class="err">→ {"task_id": "abc-123", "status": "submitted"}</span>
 </span><span id="line-8">
-</span><span id="line-9"><span class="c1"># Check status</span>
-</span><span id="line-10"><span class="n">GET</span> <span class="o">/</span><span class="n">tasks</span><span class="o">/</span><span class="n">abc</span><span class="o">-</span><span class="mi">123</span><span class="o">/</span><span class="n">status</span>
-</span><span id="line-11"><span class="err">→</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"running"</span><span class="p">,</span> <span class="s2">"started_at"</span><span class="p">:</span> <span class="mi">1234567890</span><span class="p">}</span>
+</span><span id="line-9"><span class="err"># Check status</span>
+</span><span id="line-10"><span class="err">GET /tasks/abc-123/status</span>
+</span><span id="line-11"><span class="err">→ {"status": "running", "started_at": 1234567890}</span>
 </span><span id="line-12">
-</span><span id="line-13"><span class="c1"># Get result (blocks until ready, or returns immediately if done)</span>
-</span><span id="line-14"><span class="n">GET</span> <span class="o">/</span><span class="n">tasks</span><span class="o">/</span><span class="n">abc</span><span class="o">-</span><span class="mi">123</span><span class="o">/</span><span class="n">result</span><span class="err">?</span><span class="n">wait</span><span class="o">=</span><span class="n">true</span><span class="o">&amp;</span><span class="n">timeout</span><span class="o">=</span><span class="mi">10</span>
-</span><span id="line-15"><span class="err">→</span> <span class="p">{</span><span class="s2">"status"</span><span class="p">:</span> <span class="s2">"completed"</span><span class="p">,</span> <span class="s2">"result"</span><span class="p">:</span> <span class="mi">20</span><span class="p">}</span>
+</span><span id="line-13"><span class="err"># Get result (blocks until ready, or returns immediately if done)</span>
+</span><span id="line-14"><span class="err">GET /tasks/abc-123/result?wait=true&amp;timeout=10</span>
+</span><span id="line-15"><span class="err">→ {"status": "completed", "result": 20}</span>
 </span></code></pre></div>
 </div>
 <p><strong>Advanced async configuration:</strong></p>
+
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span><span class="p">,</span> <span class="n">TaskConfig</span><span class="p">,</span> <span class="n">ProcessPoolTaskExecutor</span>
 </span><span id="line-2">
 </span><span id="line-3"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">(</span>
@@ -333,7 +334,7 @@
 </span><span id="line-8"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">([</span><span class="n">greet</span><span class="p">])</span>
 </span><span id="line-9">
 </span><span id="line-10"><span class="c1"># Export OpenAPI spec</span>
-</span><span id="line-11"><span class="n">export_openapi</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="s2">"api.json"</span><span class="p">)</span>
+</span><span id="line-11"><span class="n">export_openapi</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="s2">"api.json"</span><span class="p">)</span>
 </span><span id="line-12">
 </span><span id="line-13"><span class="c1"># Generate Python client</span>
 </span><span id="line-14"><span class="n">client</span> <span class="o">=</span> <span class="n">mk_client_from_app</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
@@ -342,7 +343,8 @@
 </span><span id="line-17"><span class="c1"># Generate TypeScript client</span>
 </span><span id="line-18"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">export_ts_client</span>
 </span><span id="line-19">
-</span><span id="line-20"><span class="n">export_ts_client</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="s2">"client.ts"</span><span class="p">)</span>
+</span><span id="line-20"><span class="n">ts_source</span> <span class="o">=</span> <span class="n">export_ts_client</span><span class="p">(</span><span class="n">export_openapi</span><span class="p">(</span><span class="n">app</span><span class="p">))</span>  <span class="c1"># a string of TypeScript</span>
+</span><span id="line-21"><span class="nb">open</span><span class="p">(</span><span class="s2">"client.ts"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ts_source</span><span class="p">)</span>
 </span></code></pre></div>
 </div>
 </section>
@@ -360,7 +362,7 @@
 </span><span id="line-10">    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 </span><span id="line-11">
 </span><span id="line-12">
-</span><span id="line-13"><span class="n">register_type</span><span class="p">(</span><span class="n">datetime</span><span class="p">,</span> <span class="n">serialize</span><span class="o">=</span><span class="n">custom_serializer</span><span class="p">,</span> <span class="n">deserialize</span><span class="o">=</span><span class="n">custom_deserializer</span><span class="p">)</span>
+</span><span id="line-13"><span class="n">register_type</span><span class="p">(</span><span class="n">datetime</span><span class="p">,</span> <span class="n">to_json</span><span class="o">=</span><span class="n">custom_serializer</span><span class="p">,</span> <span class="n">from_json</span><span class="o">=</span><span class="n">custom_deserializer</span><span class="p">)</span>
 </span><span id="line-14">
 </span><span id="line-15">
 </span><span id="line-16"><span class="k">def</span><span class="w"> </span><span class="nf">get_event_time</span><span class="p">(</span><span class="n">event_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
@@ -373,6 +375,7 @@
 </section>
 <section id="global-configuration">
 <span id="-global-configuration"></span><h3>⚙️ Global Configuration<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#global-configuration" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#global-configuration'">¶</a></h3>
+
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span><span class="p">,</span> <span class="n">AppConfig</span>
 </span><span id="line-2">
 </span><span id="line-3"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">(</span>
@@ -389,6 +392,7 @@
 </section>
 <section id="testing-utilities">
 <span id="-testing-utilities"></span><h3>🧪 Testing Utilities<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#testing-utilities" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#testing-utilities'">¶</a></h3>
+
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">test_app</span><span class="p">,</span> <span class="n">serve_app</span><span class="p">,</span> <span class="n">quick_test</span>
 </span><span id="line-2">
 </span><span id="line-3"><span class="c1"># Quick inline testing</span>
@@ -626,24 +630,27 @@
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><code><span id="line-1">pip<span class="w"> </span>install<span class="w"> </span>au
 </span></code></pre></div>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">au</span><span class="w"> </span><span class="kn">import</span> <span class="n">async_compute</span><span class="p">,</span> <span class="n">RQBackend</span>
-</span><span id="line-2"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span><span class="p">,</span> <span class="n">TaskConfig</span>
-</span><span id="line-3">
+
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">au</span><span class="w"> </span><span class="kn">import</span> <span class="n">async_compute</span>
+</span><span id="line-2"><span class="kn">from</span><span class="w"> </span><span class="nn">au.backends.rq_backend</span><span class="w"> </span><span class="kn">import</span> <span class="n">RQBackend</span>
+</span><span id="line-3"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span><span class="p">,</span> <span class="n">TaskConfig</span>
 </span><span id="line-4">
-</span><span id="line-5"><span class="c1"># Configure au with Redis backend</span>
-</span><span id="line-6"><span class="nd">@async_compute</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">RQBackend</span><span class="p">(</span><span class="s2">"redis://localhost:6379"</span><span class="p">))</span>
-</span><span id="line-7"><span class="k">def</span><span class="w"> </span><span class="nf">heavy_computation</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-</span><span id="line-8">    <span class="k">return</span> <span class="n">n</span> <span class="o">*</span> <span class="mi">2</span>
-</span><span id="line-9">
+</span><span id="line-5">
+</span><span id="line-6"><span class="c1"># Configure au with Redis backend</span>
+</span><span id="line-7"><span class="nd">@async_compute</span><span class="p">(</span><span class="n">backend</span><span class="o">=</span><span class="n">RQBackend</span><span class="p">(</span><span class="s2">"redis://localhost:6379"</span><span class="p">))</span>
+</span><span id="line-8"><span class="k">def</span><span class="w"> </span><span class="nf">heavy_computation</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+</span><span id="line-9">    <span class="k">return</span> <span class="n">n</span> <span class="o">*</span> <span class="mi">2</span>
 </span><span id="line-10">
-</span><span id="line-11"><span class="c1"># Use with qh</span>
-</span><span id="line-12"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">([</span><span class="n">heavy_computation</span><span class="p">])</span>
-</span><span id="line-13"><span class="c1"># Now heavy_computation can be distributed across multiple workers</span>
+</span><span id="line-11">
+</span><span id="line-12"><span class="c1"># Use with qh</span>
+</span><span id="line-13"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">([</span><span class="n">heavy_computation</span><span class="p">])</span>
+</span><span id="line-14"><span class="c1"># Now heavy_computation can be distributed across multiple workers</span>
 </span></code></pre></div>
 </div>
 </section>
 <section id="custom-task-executors">
 <h3>Custom Task Executors<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#custom-task-executors" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#custom-task-executors'">¶</a></h3>
+
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">TaskExecutor</span><span class="p">,</span> <span class="n">TaskConfig</span>
 </span><span id="line-2"><span class="kn">from</span><span class="w"> </span><span class="nn">concurrent.futures</span><span class="w"> </span><span class="kn">import</span> <span class="n">ThreadPoolExecutor</span>
 </span><span id="line-3">
@@ -678,6 +685,7 @@
 <section id="middleware-and-extensions">
 <h3>Middleware and Extensions<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#middleware-and-extensions" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#middleware-and-extensions'">¶</a></h3>
 <p>Since <code class="docutils literal notranslate"><span class="pre">qh</span></code> creates a FastAPI app, you can use all FastAPI features:</p>
+
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">qh</span><span class="w"> </span><span class="kn">import</span> <span class="n">mk_app</span>
 </span><span id="line-2"><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi.middleware.cors</span><span class="w"> </span><span class="kn">import</span> <span class="n">CORSMiddleware</span>
 </span><span id="line-3">
@@ -728,6 +736,7 @@
 </table>
 <p><code class="docutils literal notranslate"><span class="pre">qh.core</span></code> is removed: its <code class="docutils literal notranslate"><span class="pre">mk_fastapi_app</span></code> answered 500 on every call since it was added. Use <code class="docutils literal notranslate"><span class="pre">qh.mk_app</span></code> (or <code class="docutils literal notranslate"><span class="pre">qh.base.mk_fastapi_app</span></code>).</p>
 <p>To restrict tasks to the caller that created them, give the <code class="docutils literal notranslate"><span class="pre">TaskConfig</span></code> a <code class="docutils literal notranslate"><span class="pre">task_owner(request)</span> <span class="pre">-&gt;</span> <span class="pre">str</span></code>; anyone else gets a 404 from the task endpoints:</p>
+
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="kn">from</span><span class="w"> </span><span class="nn">fastapi</span><span class="w"> </span><span class="kn">import</span> <span class="n">HTTPException</span>
 </span><span id="line-2">
 </span><span id="line-3">
@@ -750,6 +759,7 @@
 <span id="from-v040-to-v050"></span><h3>From v0.4.0 to v0.5.0<a @click.prevent="window.navigator.clipboard.writeText($el.href); $el.setAttribute('data-tooltip', 'Copied!'); setTimeout(() =&gt; $el.setAttribute('data-tooltip', 'Copy link to this element'), 2000)" aria-label="Copy link to this element" class="headerlink" data-tooltip="Copy link to this element" href="#from-v0-4-0-to-v0-5-0" x-intersect.margin.0%.0%.-70%.0%="activeSection = '#from-v0-4-0-to-v0-5-0'">¶</a></h3>
 <p>The async task feature is fully backward compatible. Existing apps will work without changes.</p>
 <p>To enable async:</p>
+
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><code><span id="line-1"><span class="c1"># Old (still works)</span>
 </span><span id="line-2"><span class="n">app</span> <span class="o">=</span> <span class="n">mk_app</span><span class="p">([</span><span class="n">my_func</span><span class="p">])</span>
 </span><span id="line-3">
@@ -787,7 +797,7 @@
 
 </section>
 </section>
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-22 20:38 UTC from <a href="https://github.com/i2mint/qh/commit/3a7d7a8d1cf5d329df25a477ae7cb9caeb1ca80c">3a7d7a8</a> (master) · qh 0.0.28 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-11-22 22:14 UTC from <a href="https://github.com/i2mint/qh/commit/db0ee23fbd981118eb614ece35f3acc18bb22c80">db0ee23</a> (master) · qh 0.0.28 · <a href="about-this-build.html">about this build</a></p>
 </div></div><aside class="hidden text-sm xl:block" id="right-sidebar">
 <div class="sticky top-16 -mt-10 max-h-[calc(100vh-5rem)] h-full overflow-y-auto pt-6 space-y-2"><p class="font-medium">On this page</p>
 <ul>
