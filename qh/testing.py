@@ -196,7 +196,7 @@ def service_running(
             )
             server = uvicorn.Server(config)
 
-            def run_server():
+            def run_server() -> None:
                 server.run()
 
             thread = threading.Thread(target=run_server, daemon=True)
@@ -273,7 +273,7 @@ class AppRunner:
         host: str = "127.0.0.1",
         port: int = 8000,
         server_timeout: float = 2.0,
-    ):
+    ) -> None:
         """
         Initialize the app runner.
 
@@ -325,7 +325,7 @@ class AppRunner:
         self._client = TestClient(self.app)
         return self._client
 
-    def _stop_test_client(self):
+    def _stop_test_client(self) -> None:
         """Stop TestClient and clean up."""
         if self._client:
             # TestClient cleanup is automatic, but we can explicitly close
@@ -353,7 +353,7 @@ class AppRunner:
         server = uvicorn.Server(config)
 
         # Run server in background thread
-        def run_server():
+        def run_server() -> None:
             server.run()
 
         self._server_thread = threading.Thread(target=run_server, daemon=True)
@@ -375,7 +375,7 @@ class AppRunner:
             f"Server failed to start within {self.server_timeout} seconds"
         )
 
-    def _stop_server(self):
+    def _stop_server(self) -> None:
         """Forget the server thread; the daemon thread itself keeps running until the process exits."""
         if self._server_running:
             # Server will stop when thread is terminated

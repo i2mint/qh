@@ -50,7 +50,7 @@ class AuTaskStore(TaskStore):
     Maps between qh's TaskInfo and au's computation results.
     """
 
-    def __init__(self, au_store: "ComputationStore"):
+    def __init__(self, au_store: "ComputationStore") -> None:
         if not HAS_AU:
             raise ImportError("au is required. Install with: pip install au")
         self.au_store = au_store
@@ -151,7 +151,7 @@ class AuTaskExecutor(TaskExecutor):
         self,
         au_backend: "ComputationBackend",
         au_store: "ComputationStore",
-    ):
+    ) -> None:
         if not HAS_AU:
             raise ImportError("au is required. Install with: pip install au")
         self.au_backend = au_backend

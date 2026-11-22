@@ -3,7 +3,7 @@
 from fastapi.testclient import TestClient
 
 
-def test_store_dispatch(app):
+def test_store_dispatch(app) -> None:
     from time import sleep
 
     client = TestClient(app)

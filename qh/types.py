@@ -72,11 +72,11 @@ class TypeRegistry:
     True
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.handlers: Dict[Type, TypeHandler] = {}
         self._init_builtin_handlers()
 
-    def _init_builtin_handlers(self):
+    def _init_builtin_handlers(self) -> None:
         """Initialize handlers for Python builtins."""
         # Builtins pass through (FastAPI handles them)
         for typ in [str, int, float, bool, list, dict, type(None)]:
