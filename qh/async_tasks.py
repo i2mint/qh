@@ -105,7 +105,7 @@ class TaskStore(ABC):
 class InMemoryTaskStore(TaskStore):
     """Simple in-memory task storage (not persistent, single-process only)."""
 
-    def __init__(self, ttl: Optional[int] = None):
+    def __init__(self, ttl: Optional[int] = None) -> None:
         """
         Initialize in-memory store.
 
@@ -116,7 +116,7 @@ class InMemoryTaskStore(TaskStore):
         self._lock = threading.RLock()
         self.ttl = ttl
 
-    def _cleanup_expired(self):
+    def _cleanup_expired(self) -> None:
         """Remove expired tasks."""
         if not self.ttl:
             return
@@ -207,7 +207,7 @@ class TaskExecutor(ABC):
 class ThreadPoolTaskExecutor(TaskExecutor):
     """Execute tasks using a thread pool (good for I/O-bound tasks)."""
 
-    def __init__(self, max_workers: Optional[int] = None):
+    def __init__(self, max_workers: Optional[int] = None) -> None:
         """
         Initialize thread pool executor.
 
@@ -227,7 +227,7 @@ class ThreadPoolTaskExecutor(TaskExecutor):
         """``TaskExecutor.submit_task``: run ``func`` on the thread pool, calling
         ``callback`` with its result or exception when it finishes."""
 
-        def wrapper():
+        def wrapper() -> None:
             try:
                 result = func(*args, **kwargs)
                 callback(task_id, result, None)
@@ -244,7 +244,7 @@ class ThreadPoolTaskExecutor(TaskExecutor):
 class ProcessPoolTaskExecutor(TaskExecutor):
     """Execute tasks using a process pool (good for CPU-bound tasks)."""
 
-    def __init__(self, max_workers: Optional[int] = None):
+    def __init__(self, max_workers: Optional[int] = None) -> None:
         """
         Initialize process pool executor.
 
@@ -269,7 +269,7 @@ class ProcessPoolTaskExecutor(TaskExecutor):
 
         future = self._pool.submit(wrapper)
 
-        def done_callback(fut):
+        def done_callback(fut) -> None:
             try:
                 result = fut.result()
                 callback(task_id, result, None)
@@ -377,7 +377,7 @@ class TaskManager:
     This is the main coordinator between stores, executors, and HTTP handlers.
     """
 
-    def __init__(self, config: Optional[TaskConfig] = None):
+    def __init__(self, config: Optional[TaskConfig] = None) -> None:
         """
         Initialize task manager.
 

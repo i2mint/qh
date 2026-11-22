@@ -21,18 +21,19 @@ curl -H "Content-Type: application/json" -X POST -d '{"a": [1,2,3], "b": [4,5,6]
 ```
 
 """
+
 from qh import mk_http_service_app
 
 
-def poke():
-    return 'here is a peek'
+def poke() -> str:
+    return "here is a peek"
 
 
 def foo(x: int):
     return x + 2
 
 
-def bar(name='world'):
+def bar(name="world") -> str:
     return f"Hello {name}!"
 
 
@@ -40,6 +41,7 @@ def bar(name='world'):
 #   `app = mk_http_service_app([poke, foo, bar])
 
 # But check out this one:
+
 
 def add_numpy_arrays(a, b):
     return (a + b).tolist()
@@ -53,15 +55,9 @@ def add_numpy_arrays(a, b):
 from qh.trans import mk_json_handler_from_name_mapping
 import numpy as np
 
-input_trans = mk_json_handler_from_name_mapping(
-    {
-        "a": np.array,
-        "b": np.array
-    }
-)
+input_trans = mk_json_handler_from_name_mapping({"a": np.array, "b": np.array})
 
-app = mk_http_service_app([poke, foo, bar, add_numpy_arrays],
-                          input_trans=input_trans)
+app = mk_http_service_app([poke, foo, bar, add_numpy_arrays], input_trans=input_trans)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run()  # note:  you can configure a bunch of stuff here (port, cors, etc.) but we're taking defaults

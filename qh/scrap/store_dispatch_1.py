@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from collections.abc import MutableMapping
 
-backend_test_data = {'test_key': 'test_value', 'test_key_2': 2, 'test_key_3': [1, 2, 3]}
+backend_test_data = {"test_key": "test_value", "test_key_2": 2, "test_key_3": [1, 2, 3]}
 
 
 @dataclass
@@ -19,9 +19,9 @@ class StoreAccess:
     store: MutableMapping
 
     @classmethod
-    def from_uri(cls, uri: str = 'test_uri'):
+    def from_uri(cls, uri: str = "test_uri"):
         """code that makes a MutableMapping interface for the data pointed to by uri"""
-        if uri == 'test_uri':
+        if uri == "test_uri":
             data = backend_test_data
             return cls(data)
 
@@ -31,10 +31,10 @@ class StoreAccess:
     def read(self, key):
         return self.store[key]
 
-    def write(self, key, value):
+    def write(self, key, value) -> None:
         self.store[key] = value
 
-    def delete(self, key):
+    def delete(self, key) -> None:
         del self.store[key]
 
 

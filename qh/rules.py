@@ -264,10 +264,10 @@ class RuleChain:
     True
     """
 
-    def __init__(self, rules: Optional[list[Rule]] = None):
+    def __init__(self, rules: Optional[list[Rule]] = None) -> None:
         self.rules = rules or []
 
-    def add_rule(self, rule: Rule, priority: int = 0):
+    def add_rule(self, rule: Rule, priority: int = 0) -> None:
         """Add a rule with optional priority (higher = evaluated earlier)."""
         self.rules.append((priority, rule))
         self.rules.sort(key=lambda x: -x[0])  # Sort by priority descending

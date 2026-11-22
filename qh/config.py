@@ -222,7 +222,7 @@ def resolve_route_config(
 class ConfigBuilder:
     """Fluent interface for building configurations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.app_config = AppConfig()
         self.route_configs: Dict[Callable, RouteConfig] = {}
 
@@ -258,7 +258,7 @@ class ConfigBuilder:
 class FunctionConfigBuilder:
     """Fluent interface for building function-specific configuration."""
 
-    def __init__(self, parent: ConfigBuilder, func: Callable):
+    def __init__(self, parent: ConfigBuilder, func: Callable) -> None:
         self.parent = parent
         self.func = func
         self.config = RouteConfig()

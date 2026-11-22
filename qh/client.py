@@ -20,7 +20,9 @@ class HttpClient:
     under the hood.
     """
 
-    def __init__(self, base_url: str, session: Optional[requests.Session] = None):
+    def __init__(
+        self, base_url: str, session: Optional[requests.Session] = None
+    ) -> None:
         """
         Initialize HTTP client.
 
@@ -274,7 +276,7 @@ def mk_client_from_app(app, base_url: str = "http://testserver") -> HttpClient:
 
     # Wrap TestClient to look like requests.Session
     class TestClientWrapper:
-        def __init__(self, test_client):
+        def __init__(self, test_client) -> None:
             self._client = test_client
 
         def get(self, url, **kwargs):

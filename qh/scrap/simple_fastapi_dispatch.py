@@ -36,15 +36,15 @@ def mk_http_service_app(functions: list[Callable]):
 
 
 # Example functions to expose
-def poke():
-    return 'here is a peek'
+def poke() -> str:
+    return "here is a peek"
 
 
 def foo(x: int):
     return x + 2
 
 
-def bar(name: str = 'world'):
+def bar(name: str = "world") -> str:
     return f"Hello {name}!"
 
 
