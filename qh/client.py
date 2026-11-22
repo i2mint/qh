@@ -8,7 +8,6 @@ preserving the original function signatures and behavior.
 from typing import Any, Callable, Dict, Optional, get_type_hints
 import inspect
 import requests
-from urllib.parse import urljoin
 
 from qh.paths import fill_path_params, path_param_names
 
@@ -82,7 +81,8 @@ class HttpClient:
             request_data = {k: v for k, v in kwargs.items() if k not in path_params}
 
             # Make the HTTP request
-            url = urljoin(self.base_url, actual_path)
+            # join by string: urljoin drops a base-URL path prefix for an absolute path
+            url = self.base_url.rstrip("/") + "/" + actual_path.lstrip("/")
             method_lower = method.lower()
 
             try:
