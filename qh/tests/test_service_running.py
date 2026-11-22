@@ -28,17 +28,39 @@ def test_service_running_with_app():
 
 
 def test_service_running_already_running():
-    """Test service_running with an already-running external service."""
-    # Using GitHub API as a reliably running external service
-    with service_running(url='https://api.github.com') as info:
-        assert info.url == 'https://api.github.com'
-        assert info.was_already_running
-        assert info.thread is None
-        assert info.app is None
+    """Test service_running with an already-running external service.
 
-        # Verify service is accessible
-        response = requests.get(f'{info.url}/users/octocat')
-        assert response.status_code == 200
+    The "external" service is a local one started by the test, so the test needs no
+    network (i2mint/qh#36: a live call to api.github.com hit CI rate limits).
+    """
+    import threading
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+
+    class _Ok(BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(b'ok')
+
+        def log_message(self, *args):  # keep test output quiet
+            pass
+
+    server = HTTPServer(('127.0.0.1', 0), _Ok)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    url = f'http://127.0.0.1:{server.server_port}'
+    try:
+        with service_running(url=url) as info:
+            assert info.url == url
+            assert info.was_already_running
+            assert info.thread is None
+            assert info.app is None
+
+            # Verify service is accessible
+            response = requests.get(f'{info.url}/users/octocat')
+            assert response.status_code == 200
+    finally:
+        server.shutdown()
+        server.server_close()
 
 
 def test_service_running_validation():
