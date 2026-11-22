@@ -4,7 +4,9 @@ Endpoint creation using i2.Wrap to transform functions into FastAPI routes.
 This module bridges Python functions and HTTP endpoints via transformation rules.
 """
 
-from typing import Any, Callable, Dict, Optional, get_type_hints
+import types
+from typing import Any, Callable, Dict, Optional, Union, get_args, get_origin, get_type_hints
+from starlette.concurrency import run_in_threadpool
 from fastapi import Request, Response, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -135,9 +137,19 @@ def apply_egress_transform(
 _CONVERTIBLE = (int, float, bool, complex)
 
 
+def _unwrap_optional(tp: Any) -> Any:
+    """``X | None`` / ``Optional[X]`` -> ``X``; anything else unchanged."""
+    if get_origin(tp) in (Union, getattr(types, "UnionType", Union)):
+        args = [a for a in get_args(tp) if a is not type(None)]
+        if len(args) == 1:
+            return args[0]
+    return tp
+
+
 def _mk_converter(name: str, target_type: Any) -> Optional[Callable[[Any], Any]]:
     """An ingress converting a string from the URL to ``target_type`` (a plain class),
     answering 422 when it doesn't convert; ``None`` when there is nothing to convert."""
+    target_type = _unwrap_optional(target_type)
     if target_type not in _CONVERTIBLE:
         return None
 
@@ -191,6 +203,7 @@ def make_endpoint(
     route_config: RouteConfig,
     *,
     expose_errors: bool = DFLT_EXPOSE_ERRORS,
+    sync_runner: Optional[Callable] = run_in_threadpool,
 ) -> Callable:
     """
     Create FastAPI endpoint from a function using i2.Wrap.
@@ -202,6 +215,10 @@ def make_endpoint(
             client as ``"Error in <func>: <exception>"``. By default the client
             gets a generic message with an error id, and the exception is logged
             (see ``qh.errors``).
+        sync_runner: How a plain ``def`` function is called: an awaitable
+            ``runner(func, **kwargs)``. Defaults to Starlette's threadpool, so a slow
+            sync function doesn't block the event loop (as FastAPI does for ``def``
+            endpoints). ``None`` calls it inline on the event loop.
 
     Returns:
         Async endpoint function compatible with FastAPI
@@ -359,8 +376,10 @@ def make_endpoint(
             # Call the wrapped function synchronously
             if is_async:
                 result = await func(**transformed_params)
-            else:
+            elif sync_runner is None:
                 result = func(**transformed_params)
+            else:
+                result = await sync_runner(func, **transformed_params)
 
             # If the function returns a Response (or any subclass —
             # StreamingResponse, FileResponse, PlainTextResponse, …),

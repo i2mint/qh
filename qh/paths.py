@@ -80,6 +80,8 @@ def fill_path_params(
         text = str(values[name])
         if not quote:
             return text
-        return _url_quote(text, safe="/" if keeps_slash[name] else "")
+        quoted = _url_quote(text, safe="/" if keeps_slash[name] else "")
+        # '.'/'..' as a whole value would be resolved as dot segments by a client/proxy
+        return quoted.replace(".", "%2E") if quoted in (".", "..") else quoted
 
     return PARAM_REGEX.sub(_render, fmt)
