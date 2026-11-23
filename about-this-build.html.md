@@ -2,7 +2,7 @@
 
 # About this build
 
-This documentation was built on **2026-11-22 23:05 UTC** from commit <a href="https://github.com/i2mint/qh/commit/10d0f2e1974fe1ed5e359b99928e16fbbe61eaad"><code>10d0f2e</code></a> on branch <code>master</code>, for **qh 0.0.28** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-23 04:51 UTC** from commit <a href="https://github.com/i2mint/qh/commit/2ba610df09a647f3233e1eb54489bfee24821e32"><code>2ba610d</code></a> on branch <code>master</code>, for **qh 0.0.28** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -11,7 +11,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/qh/commit/10d0f2e1974fe1ed5e359b99928e16fbbe61eaad"><code>10d0f2e1974fe1ed5e359b99928e16fbbe61eaad</code></a> |
+| Commit              | <a href="https://github.com/i2mint/qh/commit/2ba610df09a647f3233e1eb54489bfee24821e32"><code>2ba610df09a647f3233e1eb54489bfee24821e32</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
 | Tags at this commit | none                                                                                                                                             |
 | Working tree        | clean                                                                                                                                            |
@@ -22,9 +22,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/qh</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/qh/actions/runs/45081127293">45081127293</a>            |
+| Run          | <a href="https://github.com/i2mint/qh/actions/runs/45114159728">45114159728</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>10d0f2e1974fe1ed5e359b99928e16fbbe61eaad</code> (in the history of the built commit) |
+| Event commit | <code>2ba610df09a647f3233e1eb54489bfee24821e32</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -55,7 +55,7 @@ Latest release: <a href="https://pypi.org/project/qh/0.0.28/">0.0.28</a>, the sa
 
 ```bash
 git clone https://github.com/i2mint/qh && cd qh
-git checkout 10d0f2e1974fe1ed5e359b99928e16fbbe61eaad
+git checkout 2ba610df09a647f3233e1eb54489bfee24821e32
 pip install "epythet==0.2.23"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
