@@ -35,3 +35,12 @@ def test_client_url_join_and_dot_values():
     assert fill_path_params("/items/{x}", {"x": ".."}) == "/items/%2E%2E"
     assert fill_path_params("/items/{x}", {"x": "."}) == "/items/%2E"
     assert fill_path_params("/items/{x}", {"x": "a.b"}) == "/items/a.b"
+
+
+def test_dot_segments_inside_a_path_value_are_escaped():
+    """A path value's own '.'/'..' segments, not only a whole-value one (qh#39)."""
+    from qh.paths import fill_path_params
+
+    assert fill_path_params("/files/{p:path}", {"p": "a/../b"}) == "/files/a/%2E%2E/b"
+    assert fill_path_params("/files/{p:path}", {"p": "./x"}) == "/files/%2E/x"
+    assert fill_path_params("/files/{p:path}", {"p": "a/b.c/..d"}) == "/files/a/b.c/..d"
