@@ -24,8 +24,6 @@ import json
 import logging
 from http import HTTPStatus
 
-from i2 import Sig
-from i2.wrapper import Wrap
 
 from qh.rules import RuleChain, TransformSpec, HttpLocation, resolve_transform
 from qh.config import RouteConfig

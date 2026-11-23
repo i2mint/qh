@@ -109,17 +109,16 @@ except ImportError:
 try:
     from py2http.service import run_app as legacy_run_app
     from py2http.decorators import mk_flat, handle_json_req
-    from qh.trans import (
-        transform_mapping_vals_with_name_func_map,
-        mk_json_handler_from_name_mapping,
-    )
-    from qh.util import flat_callable_for
-    from qh.main import mk_http_service_app
 except ImportError:
     # py2http not available, skip legacy imports
     pass
 
-__version__ = "0.5.0"  # Phase 4: Async Task Processing
+try:
+    from importlib.metadata import PackageNotFoundError, version as _pkg_version
+
+    __version__ = _pkg_version("qh")  # single source of truth: pyproject metadata
+except PackageNotFoundError:  # source tree that is not installed
+    __version__ = "0+unknown"
 __all__ = [
     # Primary API
     "mk_app",
