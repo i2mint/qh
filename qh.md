@@ -1,4 +1,4 @@
-> built 2026-11-23 21:48 UTC from a892681 (master) · qh 0.0.29. Details: build_info.json
+> built 2026-11-24 05:37 UTC from e4779ac (master) · qh 0.0.30. Details: build_info.json
 
 # index.html.md
 
@@ -5547,7 +5547,7 @@ Register a type in the global registry.
 
 # About this build
 
-This documentation was built on **2026-11-23 21:48 UTC** from commit <a href="https://github.com/i2mint/qh/commit/a8926818b26a9c8f2365564031082261fbd44e02"><code>a892681</code></a> on branch <code>master</code>, for **qh 0.0.29** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-11-24 05:37 UTC** from commit <a href="https://github.com/i2mint/qh/commit/e4779acf6a40c1530e5abe9bb5fcd662498f0c7d"><code>e4779ac</code></a> on branch <code>master</code>, for **qh 0.0.30** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -5556,7 +5556,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                  |
 |---------------------|--------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/i2mint/qh/commit/a8926818b26a9c8f2365564031082261fbd44e02"><code>a8926818b26a9c8f2365564031082261fbd44e02</code></a> |
+| Commit              | <a href="https://github.com/i2mint/qh/commit/e4779acf6a40c1530e5abe9bb5fcd662498f0c7d"><code>e4779acf6a40c1530e5abe9bb5fcd662498f0c7d</code></a> |
 | Branch              | <code>master</code>                                                                                                                              |
 | Tags at this commit | none                                                                                                                                             |
 | Working tree        | clean                                                                                                                                            |
@@ -5567,9 +5567,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>i2mint/qh</code>                                                                     |
-| Run          | <a href="https://github.com/i2mint/qh/actions/runs/45273074548">45273074548</a>            |
+| Run          | <a href="https://github.com/i2mint/qh/actions/runs/45334445255">45334445255</a>            |
 | Ref          | <code>refs/heads/master</code>                                                             |
-| Event commit | <code>a8926818b26a9c8f2365564031082261fbd44e02</code> (in the history of the built commit) |
+| Event commit | <code>e4779acf6a40c1530e5abe9bb5fcd662498f0c7d</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -5594,13 +5594,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/qh/0.0.29/">0.0.29</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/qh/0.0.30/">0.0.30</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/i2mint/qh && cd qh
-git checkout a8926818b26a9c8f2365564031082261fbd44e02
+git checkout e4779acf6a40c1530e5abe9bb5fcd662498f0c7d
 pip install "epythet==0.2.25"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
