@@ -8,8 +8,51 @@ preserving the original function signatures and behavior.
 from typing import Any, Callable, Dict, Optional, get_type_hints
 import inspect
 import requests
+from urllib.parse import urlsplit, urlunsplit
 
 from qh.paths import fill_path_params, path_param_names
+
+
+def _has_escaped_dot_segment(path: str) -> bool:
+    """Whether ``path`` has a ``%2E``/``%2E%2E`` segment (see ``fill_path_params``)."""
+    return any(seg.upper() in _ESCAPED_DOT_SEGMENTS for seg in path.split("/"))
+
+
+_ESCAPED_DOT_SEGMENTS = ("%2E", "%2E%2E")
+
+
+def _send(session, method: str, url: str, request_kwargs: dict):
+    """Send one request, keeping the ``%2E`` escape of ``.``/``..`` path segments.
+
+    ``requests`` re-quotes a URL when it prepares a request and un-quotes the
+    unreserved characters, ``.`` among them, so a ``%2E%2E`` segment would go out
+    as a literal ``..`` that a server or proxy resolves as a dot segment (qh#41).
+    Only for a URL that has such a segment, and only for a ``requests.Session``,
+    the request is prepared here and its path put back segment by segment before
+    sending; every other request goes through the session's own method unchanged.
+    """
+    url_path = urlsplit(url).path
+    if not (
+        isinstance(session, requests.Session) and _has_escaped_dot_segment(url_path)
+    ):
+        return getattr(session, method)(url, **request_kwargs)
+
+    prepared = session.prepare_request(
+        requests.Request(method.upper(), url, **request_kwargs)
+    )
+    parts = urlsplit(prepared.url)
+    sent_segments = parts.path.split("/")
+    own_segments = url_path.split("/")
+    if len(sent_segments) == len(own_segments):
+        parts = parts._replace(
+            path="/".join(
+                own if own.upper() in _ESCAPED_DOT_SEGMENTS else sent
+                for own, sent in zip(own_segments, sent_segments)
+            )
+        )
+        prepared.url = urlunsplit(parts)
+    settings = session.merge_environment_settings(prepared.url, {}, None, None, None)
+    return session.send(prepared, **settings)
 
 
 class HttpClient:
@@ -87,20 +130,17 @@ class HttpClient:
             url = self.base_url.rstrip("/") + "/" + actual_path.lstrip("/")
             method_lower = method.lower()
 
-            try:
-                if method_lower == "get":
-                    response = self.session.get(url, params=request_data)
-                elif method_lower == "post":
-                    response = self.session.post(url, json=request_data)
-                elif method_lower == "put":
-                    response = self.session.put(url, json=request_data)
-                elif method_lower == "delete":
-                    response = self.session.delete(url)
-                elif method_lower == "patch":
-                    response = self.session.patch(url, json=request_data)
-                else:
-                    raise ValueError(f"Unsupported HTTP method: {method}")
+            if method_lower == "get":
+                request_kwargs = {"params": request_data}
+            elif method_lower in ("post", "put", "patch"):
+                request_kwargs = {"json": request_data}
+            elif method_lower == "delete":
+                request_kwargs = {}
+            else:
+                raise ValueError(f"Unsupported HTTP method: {method}")
 
+            try:
+                response = _send(self.session, method_lower, url, request_kwargs)
                 response.raise_for_status()
                 return response.json()
             except requests.HTTPError as e:
